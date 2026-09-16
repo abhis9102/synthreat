@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entries = (await getCollection('vulnerabilities', ({ data }) => data.status === 'published'))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  title="Vulnerability Classes"
+  description="Deep, evidence-based writeups of vulnerability classes — technical and business impact, together, on every page."
+>
+  <span class="tagline">Index</span>
+  <h1>Vulnerability Classes</h1>
+  <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;">
+    Every page here follows the same locked structure: what it is, why the trust that enables it
+    fails, where it actually shows up, how to find it, what it costs a real business, and how it gets
+    fixed. Written for a newcomer and a client-facing security person to read the same page and both
+    get what they need.
+  </p>
+
+  <div style="margin-top:40px;display:flex;flex-direction:column;gap:14px;">
+    {entries.map((entry) => (
+      <a
+        href={`${base}vulnerabilities/${entry.id}/`}
+        style="display:block;padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-decoration:none;box-shadow:var(--shadow);"
+      >
+        <h3 style="font-size:18px;color:var(--ink);margin-bottom:6px;">{entry.data.title}</h3>
+        <p style="font-size:14px;color:var(--ink-soft);margin-bottom:0;">{entry.data.summary}</p>
+      </a>
+    ))}
+    {entries.length === 0 && (
+      <p style="color:var(--ink-faint);">Nothing published yet — check back soon.</p>
+    )}
+  </div>
+</BaseLayout>

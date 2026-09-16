@@ -1,17 +1,51 @@
 ---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
+const published = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
+const base = import.meta.env.BASE_URL;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+  title="Cybersecurity, taught straight"
+  description="A free, evidence-based cybersecurity education resource — for newcomers and client-facing security people alike."
+>
+  <span class="tagline">The AI era is not waiting for you to catch up</span>
+  <h1 style="font-size:38px;line-height:1.15;max-width:15ch;">
+    Cybersecurity, taught by people who actually broke things.
+  </h1>
+  <p style="font-size:17.5px;color:var(--ink-soft);max-width:60ch;margin-top:18px;">
+    Most security writing picks one reader: an engineer, or an executive. Synthreat is written for
+    both on the same page — real, evidence-based material, not rehashed tutorials, built for anyone
+    starting out in the field and for anyone who has to explain <em>why this matters</em> to a client
+    who isn't technical.
+  </p>
+
+  <div style="margin-top:44px;display:flex;gap:14px;flex-wrap:wrap;">
+    <a
+      href={`${base}vulnerabilities/`}
+      style="display:inline-block;padding:12px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14.5px;"
+    >
+      Browse vulnerability classes →
+    </a>
+  </div>
+
+  {published.length > 0 && (
+    <div style="margin-top:56px;">
+      <h2 style="font-size:14px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);border:none;padding:0;margin-bottom:16px;">
+        Start here
+      </h2>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        {published.map((entry) => (
+          <a
+            href={`${base}vulnerabilities/${entry.id}/`}
+            style="display:block;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-decoration:none;box-shadow:var(--shadow);"
+          >
+            <strong style="color:var(--ink);font-size:16px;">{entry.data.title}</strong>
+            <p style="font-size:13.5px;color:var(--ink-soft);margin:4px 0 0 0;">{entry.data.summary}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+</BaseLayout>

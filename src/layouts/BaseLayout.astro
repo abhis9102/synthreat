@@ -1,0 +1,54 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title} · Synthreat</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a class="brand" href={base}>Synthreat<span class="dot">.</span></a>
+        <nav>
+          <a href={`${base}vulnerabilities/`}>Vulnerabilities</a>
+        </nav>
+      </div>
+    </header>
+    <main class="page">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="inner">
+        Synthreat is a free, evidence-based cybersecurity education resource. Real-engagement
+        material referenced anywhere on this site is fully genericized before publishing — no real
+        client, system, or data is ever identified.
+        <a href="https://github.com/abhis9102/synthreat" target="_blank" rel="noopener">Source on GitHub</a>
+      </div>
+    </footer>
+    <script>
+      // Markdown-rendered tables have no wrapper element to scroll horizontally on narrow
+      // screens — add one programmatically rather than pulling in a build-time rehype plugin
+      // for this alone.
+      document.querySelectorAll('article.vuln-body table').forEach((table) => {
+        if (table.parentElement?.classList.contains('table-wrap')) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        table.parentNode?.insertBefore(wrap, table);
+        wrap.appendChild(table);
+      });
+    </script>
+  </body>
+</html>

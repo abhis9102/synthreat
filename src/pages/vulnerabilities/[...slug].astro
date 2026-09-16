@@ -1,0 +1,30 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, summary, owasp, cwe, typicalSeverityCeiling } = entry.data;
+---
+
+<BaseLayout title={title} description={summary}>
+  <span class="tagline">Vulnerability class</span>
+  <h1>{title}</h1>
+  <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
+  <div class="vuln-meta">
+    <span class="chip severity">Typical ceiling: {typicalSeverityCeiling}</span>
+    {owasp && <span class="chip">{owasp}</span>}
+    {cwe.map((id: string) => <span class="chip">{id}</span>)}
+  </div>
+  <article class="vuln-body">
+    <Content />
+  </article>
+</BaseLayout>
