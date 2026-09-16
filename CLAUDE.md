@@ -1,10 +1,9 @@
 # CLAUDE.md
 
 This file governs how work happens in this folder. It is this project's operating charter — read it
-the way a new engineering/content hire would read a company handbook on day one. Everything below is
-a working draft until the open decisions at the bottom are resolved with the project owner.
+the way a new engineering/content hire would read a company handbook on day one.
 
-# Project: [Name TBD] — a cybersecurity education portal
+# Project: Synthreat — a cybersecurity education portal
 
 ## Mission
 
@@ -119,12 +118,46 @@ content, even when it's the same session doing both roles sequentially.
 6. Publish, and log the outcome in `PROGRESS.md` — what shipped, what's next, any decision made along
    the way and why. Treat `PROGRESS.md` as a living document, the same way this file is.
 
+## Tech stack
+
+**Astro**, static output, deployed to GitHub Pages via a GitHub Actions build.
+
+- Content lives as Markdown/MDX with typed frontmatter (Zod content-collection schemas) — the
+  locked 11-section vulnerability-class template gets enforced structurally: a page missing a
+  required section fails the build instead of silently shipping incomplete.
+- Ships fully static HTML by default (fast, no client-side framework tax for a page that's
+  fundamentally an article).
+- Interactive components (a severity calculator, a quiz, search) can be added later as isolated
+  Astro islands without a stack change — deliberately chosen over Eleventy/Jekyll for this reason.
+- Built-in image optimization covers the "rich media" requirement without a separate pipeline.
+
 ## Repository & deployment
 
 - This folder is its own git repository, separate from any single client engagement's working
   directory.
-- Intended to live in its own GitHub repo (public), deployed via GitHub Pages, once the tech-stack
-  decision below is finalized.
+- Lives in its own public GitHub repo — `synthreat` — deployed via GitHub Pages, built by a GitHub
+  Actions workflow (Astro's static output isn't natively built by GitHub's own Jekyll pipeline the
+  way `pentest-playbook`'s plain HTML is).
+
+## Astro operational notes
+
+- Local Node must be 22.12+ — the system-wide `node` in this sandbox is older (v20); a user-local
+  Node 22 install lives at `~/.local/node22/bin`. Prepend that to `PATH` before running any `npm`/
+  `astro` command in this project: `export PATH="$HOME/.local/node22/bin:$PATH"`.
+- `npm run dev` — local dev server. Prefer starting it in the background
+  (`astro dev --background`, managed via `astro dev stop` / `astro dev status` / `astro dev logs`)
+  rather than a foreground process, matching Astro's own guidance for agent-driven work.
+- `npm run build` — static output to `dist/`, mirrors exactly what GitHub Actions builds and deploys.
+- Content, routing, and styling all go through Astro's own conventions — consult
+  [docs.astro.build](https://docs.astro.build) before improvising a pattern, specifically the guides
+  on [content collections](https://docs.astro.build/en/guides/content-collections/) (this is where
+  the locked vulnerability-class template gets encoded as an enforced schema),
+  [routing](https://docs.astro.build/en/guides/routing/), and
+  [styling](https://docs.astro.build/en/guides/styling/).
+- Deployment is GitHub Actions → GitHub Pages (`.github/workflows/deploy.yml`), not GitHub's native
+  Jekyll pipeline — Astro's static output needs an actual build step. `astro.config.mjs` sets
+  `site`/`base` for the `github.io/synthreat` path; update both together if a custom domain is ever
+  added.
 
 ## Working notes for whoever (human or Claude) picks this up next
 
@@ -133,15 +166,3 @@ content, even when it's the same session doing both roles sequentially.
 - If a decision in this file stops matching reality (a role isn't working the way it's described, the
   template needs an twelfth section, etc.), update this file in the same commit that changes the
   behavior — this document drifting out of sync with practice is worse than not having it.
-
----
-
-## Open decisions — needs the project owner's call before content work starts at scale
-
-1. **Project / site name.** Nothing below assumes one yet.
-2. **Tech stack.** The smaller, narrower "pentest briefing" page used hand-rolled static HTML by
-   deliberate choice. This project is explicitly bigger — full-time, long-term, rich media,
-   eventually many domains. Worth re-deciding at this scale rather than inheriting the smaller
-   project's answer by default: a hand-authored HTML-per-page approach will accumulate real
-   maintenance drag once there are dozens-to-hundreds of pages sharing navigation, a design system,
-   and cross-links. Recommend revisiting with the new scale explicitly in view.
