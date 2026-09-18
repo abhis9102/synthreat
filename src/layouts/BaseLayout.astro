@@ -158,14 +158,14 @@ const NAV_SECTIONS = [
               <div class="vuln-surface-list">
                 {vulnGroups.map((group) => (
                   <div class="vuln-surface-item">
-                    <a href={`${base}vulnerabilities/#${surfaceSlug(group.surface)}`} class="vuln-surface-row">
+                    <a href={`${base}vulnerabilities/${surfaceSlug(group.surface)}/`} class="vuln-surface-row">
                       <span>{group.surface}</span>
                       <span class="vuln-surface-count">{group.entries.length}</span>
                     </a>
                     <div class="vuln-surface-panel">
                       {group.subgroups ? (
                         group.subgroups.map((sub) => (
-                          <a href={`${base}vulnerabilities/#${surfaceSlug(group.surface)}-${sub.code.toLowerCase()}`}>
+                          <a href={`${base}vulnerabilities/${surfaceSlug(group.surface)}/#${sub.code.toLowerCase()}`}>
                             {sub.label} <span class="vuln-surface-count">{sub.count}</span>
                           </a>
                         ))

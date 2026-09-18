@@ -3,46 +3,33 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { VULN_SURFACES } from '../../content.config';
 
-const entries = (await getCollection('vulnerabilities', ({ data }) => data.status === 'published'))
-  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+const entries = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
 const base = import.meta.env.BASE_URL;
 
-// Cards shown before a "View all" toggle takes over, matching the homepage's own 4-card-cap pattern
-// (src/pages/index.astro) so the two pages read consistently.
-const CARD_CAP = 4;
-
-// Kebab-case anchor id for a surface, e.g. "Web Application" -> "web-application". Used both for
-// this page's <details id> targets and for the "explore X vulnerabilities" links other collections
-// (domains in particular) point at. Degrades gracefully: linking to an anchor with zero entries
-// today just lands on the top of this page, and starts working the moment that surface gets content.
 const surfaceSlug = (surface: string) => surface.toLowerCase().replace(/\s+/g, '-');
 
-// Grouped by surface (locked display order, see content.config.ts VULN_SURFACES), mirroring the
-// domains collection's own surface names. "Web Application" is large enough to need its own
-// sub-grouping, by OWASP Top 10 category (A01-A10), reusing the `owasp` field every entry in that
-// surface already carries rather than a second custom field. Each surface renders as an
-// open-by-default <details> accordion: nothing is hidden from a first-time visitor, search, or
-// read-aloud, but a section can be collapsed once it's not needed.
-const groups = VULN_SURFACES.map((surface) => {
-  const surfaceEntries = entries.filter((entry) => entry.data.surface === surface);
-  let subgroups: { code: string; label: string; entries: typeof entries }[] | null = null;
-  if (surface === 'Web Application') {
-    const byCode = new Map<string, { code: string; label: string; entries: typeof entries }>();
-    for (const entry of surfaceEntries) {
-      const code = entry.data.owasp?.match(/^A\d{2}/)?.[0] ?? 'Other';
-      if (!byCode.has(code)) byCode.set(code, { code, label: entry.data.owasp ?? 'Other', entries: [] });
-      byCode.get(code)!.entries.push(entry);
-    }
-    subgroups = [...byCode.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
-  }
-  return { surface, entries: surfaceEntries, subgroups };
-}).filter((group) => group.entries.length > 0);
+const SURFACE_BLURBS: Record<(typeof VULN_SURFACES)[number], string> = {
+  'Cloud Security': 'Public storage exposure, IAM misconfiguration, insecure IaC, and the other failure modes unique to renting infrastructure.',
+  'Web Application': 'The OWASP Top 10: injection, broken access control, and everything else a browser-facing app can get wrong.',
+  'Mobile Security': "What's structurally different about securing an app that ships its own compiled code onto a device the user controls.",
+  'Network Security': "Segmentation, access control, wireless, and the building blocks of a network an attacker can't freely move across.",
+  'AI Security': 'The OWASP Top 10 for LLM Applications: prompt injection, excessive agency, and the risks specific to AI-powered systems.',
+};
+
+// This page is a landing page, not a flat list: each surface (mirroring the domains collection's
+// own surface names) gets its own dedicated listing page at /vulnerabilities/<surface>/
+// (src/pages/vulnerabilities/[surface]/index.astro), the same way the homepage points at each
+// top-level collection's own index rather than trying to list everything in one place.
+const surfaces = VULN_SURFACES.map((surface) => ({
+  surface,
+  count: entries.filter((entry) => entry.data.surface === surface).length,
+})).filter((s) => s.count > 0);
 ---
 
 <BaseLayout
   wide
   title="Vulnerability Classes"
-  description="Deep, evidence-based writeups of vulnerability classes, with technical and business impact together on every page."
+  description="Deep, evidence-based writeups of vulnerability classes, organized by surface, with technical and business impact together on every page."
 >
   <span class="tagline">Index</span>
   <h1>Vulnerability Classes</h1>
@@ -50,79 +37,18 @@ const groups = VULN_SURFACES.map((surface) => {
     Every page here follows the same locked structure: what it is, why the trust that enables it
     fails, where it actually shows up, how to find it, what it costs a real business, and how it gets
     fixed. Written for a newcomer and a client-facing security person to read the same page and both
-    get what they need.
+    get what they need. Pick a surface below to see its full list.
   </p>
 
-  <div class="category-groups" style="margin-top:36px;">
-    {groups.map((group) => (
-      <details class="category-group" id={surfaceSlug(group.surface)} open>
-        <summary class="category-group-summary">
-          <span class="category-group-title">{group.surface}</span>
-          <span class="category-group-line" aria-hidden="true"></span>
-          <span class="category-group-count">{group.entries.length}</span>
-          <svg class="category-group-chev" width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        {group.subgroups ? (
-          <div style="margin-top:18px;display:flex;flex-direction:column;gap:26px;">
-            {group.subgroups.map((sub) => (
-              <div id={`${surfaceSlug(group.surface)}-${sub.code.toLowerCase()}`}>
-                <div class="subgroup-label">{sub.label}</div>
-                <div class="card-grid" style="margin-top:12px;">
-                  {sub.entries.slice(0, CARD_CAP).map((entry) => (
-                    <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
-                      <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
-                      <h3>{entry.data.title}</h3>
-                      <p>{entry.data.summary}</p>
-                    </a>
-                  ))}
-                </div>
-                {sub.entries.length > CARD_CAP && (
-                  <details class="view-all-toggle">
-                    <summary>View all {sub.entries.length} {sub.label} pages →</summary>
-                    <div class="card-grid" style="margin-top:14px;">
-                      {sub.entries.slice(CARD_CAP).map((entry) => (
-                        <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
-                          <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
-                          <h3>{entry.data.title}</h3>
-                          <p>{entry.data.summary}</p>
-                        </a>
-                      ))}
-                    </div>
-                  </details>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <>
-            <div class="card-grid" style="margin-top:18px;">
-              {group.entries.slice(0, CARD_CAP).map((entry) => (
-                <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
-                  <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
-                  <h3>{entry.data.title}</h3>
-                  <p>{entry.data.summary}</p>
-                </a>
-              ))}
-            </div>
-            {group.entries.length > CARD_CAP && (
-              <details class="view-all-toggle">
-                <summary>View all {group.entries.length} {group.surface} pages →</summary>
-                <div class="card-grid" style="margin-top:14px;">
-                  {group.entries.slice(CARD_CAP).map((entry) => (
-                    <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
-                      <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
-                      <h3>{entry.data.title}</h3>
-                      <p>{entry.data.summary}</p>
-                    </a>
-                  ))}
-                </div>
-              </details>
-            )}
-          </>
-        )}
-      </details>
+  <div class="card-grid" style="margin-top:36px;">
+    {surfaces.map(({ surface, count }) => (
+      <a href={`${base}vulnerabilities/${surfaceSlug(surface)}/`} class="card">
+        <span class="badge">{count} {count === 1 ? 'page' : 'pages'}</span>
+        <h3>{surface}</h3>
+        <p>{SURFACE_BLURBS[surface]}</p>
+      </a>
     ))}
-    {entries.length === 0 && (
+    {surfaces.length === 0 && (
       <p style="color:var(--ink-faint);">Nothing published yet. Check back soon.</p>
     )}
   </div>

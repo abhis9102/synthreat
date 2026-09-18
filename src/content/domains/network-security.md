@@ -45,7 +45,7 @@ The clearest, most concrete way to explain this to a client is with the flat-net
 
 ## Related Topics
 
-- **Explore Network Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/#network-security)
+- **Explore Network Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/network-security/)
   has dedicated, worked-example pages for every building block named above.
 - [Cloud Security](../cloud-security/): the parallel domain for infrastructure that is not run on premises.
 - [Application Security](../application-security/): securing the software layer, distinct from the network it runs on.

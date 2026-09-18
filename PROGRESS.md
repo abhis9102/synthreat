@@ -4,6 +4,50 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Vulnerabilities restructured into a landing page + 5 dedicated surface pages
+
+**What happened (Design/Frontend Lead, direct user request):** `/vulnerabilities/` previously
+rendered every surface as an accordion on one long page, with in-place `<details>` "View all" reveals
+for anything past a 4-item cap. Direct feedback: "View all" should be a real separate page, not an
+in-place expand, and Web Application specifically should show only 4 OWASP categories before its own
+"View all."
+
+Restructured to match: `/vulnerabilities/` is now a landing page, five surface cards (Cloud Security,
+Web Application, Mobile Security, Network Security, AI Security), each showing its page count and a
+one-line description, linking out to a real dedicated page per surface. Added
+`src/pages/vulnerabilities/[surface]/index.astro`, a dynamic route generating
+`/vulnerabilities/<surface-slug>/` for each of the 5 surfaces via `getStaticPaths`. Verified no slug
+collision is possible between a surface route and any actual vulnerability entry id before building
+this (none of the 50 entries is named e.g. "cloud-security"). Each surface page shows its full list
+directly, no cap, since the page itself already is "the full list" now; Web Application is the one
+exception, still capped at 4 OWASP categories shown with a "View all 10 OWASP Top 10 categories"
+`<details>` toggle for the rest, since 10 categories on one page was the specific thing called out as
+too much.
+
+**Rewired every link that used to point at an anchor on the single index page**
+(`/vulnerabilities/#cloud-security` etc.) to the real page instead (`/vulnerabilities/cloud-security/`):
+the nav dropdown's surface rows and Web Application's OWASP sub-links (`BaseLayout.astro`), the
+detail page's breadcrumb (`[...slug].astro`), and the "Explore X vulnerabilities" line on
+`application-security.md`, `web-security.md`, `cloud-security.md`, `mobile-security.md`,
+`network-security.md`, `ai-security.md`, and `frameworks/ai-llm-top-10.md`. Removed the now-dead
+`.category-group*` CSS family (the old single-page accordion styling) since nothing renders it
+anymore; kept `.subgroup-label` and `.view-all-toggle`, both still used on the new Web Application
+surface page.
+
+**Editorial Reviewer pass:** `npm run validate:content` (104 files, unaffected since this was a
+routing/UI change with no content template changes) and `npm run build` (116 pages, +5 for the new
+surface routes) both clean. Confirmed via the dist output that all 5 surface directories exist
+alongside all 50 individual vulnerability pages with no collision. The project's own relative-link
+checker script flagged 8 links to the new surface pages as "broken" since it only knows about content
+markdown files, not Astro's own generated routes; manually confirmed each one resolves correctly by
+checking the actual build output. Verified rendered dev-server HTML directly: landing page shows all 5
+surfaces with correct counts (6/22/6/6/10), the Cloud Security page shows all 6 cards with no cap, the
+Web Application page shows all 22 cards total with exactly one real "View all 10 OWASP Top 10
+categories" toggle (the other 5 `view-all-toggle` string matches were the CSS rule itself, not stray
+elements).
+
+---
+
 ## 2026-09-18 — Mobile + Network Security batches, full LLM Top 10, index/nav UI fixes
 
 **What happened (Content Architect + Design/Frontend Lead + Subject-Matter Writer, all direct user

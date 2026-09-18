@@ -18,7 +18,7 @@ const surfaceSlug = surface.toLowerCase().replace(/\s+/g, '-');
 ---
 
 <BaseLayout title={title} description={summary}>
-  <a class="tagline" href={`${base}vulnerabilities/#${surfaceSlug}`}>← Vulnerability class · {surface}</a>
+  <a class="tagline" href={`${base}vulnerabilities/${surfaceSlug}/`}>← Vulnerability class · {surface}</a>
   <h1>{title}</h1>
   <p style="font-size:18px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
   <div class="vuln-meta">

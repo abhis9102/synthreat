@@ -100,7 +100,7 @@ model is.
 
 ## Related Topics
 
-- **Explore AI Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/#ai-security)
+- **Explore AI Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/ai-security/)
   has dedicated, worked-example pages for every risk category named above.
 - [Security Frameworks & Standards](../frameworks-standards/): how this list fits among the other
   named frameworks covered on this site.

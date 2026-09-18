@@ -41,7 +41,7 @@ This is a domain the field is still actively building shared practice around, an
 
 ## Related Topics
 
-- **Explore AI Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/#ai-security)
+- **Explore AI Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/ai-security/)
   has all ten dedicated, worked-example pages behind [The OWASP Top 10 for LLM
   Applications](../../frameworks/ai-llm-top-10/), plus [Training Data
   Poisoning](../../vulnerabilities/training-data-poisoning/).
