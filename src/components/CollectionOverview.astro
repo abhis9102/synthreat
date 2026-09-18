@@ -1,0 +1,68 @@
+---
+interface Props {
+  kind: 'domains' | 'attacks' | 'vulnerabilities';
+  entries: any[];
+}
+
+const { kind, entries } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const imageByKind = {
+  domains: 'synthreat-domain-security.jpg',
+  attacks: 'synthreat-attack-technique.jpg',
+  vulnerabilities: 'synthreat-vulnerability.jpg',
+};
+const copyByKind = {
+  domains: {
+    label: 'Library at a glance',
+    heading: 'Build the map before you pick a tool',
+    text: 'Start with the shape of the problem: the disciplines, methods, and service models that make security work understandable.',
+    chart: 'Pages by learning category',
+    item: 'published domains',
+  },
+  attacks: {
+    label: 'Library at a glance',
+    heading: 'Understand the move, not just the name',
+    text: 'Attack techniques become easier to remember when entry point, behavior, impact, and defense stay connected.',
+    chart: 'Pages by typical severity ceiling',
+    item: 'published attack techniques',
+  },
+  vulnerabilities: {
+    label: 'Library at a glance',
+    heading: 'See the trust boundary that failed',
+    text: 'Vulnerability classes are patterns of misplaced trust. The chart below shows how the current library is distributed by typical severity ceiling.',
+    chart: 'Pages by typical severity ceiling',
+    item: 'published vulnerability classes',
+  },
+};
+const copy = copyByKind[kind];
+const severityOrder = ['Critical', 'High', 'Medium', 'Low'];
+const domainOrder = ['Methodology', 'Domain Overview', 'Service Model', 'Attack Landscape'];
+const labels = kind === 'domains' ? domainOrder : severityOrder;
+const chartItems = labels.map((label) => ({
+  label,
+  count: entries.filter((entry) => kind === 'domains' ? entry.data.category === label : entry.data.typicalSeverityCeiling === label).length,
+})).filter((item) => item.count > 0);
+const maxCount = Math.max(1, ...chartItems.map((item) => item.count));
+---
+
+<section class={'collection-overview collection-overview-' + kind} aria-labelledby={'collection-overview-title-' + kind}>
+  <div class="collection-overview-media">
+    <img src={base + 'images/' + imageByKind[kind]} alt={'Realistic editorial scene for ' + kind} loading="lazy" />
+    <span>{kind === 'domains' ? 'Systems thinking' : kind === 'attacks' ? 'Adversary thinking' : 'Trust-boundary thinking'}</span>
+  </div>
+  <div class="collection-overview-copy">
+    <span class="eyebrow">{copy.label}</span>
+    <h2 id={'collection-overview-title-' + kind}>{copy.heading}</h2>
+    <p>{copy.text}</p>
+    <div class="overview-total"><strong>{entries.length}</strong><span>{copy.item}</span></div>
+    <div class="overview-chart" aria-label={copy.chart}>
+      <div class="overview-chart-title"><span>{copy.chart}</span><span>Count</span></div>
+      {chartItems.map((item) => (
+        <div class="overview-chart-row">
+          <div><span>{item.label}</span><strong>{item.count}</strong></div>
+          <div class="overview-chart-track"><span style={'width: ' + ((item.count / maxCount) * 100) + '%'}></span></div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
