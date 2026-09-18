@@ -3,6 +3,8 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const published = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
+const publishedDomains = (await getCollection('domains', ({ data }) => data.status === 'published'))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -23,17 +25,42 @@ const base = import.meta.env.BASE_URL;
 
   <div style="margin-top:44px;display:flex;gap:14px;flex-wrap:wrap;">
     <a
-      href={`${base}vulnerabilities/`}
+      href={`${base}domains/`}
       style="display:inline-block;padding:12px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14.5px;"
+    >
+      Start with the fundamentals →
+    </a>
+    <a
+      href={`${base}vulnerabilities/`}
+      style="display:inline-block;padding:12px 20px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;text-decoration:none;font-weight:600;font-size:14.5px;"
     >
       Browse vulnerability classes →
     </a>
   </div>
 
+  {publishedDomains.length > 0 && (
+    <div style="margin-top:56px;">
+      <h2 style="font-size:14px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);border:none;padding:0;margin-bottom:16px;">
+        New to cybersecurity? Start here
+      </h2>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        {publishedDomains.map((entry) => (
+          <a
+            href={`${base}domains/${entry.id}/`}
+            style="display:block;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-decoration:none;box-shadow:var(--shadow);"
+          >
+            <strong style="color:var(--ink);font-size:16px;">{entry.data.title}</strong>
+            <p style="font-size:13.5px;color:var(--ink-soft);margin:4px 0 0 0;">{entry.data.summary}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
   {published.length > 0 && (
     <div style="margin-top:56px;">
       <h2 style="font-size:14px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);border:none;padding:0;margin-bottom:16px;">
-        Start here
+        Vulnerability classes
       </h2>
       <div style="display:flex;flex-direction:column;gap:12px;">
         {published.map((entry) => (

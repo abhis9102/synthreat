@@ -39,4 +39,35 @@ const vulnerabilities = defineCollection({
   }),
 });
 
-export const collections = { vulnerabilities };
+// The 7 section headings the locked domain & concept page template (CLAUDE.md) requires, in order.
+// Covers domain overviews, methodology explainers, service models, and attack-landscape taxonomies —
+// anything broader than a single vulnerability class. Enforced the same way as the vuln template.
+export const REQUIRED_DOMAIN_SECTIONS = [
+  'What It Is',
+  'Why It Exists',
+  'How It Works',
+  'Where This Shows Up in Practice',
+  'Why a Business Should Care',
+  'Common Misconceptions',
+  'Related Topics',
+] as const;
+
+const domains = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/domains' }),
+  schema: z.object({
+    title: z.string(),
+    // One-sentence dek shown in listings and search/share previews.
+    summary: z.string().max(200),
+    // What kind of domain/concept page this is, for grouping and filtering on the index.
+    category: z.enum(['Domain Overview', 'Methodology', 'Service Model', 'Attack Landscape']),
+    // Slugs of other entries in this collection, for the Related Topics section's cross-links.
+    related: z.array(z.string()).default([]),
+    // Slugs of vulnerabilities-collection entries this page connects to.
+    relatedVulnerabilities: z.array(z.string()).default([]),
+    status: z.enum(['draft', 'published']).default('draft'),
+    datePublished: z.coerce.date().optional(),
+    dateUpdated: z.coerce.date().optional(),
+  }),
+});
+
+export const collections = { vulnerabilities, domains };

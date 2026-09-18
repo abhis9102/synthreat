@@ -82,6 +82,38 @@ Do not skip a section; write "not yet documented" rather than omit it, so gaps a
 Other content types (case studies, methodology playbooks, cheatsheets) get their own template, defined
 when the first one of that type is actually drafted — not guessed in the abstract ahead of time.
 
+## The locked content template — domain & concept pages
+
+The second repeating unit, defined once the first batch of this type was actually drafted (see rule
+above). This is for pages that explain a *domain* (application security, cloud security), a
+*methodology* (penetration testing, red teaming, continuous threat exposure management), a *service
+model* (penetration testing as a service), or an *attack landscape* (a taxonomy of attack types) —
+anything broader than one vulnerability class, where the 11-section vulnerability template doesn't
+fit because there's no single trust boundary or single remediation to anchor on. These pages live in
+the `domains` content collection, at `/domains/`, separate from `/vulnerabilities/`.
+
+Every domain/concept page follows this structure, in this order. Do not skip a section; write "not
+yet documented" rather than omit it.
+
+1. **What It Is** — plain-language definition, no jargon-stacking. Assume zero prior knowledge.
+2. **Why It Exists** — the real-world problem or failure mode that makes this domain/methodology/
+   service necessary. What goes wrong without it.
+3. **How It Works** — the core mechanics, steps, or building blocks, at a level a newcomer can follow
+   end to end. For a taxonomy-style page (e.g. attack types), this is where the reference table lives.
+4. **Where This Shows Up in Practice** — concrete, real surface patterns: specific engagement types,
+   tools, roles, or scenarios — not abstractions.
+5. **Why a Business Should Care** — same non-negotiable rule as the vulnerability template: real cost/
+   risk categories, and how to raise this with a client without fear-mongering or underselling it.
+6. **Common Misconceptions** — the specific wrong ideas newcomers and clients actually carry into this
+   topic, and what's true instead. This is the section that does the most work for the dual-audience
+   mission — it's where a client-facing reader gets armed against the wrong question a prospect will
+   actually ask.
+7. **Related Topics** — cross-links to other domain pages and to specific vulnerability-class pages
+   the topic connects to, so the site reads as one connected body of knowledge.
+
+Case studies and cheatsheets that don't fit either template above still get their own template,
+defined when the first one is actually drafted.
+
 ## Team architecture — roles, not headcount
 
 One person (plus Claude) is doing this work, but the *roles* below are real and should be kept
