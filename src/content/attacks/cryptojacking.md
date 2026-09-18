@@ -13,18 +13,18 @@ datePublished: 2026-09-18
 ## Definition
 
 Cryptojacking is the secret use of a victim's computing resources to mine cryptocurrency for an
-attacker's benefit. Unlike most of the attacks on this site, the goal isn't to steal data — it's to
+attacker's benefit. Unlike most of the attacks on this site, the goal isn't to steal data: it's to
 steal computing power, quietly, for as long as possible.
 
 ## What Makes It Work
 
-Cryptojacking is delivered through the same vectors as ordinary malware — a malicious attachment, a
-compromised website script, an exploited server vulnerability — but what it does once it's in is
+Cryptojacking is delivered through the same vectors as ordinary malware (a malicious attachment, a
+compromised website script, an exploited server vulnerability), but what it does once it's in is
 different, and that difference is the point. Most malware wants to reach data or credentials, and
 that goal creates activity an attacker eventually has to surface (moving data, contacting a
 command-and-control server for instructions, encrypting files). Cryptojacking's entire goal can be
 satisfied by simply running quietly and continuously in the background. What breaks is availability
-of computing resources — CPU and GPU cycles, cloud compute capacity, electricity — not
+of computing resources (CPU and GPU cycles, cloud compute capacity, electricity), not
 confidentiality of any specific data, which is exactly why it's built to avoid the kind of visible
 activity that would normally raise an alarm.
 
@@ -65,11 +65,11 @@ activity that would normally raise an alarm.
 
 ## Where It Actually Shows Up
 
-- **Traditional endpoint infection** — delivered via a malicious attachment, compromised download, or
+- **Traditional endpoint infection**: delivered via a malicious attachment, compromised download, or
   exploited vulnerability, exactly like other [malware](../malware/).
-- **Browser-based cryptojacking** — a script embedded in a malicious or compromised webpage that mines
+- **Browser-based cryptojacking**: a script embedded in a malicious or compromised webpage that mines
   only while the page is open, requiring no installation on the device at all.
-- **Cloud compute instances specifically** — an increasingly common target, because usage on a large
+- **Cloud compute instances specifically**: an increasingly common target, because usage on a large
   cloud bill can scale for a meaningful amount of time before anyone notices the increase against the
   expected baseline.
 
@@ -82,7 +82,7 @@ an organization that isn't already tracking per-workload resource baselines clos
 
 ## How to Detect It
 
-1. **Monitoring for CPU/GPU utilization inconsistent with a system's normal workload** — a sustained,
+1. **Monitoring for CPU/GPU utilization inconsistent with a system's normal workload**: a sustained,
    unexplained baseline shift is the clearest signal.
 2. **Reviewing unexplained increases in cloud compute costs** against what actual business activity
    would predict, rather than assuming growth explains every increase.
@@ -96,19 +96,19 @@ an organization that isn't already tracking per-workload resource baselines clos
 | Single infected endpoint, browser-based, active only while a malicious page is open | Minor, temporary performance degradation, likely to go unnoticed |
 | Cryptojacking malware installed and persistent on an endpoint | Continuous performance degradation and shortened hardware lifespan from sustained high utilization |
 | Undetected across a fleet of cloud compute instances | Significant, ongoing inflated cloud costs, potentially for months before detection |
-| Detected only after a substantial unexplained cost increase | The delay itself represents the real cost — the earlier this is caught, the smaller the loss |
+| Detected only after a substantial unexplained cost increase | The delay itself represents the real cost: the earlier this is caught, the smaller the loss |
 
 ## Why a Business Should Care
 
 This is a useful example to walk a client through of an attack that doesn't fit the "was our data
 stolen" question they usually lead with. The actual damage here is degraded performance, inflated
-infrastructure costs, and shortened hardware lifespan — a resource-theft impact, not a data-theft one.
+infrastructure costs, and shortened hardware lifespan: a resource-theft impact, not a data-theft one.
 It's worth explicitly broadening a client's mental model of what counts as a security incident worth
 investigating, rather than letting "nothing sensitive was taken" stand in for "nothing happened."
 
 ## A Worked Example
 
-*(Generalized from common assessment patterns. Company and identifiers below are invented — no real
+*(Generalized from common assessment patterns. Company and identifiers below are invented; no real
 system, client, or data is referenced.)*
 
 During a cost and security review for a software company, Ferrowave Analytics, the review team
@@ -120,14 +120,14 @@ outbound connections to infrastructure consistent with cryptocurrency-mining poo
 Tracing back the initial access point, the affected instances share a common exposed service running
 outdated software with a known, unpatched vulnerability. The mining payload itself is removed and the
 instances rebuilt from a clean image; the real fix addressed in the report is the exposed,
-unpatched service that let the payload in — the resource theft was a symptom, not the root finding.
+unpatched service that let the payload in. The resource theft was a symptom, not the root finding.
 
 ## Severity Calibration
 
 Severity here generally rates lower than most other entries on this page, precisely because the
 attacker's intent is resource theft rather than data compromise. Calibration should still account for
-two things beyond the mining activity itself: how the payload got in — the same delivery flaw could
-just as easily have carried a more damaging payload instead — and how widely it spread before
+two things beyond the mining activity itself: how the payload got in (the same delivery flaw could
+just as easily have carried a more damaging payload instead) and how widely it spread before
 detection, since a fleet-wide, months-long infection represents real, ongoing financial cost even
 without any data ever being touched.
 
@@ -138,12 +138,12 @@ the same patching and endpoint-protection discipline used against malware genera
 egress monitoring for connections to known mining-pool infrastructure.
 
 The common inadequate response is dismissing unexplained performance or cost anomalies as an
-infrastructure quirk rather than investigating them as a possible security incident — which is
+infrastructure quirk rather than investigating them as a possible security incident, which is
 exactly the blind spot this technique is built to exploit.
 
 ## Related Attacks & Vulnerabilities
 
-- [Malware](../malware/) — the broader category cryptojacking belongs to, distinguished mainly by its
+- [Malware](../malware/): the broader category cryptojacking belongs to, distinguished mainly by its
   resource-theft goal rather than data theft.
-- [IoT-Based Attacks](../iot-based-attacks/) — another attack type where compromised devices are
+- [IoT-Based Attacks](../iot-based-attacks/): another attack type where compromised devices are
   valued for the resources or capacity they add to an attacker's infrastructure, not the data on them.

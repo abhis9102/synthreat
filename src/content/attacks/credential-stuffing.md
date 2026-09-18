@@ -16,14 +16,14 @@ Credential stuffing is the automated use of username/password pairs that leaked 
 organization, tried against the login page of a completely different, unrelated organization. It's
 easy to confuse with [brute force](../brute-force/), but the mechanism is different: brute force
 *guesses* at credentials it has never seen before; credential stuffing *replays* credentials the
-attacker already knows are real, valid, working logins — just somewhere else.
+attacker already knows are real, valid, working logins, just somewhere else.
 
 ## What Makes It Work
 
 This is the one attack on this site where it's worth saying plainly, up front: the target's own
 system can be flawlessly built, fully patched, and free of every coding mistake described elsewhere
 on this site, and still be successfully attacked this way. That's because credential stuffing doesn't
-exploit a weakness in the target's code at all — it exploits a weakness in human behavior that exists
+exploit a weakness in the target's code at all. It exploits a weakness in human behavior that exists
 completely outside the target's control: a large share of people reuse the same password across
 multiple, unrelated accounts. When any one of those accounts is breached, elsewhere, by someone else,
 the leaked password becomes a valid key to every other account where that same person reused it.
@@ -60,7 +60,7 @@ the leaked password becomes a valid key to every other account where that same p
 <text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Reused password</text>
 <text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">still works</text>
 </svg>
-<figcaption>Site B never had a vulnerability — the reused password was the whole attack.</figcaption>
+<figcaption>Site B never had a vulnerability; the reused password was the whole attack.</figcaption>
 </figure>
 
 ## Where It Actually Shows Up
@@ -68,8 +68,8 @@ the leaked password becomes a valid key to every other account where that same p
 - Automated tooling running millions of leaked username/password pairs against a single login
   endpoint, typically distributed across a large number of source IPs specifically to evade simple
   per-IP rate-limiting.
-- Login endpoints for services holding a stored payment method, loyalty points, or gift card balance
-  — anywhere a successfully taken-over account has direct resale or spending value to the attacker.
+- Login endpoints for services holding a stored payment method, loyalty points, or gift card balance:
+  anywhere a successfully taken-over account has direct resale or spending value to the attacker.
 - Mobile app API endpoints that authenticate the same way a web login does, but were built later and
   never received the same rate-limiting or anomaly-detection attention as the original web login.
 
@@ -83,7 +83,7 @@ inconvenient without a password manager, and most people don't use one consisten
 
 ## How to Detect It
 
-1. Watch for anomalous login velocity and pattern — a burst of login attempts across many different
+1. Watch for anomalous login velocity and pattern: a burst of login attempts across many different
    *accounts*, often from a narrow, related set of source infrastructure, is a distinct signature
    from ordinary user traffic.
 2. Look for impossible-travel and device-fingerprint anomalies: the same account authenticating from
@@ -91,7 +91,7 @@ inconvenient without a password manager, and most people don't use one consisten
 3. Proactively check your own users' credentials against known-breach data (there are legitimate,
    privacy-respecting ways to do this, such as checking hashed password prefixes) and force a reset
    before an attacker gets there first, rather than waiting to detect the attack after it starts.
-4. Monitor login success *rates*, not just volume — a credential-stuffing run typically has a very
+4. Monitor login success *rates*, not just volume. A credential-stuffing run typically has a very
    low success rate against any well-defended target, but a non-zero one is still a real breach per
    successful attempt.
 
@@ -100,7 +100,7 @@ inconvenient without a password manager, and most people don't use one consisten
 | Scenario | Realistic impact |
 |---|---|
 | No MFA, no rate-limiting on the login endpoint | High success rate; every reused-password account is directly takeable |
-| MFA available but not required for every account (opt-in) | Attackers succeed specifically against the subset of users who never enabled it — often the majority |
+| MFA available but not required for every account (opt-in) | Attackers succeed specifically against the subset of users who never enabled it, often the majority |
 | MFA enforced for all accounts, with login anomaly detection | Individual stuffing attempts largely fail at the MFA step; detection still valuable to catch the attempt and force resets |
 | Stuffing attempt detected and credentials force-reset before large-scale success | Contained to a small number of accounts rather than an account-takeover incident at scale |
 
@@ -111,7 +111,7 @@ above: a business can have objectively secure, well-built software and still suf
 damaging incident through this vector, because the vulnerability being exploited belongs to the
 user's password habits, not the business's code. That reframes the right question from "is our
 system secure" to "what happens to *our* accounts when someone else's password habits fail
-elsewhere" — a question a client can act on directly by requiring MFA, regardless of how confident
+elsewhere," a question a client can act on directly by requiring MFA, regardless of how confident
 they are in their own application's code quality.
 
 ## A Worked Example
@@ -120,15 +120,15 @@ they are in their own application's code quality.
 
 Solandra Retail, an online storefront, notices during a routine review of authentication logs a
 sustained spike in failed logins spread across thousands of distinct customer accounts, originating
-from a rotating pool of a few hundred IP addresses over several hours — a pattern inconsistent with
-normal customer behavior, and inconsistent with a single-account brute-force attempt.
+from a rotating pool of a few hundred IP addresses over several hours, a pattern inconsistent with
+normal customer behavior and inconsistent with a single-account brute-force attempt.
 
 Cross-referencing a sample of the targeted usernames (email addresses) against a public
 breach-notification service confirms that a meaningful share of them appeared in an unrelated
 retailer's breach roughly a year earlier. The attack is confirmed as credential stuffing, not brute
 force: the same email/password combinations that had leaked elsewhere were simply being replayed here.
 
-The success rate turns out to be low — under one percent of attempts succeed in logging in — but
+The success rate turns out to be low (under one percent of attempts succeed in logging in), but
 because the attempt volume was so large, that low rate still represents several dozen compromised
 accounts, several of which had a stored payment method on file. The response is immediate: force a
 password reset on every affected account, require MFA re-enrollment, and flag the specific stored
@@ -137,7 +137,7 @@ payment methods for the affected accounts for manual review with the payment pro
 ## Severity Calibration
 
 This class of finding rates **High** when successful account takeovers with stored payment access
-are confirmed, but the technique itself carries no fixed severity — an identical attack pattern
+are confirmed, but the technique itself carries no fixed severity. An identical attack pattern
 against a service with no financial data and mandatory MFA on every account would rate meaningfully
 lower, because the actual, demonstrated blast radius (accounts with stored payment data, actually
 taken over) is what sets the rating, not the fact that stuffing traffic was observed at all.
@@ -147,16 +147,16 @@ taken over) is what sets the rating, not the fact that stuffing traffic was obse
 The real fix is mandatory multi-factor authentication on every account, rate-limiting and anomaly
 detection tuned to catch distributed low-and-slow attempts (not just high-volume single-source
 attempts), and proactively screening user credentials against known-breach data at signup and
-periodically afterward, forcing a reset when a match is found — before an attacker gets there.
+periodically afterward, forcing a reset when a match is found, before an attacker gets there.
 
 The common inadequate response is relying on password complexity requirements alone. This does
 nothing here: the passwords being used are often already long, complex, and "strong" by any
-composition rule — they're real, working passwords. The problem was never that the password was
+composition rule; they're real, working passwords. The problem was never that the password was
 weak; it's that the same real password worked in two unrelated places.
 
 ## Related Attacks & Vulnerabilities
 
-- [Brute Force](../brute-force/) — the closely related technique that guesses unknown credentials
+- [Brute Force](../brute-force/): the closely related technique that guesses unknown credentials
   rather than replaying known-real ones.
-- [Phishing](../phishing/) — one of the ways an attacker gets a fresh, unbreached set of credentials
+- [Phishing](../phishing/): one of the ways an attacker gets a fresh, unbreached set of credentials
   to begin with, rather than waiting for someone else's breach.

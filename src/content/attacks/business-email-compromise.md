@@ -13,7 +13,7 @@ datePublished: 2026-09-18
 ## Definition
 
 Business Email Compromise, usually shortened to BEC, is a targeted, researched impersonation of a
-specific person — almost always an executive, a finance team member, or a trusted vendor — used to
+specific person (almost always an executive, a finance team member, or a trusted vendor) used to
 induce a specific, high-value action, most commonly a fraudulent wire transfer. It's related to
 [Phishing](../phishing/) but distinct enough to warrant its own page: generic phishing casts a wide
 net for whatever it can catch, while BEC is narrow, patient, and built around one convincing request
@@ -21,8 +21,8 @@ to one specific person, often with no malicious link or attachment at all.
 
 ## What Makes It Work
 
-An internal request "sounding right" — the correct names, the correct context, the correct timing
-relative to something actually happening at the company — creates a strong, almost automatic
+An internal request "sounding right" (the correct names, the correct context, the correct timing
+relative to something actually happening at the company) creates a strong, almost automatic
 impression of legitimacy. None of that surface plausibility actually verifies who sent the message.
 What breaks is the authenticity of an instruction, specifically a financial one: the recipient
 reasonably assumes that a request which knows accurate, specific details about the business must have
@@ -66,20 +66,20 @@ from public sources, not from genuine internal access.
 
 ## Where It Actually Shows Up
 
-- **Wire transfer redirection** — a message, appearing to come from an executive, instructing finance
+- **Wire transfer redirection**: a message, appearing to come from an executive, instructing finance
   staff to urgently process a payment to a specified account.
-- **Vendor bank-detail changes** — a message impersonating a known, existing vendor claiming their
+- **Vendor bank-detail changes**: a message impersonating a known, existing vendor claiming their
   banking details have changed, redirecting a legitimate, expected payment to the attacker instead.
-- **Gift card requests** — a lower-value but very common variant, an "executive" asking an assistant
+- **Gift card requests**: a lower-value but very common variant, an "executive" asking an assistant
   or junior employee to urgently purchase gift cards and send the codes directly.
-- **Timing tied to real events** — attackers increasingly time these requests around genuine, publicly
+- **Timing tied to real events**: attackers increasingly time these requests around genuine, publicly
   knowable events (a recently announced acquisition, an executive known to be traveling and hard to
   reach for a quick verbal confirmation), making the pretext more convincing.
 
 ## Why It Keeps Succeeding
 
 Attackers now have access to an enormous amount of accurate organizational detail from entirely
-public sources — professional networking profiles, press releases, earnings calls, and prior data
+public sources: professional networking profiles, press releases, earnings calls, and prior data
 breaches that leaked real internal terminology and reporting structures. That detail makes a fabricated
 request read as specific and credible rather than generic. Layered on top of that is the same urgency-
 plus-authority dynamic seen in ordinary phishing, but sharpened: a request that appears to come
@@ -88,12 +88,12 @@ suppresses the normal instinct to double-check.
 
 ## How to Detect It
 
-- **Out-of-band verification** — calling a known, previously verified phone number (never one
+- **Out-of-band verification**: calling a known, previously verified phone number (never one
   provided in the email itself) before acting on any payment or banking-detail change request,
   regardless of how convincing or urgent it appears.
-- **Lookalike domain inspection** — checking the actual sending domain character by character; a
+- **Lookalike domain inspection**: checking the actual sending domain character by character; a
   single substituted or added character is the most common technical tell.
-- **Flagging the request type, not the sender** — treating *any* request to change payment details or
+- **Flagging the request type, not the sender**: treating *any* request to change payment details or
   redirect funds as requiring verification, independent of who appears to be asking, removes the
   reliance on correctly spotting impersonation in the moment.
 
@@ -103,24 +103,24 @@ suppresses the normal instinct to double-check.
 |---|---|
 | Suspicious request flagged and verified before any action taken | No loss; the control worked as intended |
 | Funds transferred, recovery attempted within hours through the bank | Partial recovery is sometimes possible if caught immediately, but far from guaranteed |
-| Funds transferred, discovered days later | Typically unrecoverable — funds have usually already moved through additional accounts by then |
+| Funds transferred, discovered days later | Typically unrecoverable: funds have usually already moved through additional accounts by then |
 | Vendor bank-detail change accepted without verification | Loss compounds with every subsequent legitimate payment made to the wrong account until the fraud is discovered |
 
 ## Why a Business Should Care
 
 BEC is one of the few attack techniques on this site with a direct, often large, and frequently
-irreversible financial loss as the primary outcome — worth naming plainly rather than folding into
+irreversible financial loss as the primary outcome, worth naming plainly rather than folding into
 generic "cybersecurity risk" language. Once a fraudulent wire transfer clears and moves through
 several intermediary accounts, recovery becomes unlikely regardless of how quickly it's discovered.
-That makes prevention — specifically, a verification process that doesn't depend on any one
-employee's judgment in the moment — a far better investment than detection after the fact. This is
+That makes prevention (specifically, a verification process that doesn't depend on any one
+employee's judgment in the moment) a far better investment than detection after the fact. This is
 also a genuinely easy risk to explain to a non-technical client: it isn't about firewalls or code, it's
-about one specific process — payment and banking-detail changes always get an independent, out-of-band
+about one specific process: payment and banking-detail changes always get an independent, out-of-band
 check, no matter who's asking or how urgent it sounds.
 
 ## A Worked Example
 
-*(Generalized from real engagement patterns. Company, product, and identifiers below are invented —
+*(Generalized from real engagement patterns. Company, product, and identifiers below are invented;
 no real system, client, or data is referenced.)*
 
 As part of an authorized assessment, a testing team sends the accounts-payable team at Halewood
@@ -130,7 +130,7 @@ noted as traveling and unreachable by phone. The sending domain is a single-char
 real company domain.
 
 An accounts-payable employee begins processing the payment before a colleague notices the sender
-domain doesn't match exactly and raises it. The engagement is halted at that point — the assessment's
+domain doesn't match exactly and raises it. The engagement is halted at that point. The assessment's
 goal is to measure whether the request would have been caught, not to complete an actual transfer.
 The report's central finding isn't the near-miss itself; it's that no policy existed requiring
 out-of-band verification for time-sensitive payment requests specifically, meaning the outcome came
@@ -140,8 +140,8 @@ repeating.
 ## Severity Calibration
 
 This class of finding rates **Critical** when a realistic path to an actual completed fraudulent
-transfer is demonstrated, because the potential impact — direct, often large, frequently
-unrecoverable financial loss — is about as severe and as concrete as impact gets. Severity drops
+transfer is demonstrated, because the potential impact (direct, often large, frequently
+unrecoverable financial loss) is about as severe and as concrete as impact gets. Severity drops
 meaningfully if the organization already has a verification step that would have caught the request
 regardless of the pretext's quality; in that case the finding shifts from "this technique fully
 succeeds" to "this technique was attempted and would have been stopped," which is a different and
@@ -150,19 +150,19 @@ much less urgent risk profile.
 ## Prevention & Response
 
 The real fix is a mandatory, no-exceptions, out-of-band verification process for any payment
-initiation or banking-detail change — a callback to a previously verified number, not a reply to the
-email itself — combined with dual approval for transfers above a set threshold, so no single
+initiation or banking-detail change (a callback to a previously verified number, not a reply to the
+email itself), combined with dual approval for transfers above a set threshold, so no single
 employee's judgment is ever the only control in the chain. If a fraudulent transfer does happen, speed
 matters enormously: contacting the receiving bank and initiating a recall request within hours, not
 days, meaningfully changes recovery odds.
 
 The common inadequate response is relying on training alone, or trusting a "reply-to matches" check
-as verification — both are easily defeated, the first because attention lapses under real pressure no
+as verification: both are easily defeated, the first because attention lapses under real pressure no
 matter how well-trained someone is, the second because a reply-to address is exactly as easy to spoof
 as the sender address itself.
 
 ## Related Attacks & Vulnerabilities
 
-- [Phishing](../phishing/) — the broader, less targeted version of the same underlying technique.
-- [Social Engineering](../social-engineering/) — the general discipline of manipulating a person
+- [Phishing](../phishing/): the broader, less targeted version of the same underlying technique.
+- [Social Engineering](../social-engineering/): the general discipline of manipulating a person
   rather than a system, of which this is a financially-focused, email-based form.

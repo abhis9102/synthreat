@@ -4,6 +4,31 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Em-dash copyedit pass; concurrent-session note
+
+**What happened:** All 31 published content files (2 vulnerabilities, 9 domains, 20 attacks)
+copyedited to remove every em-dash, rewritten sentence-by-sentence with punctuation suited to each
+one's actual grammatical role (period, colon, semicolon, comma, or parentheses) rather than a blind
+find-and-replace. Done via 7 parallel review forks, verified with a zero-em-dash grep across the
+whole `src/content/` tree afterward.
+
+**Why:** Direct user feedback that the prose read as visibly AI-generated specifically because of
+heavy em-dash use.
+
+**Decided:** New content going forward should be written without em-dashes from the start, folded
+into the drafting-fork instructions for future batches, rather than relying on a cleanup pass.
+
+**Operational note:** While this pass was running, the same GitHub account pushed two commits
+directly to `main` (`Add light default theme toggle`, `Make light mode the default`) implementing
+the same light/dark toggle feature this session had also just built independently, most likely a
+second concurrent Claude Code session acting on the same request. Reconciled by taking that
+already-live implementation as canonical (`git reset --hard origin/main`) and reapplying only the
+em-dash cleanup and a `domains` schema change on top, rather than attempting a line-level merge of
+two independent implementations of the same feature, which produced duplicated markup on a first
+attempt and was aborted. This session's own theme-toggle code was discarded, not merged.
+
+---
+
 ## 2026-09-18 — Attack Techniques section shipped, site redesigned, live
 
 **What happened (Content Architect):** Added a third content collection, `attacks` (site path

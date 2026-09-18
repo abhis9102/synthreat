@@ -17,19 +17,19 @@ group, rather than attacking that group directly. The name comes from the same l
 at an actual watering hole: instead of chasing prey across open ground, wait at the place they're
 already going to visit on their own.
 
-It's worth being precise about what this page covers versus [Drive-by Download](../drive-by-download/):
-that page is the *mechanism* — how a compromised page actually installs malware on a visitor's
-device. This page is the *targeting strategy* — deliberately choosing which site to compromise based
+It's worth being precise about what this page covers versus [Drive-by Download](../drive-by-download/).
+That page is the *mechanism*: how a compromised page actually installs malware on a visitor's
+device. This page is the *targeting strategy*: deliberately choosing which site to compromise based
 on who visits it, then letting that mechanism do the rest.
 
 ## What Makes It Work
 
 People are trained, reasonably, to be cautious about unsolicited links and unfamiliar sites. That
 caution has a blind spot: it doesn't extend to sites someone already visits routinely as part of their
-normal work or interests — an industry forum, a professional association's site, a vendor portal.
+normal work or interests, an industry forum, a professional association's site, a vendor portal.
 What a watering hole attack exploits is exactly that gap. The assumption being relied on is "I trust
 this site because I already know it and visit it regularly," and that assumption is precisely what
-makes the compromise effective once achieved — the same trust that makes the site useful to its
+makes the compromise effective once achieved: the same trust that makes the site useful to its
 regular visitors is what makes it dangerous once an attacker controls it.
 
 <figure class="diagram">
@@ -73,18 +73,18 @@ regular visitors is what makes it dangerous once an attacker controls it.
   sector, compromised to reach anyone in that sector who visits as part of normal professional life.
 - **Vendor or partner portals** a target organization's employees are known to log into regularly,
   which carry an even higher degree of implicit trust than a general public site.
-- **Selective payload delivery** — some watering hole compromises are engineered to serve the
+- **Selective payload delivery**: some watering hole compromises are engineered to serve the
   malicious content only to visitors matching specific characteristics (a particular network range,
   browser fingerprint, or geography), specifically to avoid tipping off unrelated visitors or security
   researchers who might otherwise notice and report the compromise quickly.
 
 ## Why It Keeps Succeeding
 
-The reconnaissance this technique requires is often just open-source research — which sites does this
-industry's or company's staff actually visit — rather than anything technically difficult. The payoff
+The reconnaissance this technique requires is often just open-source research (which sites does this
+industry's or company's staff actually visit) rather than anything technically difficult. The payoff
 can be substantial: reaching a well-defended, hard-to-directly-target organization through a much
 softer, indirectly related site that was never the actual target itself. This patient, indirect
-approach is a recognizable hallmark of well-resourced, long-horizon campaigns — see
+approach is a recognizable hallmark of well-resourced, long-horizon campaigns. See
 [Advanced Persistent Threat](../advanced-persistent-threat/) for how this fits into a broader,
 multi-stage intrusion.
 
@@ -94,7 +94,7 @@ multi-stage intrusion.
    generally, since that's the mechanism the compromised site is actually using.
 2. **Threat intelligence monitoring** for sites known to be relevant to a specific industry or
    organization that have been reported as compromised elsewhere.
-3. **Web filtering that doesn't rely purely on general site reputation** — a legitimate,
+3. **Web filtering that doesn't rely purely on general site reputation**: a legitimate,
    normally-safe site with an established good reputation is exactly the risk this technique
    exploits, so reputation alone is an insufficient signal here.
 
@@ -104,13 +104,13 @@ multi-stage intrusion.
 |---|---|
 | Opportunistic watering hole affecting many unrelated visitors of a general-interest site | Broad, low-value compromise, more likely to be noticed and reported quickly due to volume |
 | Selectively-served payload targeting only a specific organization's visitors | Slower to detect, since most visitors to the compromised site see nothing unusual at all |
-| Successful compromise of a specifically targeted, high-value organization through this indirect path | The intended outcome of the technique — access gained without ever directly approaching a well-defended target |
+| Successful compromise of a specifically targeted, high-value organization through this indirect path | The intended outcome of the technique: access gained without ever directly approaching a well-defended target |
 | Compromise discovered and reported quickly by an unrelated visitor or security researcher | The window of usefulness for the attacker closes fast once the compromised site itself becomes known |
 
 ## Why a Business Should Care
 
 The useful thing to say plainly to a client is that this technique defeats their most intuitive
-security instinct — "we only trust sites we already know" — precisely because it targets the sites
+security instinct: "we only trust sites we already know," precisely because it targets the sites
 they already know. Being targeted doesn't always look like an unsolicited approach; sometimes it
 looks exactly like a normal Tuesday visit to a site an employee has used for years. The mitigation
 has to combine technical controls (browser isolation, so a compromised trusted site can't do full
@@ -119,25 +119,25 @@ damage even when visited) with a broadened mental model of what "being targeted"
 ## A Worked Example
 
 *(Generalized from common assessment and threat-intelligence patterns. Company and identifiers below
-are invented — no real system, client, or data is referenced.)*
+are invented; no real system, client, or data is referenced.)*
 
 A threat-intelligence review conducted for a regional utility company, Amberfield Power, flags that a
-niche industry association site — one several of the company's engineering staff are known to visit
-for technical bulletins — was reported compromised by an unrelated third party several weeks earlier.
+niche industry association site, one several of the company's engineering staff are known to visit
+for technical bulletins, was reported compromised by an unrelated third party several weeks earlier.
 Cross-referencing internal browsing logs shows two engineering workstations visited that site during
 the window it was known to be compromised.
 
 Neither workstation shows confirmed signs of successful compromise on further investigation, but the
 finding is treated seriously regardless: the organization had no way of knowing about this exposure
 without external threat intelligence, because from the inside, the visit looked like completely
-routine, expected browsing behavior. The recommendation isn't "stop visiting industry sites" — it's
+routine, expected browsing behavior. The recommendation isn't "stop visiting industry sites," it's
 closing the actual gap: browser isolation on engineering workstations and a standing subscription to
 threat intelligence relevant to the company's specific industry.
 
 ## Severity Calibration
 
 Severity depends on how targeted and successful the delivery actually was and what the compromised
-endpoint could reach afterward — not on how clever the choice of watering hole site was. A watering
+endpoint could reach afterward, not on how clever the choice of watering hole site was. A watering
 hole that reached an isolated, low-privilege workstation with no further network access represents a
 materially lower demonstrated risk than one that reached a workstation with access to sensitive
 internal systems, even though the targeting strategy itself was identical in both cases.
@@ -149,13 +149,13 @@ compromised, trusted site doesn't translate directly into device compromise), th
 monitoring specifically for sites relevant to the organization's own industry, and defense-in-depth
 so a single compromised endpoint can't cascade into a larger breach.
 
-The common inadequate response is relying on site-reputation-based web filtering alone — this is
+The common inadequate response is relying on site-reputation-based web filtering alone. This is
 precisely the control this technique is designed to bypass, since the site in question has a
 genuinely good reputation right up until the moment it's compromised.
 
 ## Related Attacks & Vulnerabilities
 
-- [Drive-by Download](../drive-by-download/) — the technical delivery mechanism a watering hole
+- [Drive-by Download](../drive-by-download/): the technical delivery mechanism a watering hole
   attack relies on once the trusted site itself has been compromised.
-- [Advanced Persistent Threat](../advanced-persistent-threat/) — the kind of patient, well-resourced
+- [Advanced Persistent Threat](../advanced-persistent-threat/): the kind of patient, well-resourced
   campaign this indirect targeting strategy is a recognizable hallmark of.

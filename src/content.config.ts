@@ -59,7 +59,14 @@ const domains = defineCollection({
     // One-sentence dek shown in listings and search/share previews.
     summary: z.string().max(200),
     // What kind of domain/concept page this is, for grouping and filtering on the index.
-    category: z.enum(['Domain Overview', 'Methodology', 'Service Model', 'Attack Landscape']),
+    category: z.enum([
+      'Domain Overview',
+      'Methodology',
+      'Service Model',
+      'Attack Landscape',
+      'Framework & Standard',
+      'Compliance & Regulation',
+    ]),
     // Slugs of other entries in this collection, for the Related Topics section's cross-links.
     related: z.array(z.string()).default([]),
     // Slugs of vulnerabilities-collection entries this page connects to.
