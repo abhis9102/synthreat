@@ -35,6 +35,13 @@ const domainGroups = DOMAIN_CATEGORY_ORDER.map((category) => ({
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title} · Synthreat</title>
     <meta name="description" content={description} />
+    <script is:inline>
+      try {
+        if (localStorage.getItem('synthreat-theme') === 'dark') {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      } catch {}
+    </script>
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
   </head>
   <body>
@@ -115,6 +122,17 @@ const domainGroups = DOMAIN_CATEGORY_ORDER.map((category) => ({
             </div>
           </div>
         </nav>
+
+          <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="Switch to dark mode">
+            <svg class="theme-icon theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <svg class="theme-icon theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20.5 14.3A8.5 8.5 0 0 1 9.7 3.5 8.5 8.5 0 1 0 20.5 14.3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+            </svg>
+            <span class="theme-toggle-label">Dark</span>
+          </button>
       </div>
     </header>
 
@@ -201,6 +219,29 @@ const domainGroups = DOMAIN_CATEGORY_ORDER.map((category) => ({
           const isOpen = item?.classList.toggle('open');
           btn.setAttribute('aria-expanded', String(!!isOpen));
         });
+      });
+
+
+      // Theme preference: light is the default, and an explicit choice persists across visits.
+      const themeToggle = document.getElementById('themeToggle');
+
+      function applyTheme(theme, persist = true) {
+        const isDark = theme === 'dark';
+        document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+        themeToggle?.setAttribute('aria-pressed', String(isDark));
+        themeToggle?.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        const label = themeToggle?.querySelector('.theme-toggle-label');
+        if (label) label.textContent = isDark ? 'Light' : 'Dark';
+        if (persist) {
+          try { localStorage.setItem('synthreat-theme', isDark ? 'dark' : 'light'); } catch {}
+        }
+      }
+
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem('synthreat-theme'); } catch {}
+      applyTheme(savedTheme === 'dark' ? 'dark' : 'light', false);
+      themeToggle?.addEventListener('click', () => {
+        applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
       });
 
       document.addEventListener('keydown', (e) => {
