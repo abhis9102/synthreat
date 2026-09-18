@@ -190,7 +190,6 @@ const NAV_SECTIONS = [
         </div>
         <div class="footer-bottom">
           <span>Synthreat</span>
-          <a href="https://github.com/abhis9102/synthreat" target="_blank" rel="noopener">Source on GitHub</a>
         </div>
       </div>
     </footer>
@@ -206,6 +205,70 @@ const NAV_SECTIONS = [
         table.parentNode?.insertBefore(wrap, table);
         wrap.appendChild(table);
       });
+
+      // "Listen to this page": reads the article aloud using the browser's own built-in
+      // text-to-speech (no server, no API key, no cost). Only appears on pages that actually have
+      // an article body; index and homepage pages have nothing worth reading aloud.
+      const listenArticle = document.querySelector('article.vuln-body');
+      if (listenArticle && 'speechSynthesis' in window) {
+        const bar = document.createElement('div');
+        bar.className = 'listen-bar';
+        bar.innerHTML = `
+          <button class="listen-btn" id="listenBtn" aria-label="Read this page aloud" type="button">
+            <svg class="listen-icon listen-icon-play" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4l14 8-14 8V4Z" fill="currentColor"/></svg>
+            <svg class="listen-icon listen-icon-pause" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></svg>
+            <span class="listen-label">Listen to this page</span>
+          </button>
+          <button class="listen-stop" id="listenStop" aria-label="Stop reading" type="button" hidden>Stop</button>
+        `;
+        listenArticle.parentNode?.insertBefore(bar, listenArticle);
+
+        const listenBtn = bar.querySelector('#listenBtn');
+        const listenStop = bar.querySelector('#listenStop');
+        const listenLabel = bar.querySelector('.listen-label');
+        let utterance = null;
+        let paused = false;
+
+        function readableText() {
+          const clone = listenArticle.cloneNode(true);
+          clone.querySelectorAll('figure.diagram').forEach((el) => el.remove());
+          const h1 = document.querySelector('main h1');
+          const lead = (h1 ? h1.textContent + '. ' : '') + clone.textContent.replace(/\s+/g, ' ').trim();
+          return lead;
+        }
+
+        function setState(state) {
+          bar.dataset.state = state;
+          listenStop.hidden = state === 'idle';
+          listenLabel.textContent = state === 'playing' ? 'Pause' : state === 'paused' ? 'Resume' : 'Listen to this page';
+        }
+        setState('idle');
+
+        listenBtn.addEventListener('click', () => {
+          if (!utterance || (!window.speechSynthesis.speaking && !paused)) {
+            utterance = new SpeechSynthesisUtterance(readableText());
+            utterance.onend = () => setState('idle');
+            utterance.onerror = () => setState('idle');
+            window.speechSynthesis.speak(utterance);
+            paused = false;
+            setState('playing');
+          } else if (!paused) {
+            window.speechSynthesis.pause();
+            paused = true;
+            setState('paused');
+          } else {
+            window.speechSynthesis.resume();
+            paused = false;
+            setState('playing');
+          }
+        });
+
+        listenStop.addEventListener('click', () => {
+          window.speechSynthesis.cancel();
+          paused = false;
+          setState('idle');
+        });
+      }
 
       // Mobile nav: hover/focus-within handles the desktop dropdowns with no JS at all. Below the
       // desktop breakpoint there's no hover, so the hamburger and per-item chevrons need a toggle.

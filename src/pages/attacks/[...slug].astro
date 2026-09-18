@@ -19,7 +19,7 @@ const base = import.meta.env.BASE_URL;
 <BaseLayout title={title} description={summary}>
   <a class="tagline" href={`${base}attacks/`}>← Attack technique</a>
   <h1>{title}</h1>
-  <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
+  <p style="font-size:18px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
   <div class="vuln-meta">
     <span class="chip severity">Typical ceiling: {typicalSeverityCeiling}</span>
     {capec.map((id: string) => <span class="chip">{id}</span>)}

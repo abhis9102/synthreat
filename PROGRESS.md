@@ -4,6 +4,31 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Read-aloud feature, font size, footer link, minor fixes
+
+**What happened:**
+- Added a "Listen to this page" control using the browser's native `speechSynthesis` API: no
+  server, no API key, no third-party cost. It's injected client-side only when the page actually
+  has an `article.vuln-body` element, so it appears on every domains/methodology/frameworks/
+  compliance/attacks/vulnerabilities detail page and nowhere else (index pages and the homepage
+  have nothing worth reading aloud). Strips the inline SVG diagrams from what gets read (reading
+  out coordinate/path data would be nonsense) and reads the page's own `<h1>` first. Play, pause/
+  resume, and stop controls.
+- Bumped every explicit font-size in the stylesheet and page templates up by 1px (site-wide, via a
+  script rather than hand-editing each one, to keep every size consistent relative to the others).
+- Removed the "Source on GitHub" footer link per request.
+- Confirmed Red Teaming was never actually missing from the site, just relocated from `domains` to
+  `methodology` during the earlier collection split (it's a testing methodology, not a domain,
+  same reasoning as AI Red Teaming next to it) — no content change needed, just a location
+  clarification.
+
+**Why:** Direct user requests. The read-aloud feature specifically was scoped to the Web Speech
+API rather than a cloud TTS service specifically because this is a static site with no backend,
+and introducing a paid third-party API for this would add real cost and a credential to manage for
+a free educational resource; the browser-native approach costs nothing and needs no key.
+
+---
+
 ## 2026-09-18 — Vulnerability/attack gap-fill, reference-link audit, UI polish
 
 **What happened (Content Architect gap analysis, re-derived without external browsing, confirmed
