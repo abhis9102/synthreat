@@ -3,7 +3,7 @@ title: Mobile Security
 summary: What's structurally different about securing an iOS or Android app compared to a web application, and the mobile-specific failure patterns that show up again and again.
 category: Domain Overview
 related: ["frameworks-standards"]
-relatedVulnerabilities: []
+relatedVulnerabilities: ["insecure-mobile-data-storage", "insecure-mobile-communication", "insecure-mobile-authentication", "insufficient-binary-protections", "mobile-permission-misuse", "insecure-webview-deeplink-handling"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -29,17 +29,24 @@ OWASP maintains a dedicated [Mobile Top 10](https://owasp.org/www-project-mobile
 worth knowing exists without treating any specific current wording as fixed. Several representative
 failure patterns recur constantly in real mobile assessments:
 
-- **Insecure local data storage.** Sensitive data cached in plaintext directly on the device,
-  retrievable by anyone with physical or forensic access to it, regardless of how well the backend
-  is secured.
-- **Insecure communication.** An app that doesn't properly validate the server's TLS certificate,
-  leaving it open to interception. See [Man-in-the-Middle](../../attacks/man-in-the-middle/) for how
-  that interception typically happens.
-- **Reverse engineering and weak binary protections.** Since the compiled app itself sits in the
-  attacker's hands, obfuscation and tamper-detection matter here in a way they simply don't for
-  server-side code that never leaves the developer's infrastructure.
-- **Platform permission misuse.** An app requesting far more device permissions than its actual
-  function requires, expanding what a compromise of that app can actually reach.
+- **[Insecure local data storage](../../vulnerabilities/insecure-mobile-data-storage/).** Sensitive
+  data cached in plaintext directly on the device, retrievable by anyone with physical or forensic
+  access to it, regardless of how well the backend is secured.
+- **[Insecure communication](../../vulnerabilities/insecure-mobile-communication/).** An app that
+  doesn't properly validate the server's TLS certificate, leaving it open to interception. See
+  [Man-in-the-Middle](../../attacks/man-in-the-middle/) for how that interception typically happens.
+- **[Insecure authentication and session management](../../vulnerabilities/insecure-mobile-authentication/).**
+  Login and session logic enforced only on the client, or a biometric prompt the backend never
+  independently re-validates.
+- **[Insufficient binary protections](../../vulnerabilities/insufficient-binary-protections/).** Since
+  the compiled app itself sits in the attacker's hands, obfuscation and tamper-detection matter here in
+  a way they simply don't for server-side code that never leaves the developer's infrastructure.
+- **[Platform permission misuse](../../vulnerabilities/mobile-permission-misuse/).** An app requesting
+  far more device permissions than its actual function requires, or exposing its own components to
+  other apps by mistake, expanding what a compromise can actually reach.
+- **[Insecure WebView and deep link handling](../../vulnerabilities/insecure-webview-deeplink-handling/).**
+  An embedded browser component or deep link handler that trusts content or parameters with no
+  validation of where they actually came from.
 
 Mobile testing methodology typically covers three layers: static analysis of the compiled app
 package itself, dynamic testing of the app running live on a device or emulator, and testing of the
@@ -73,9 +80,9 @@ testing on their own terms.
 
 ## Related Topics
 
-- **Explore Mobile Security vulnerabilities:** dedicated mobile vulnerability-class pages are on the
-  roadmap for the [Vulnerabilities section](../../vulnerabilities/#mobile-security); until then, the
-  backend layer a mobile app talks to is covered by the same [Web
+- **Explore Mobile Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/#mobile-security)
+  has dedicated, worked-example pages for every failure pattern named above; the backend layer a
+  mobile app talks to is additionally covered by the same [Web
   Application](../../vulnerabilities/#web-application) vulnerability classes as any other API.
 - [Application Security](../application-security/): the broader discipline mobile security is a
   specialized branch of.

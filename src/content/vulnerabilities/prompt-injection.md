@@ -1,10 +1,11 @@
 ---
 title: Prompt Injection
 surface: "AI Security"
+owasp: "LLM01:2025 – Prompt Injection"
 summary: Getting a large language model to follow attacker-supplied instructions hidden inside the content it's asked to process, rather than the instructions its own developer gave it.
 cwe: []
 typicalSeverityCeiling: Critical
-related: ["insecure-output-handling", "excessive-agency"]
+related: ["insecure-output-handling", "excessive-agency", "system-prompt-leakage"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -178,3 +179,6 @@ it possible to phrase an injected instruction to work around this kind of prompt
 - **Excessive Agency** ([../excessive-agency/](../excessive-agency/)): what turns a successful prompt
   injection from an unwanted response into a real-world unauthorized action, when the model has tool
   access beyond what the task requires.
+- **System Prompt Leakage** ([../system-prompt-leakage/](../system-prompt-leakage/)): a common,
+  narrower target of this same technique, extracting the model's own confidential instructions rather
+  than causing a different action.

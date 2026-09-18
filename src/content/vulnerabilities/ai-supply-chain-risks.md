@@ -1,6 +1,7 @@
 ---
 title: AI Model & Training Data Supply Chain Risks
 surface: "AI Security"
+owasp: "LLM03:2025 – Supply Chain"
 summary: A third-party model, dataset, or hosting component compromised before it reaches an application, the same supply-chain pattern as any other dependency, applied to the AI pipeline.
 cwe: []
 typicalSeverityCeiling: Critical

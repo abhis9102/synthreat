@@ -1,6 +1,7 @@
 ---
 title: Insecure Output Handling
 surface: "AI Security"
+owasp: "LLM05:2025 – Improper Output Handling"
 summary: Trusting a large language model's output enough to render or execute it directly, without giving it the same validation any other untrusted input would get.
 cwe: []
 typicalSeverityCeiling: Critical

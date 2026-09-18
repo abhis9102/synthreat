@@ -43,6 +43,12 @@ the provider more responsibility than a raw virtual machine the customer adminis
 core split (provider secures the foundation, customer secures their own configuration) holds across
 all of them.
 
+Worth naming honestly: OWASP attempted a dedicated Cloud-Native Application Security Top 10 project,
+but it stalled at an interim draft of roughly six risk areas and was archived in 2025 without ever
+publishing a finished, numbered list, unlike the mature OWASP Top 10 or the actively maintained OWASP
+Top 10 for LLM Applications. No page on this site cites it by number for that reason; the failure modes
+below are drawn from real, well-established incident patterns rather than that unfinished list.
+
 In practice, the failure modes that repeatedly cause real cloud incidents fall into a short, well-known
 list:
 

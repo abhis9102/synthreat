@@ -3,7 +3,7 @@ title: AI Security
 summary: The security concerns specific to building and operating AI systems, across the data, the model, the infrastructure, and the application layer around it.
 category: Domain Overview
 related: ["application-security"]
-relatedVulnerabilities: ["prompt-injection", "insecure-output-handling", "excessive-agency", "ai-sensitive-information-disclosure", "ai-supply-chain-risks", "training-data-poisoning"]
+relatedVulnerabilities: ["prompt-injection", "ai-sensitive-information-disclosure", "ai-supply-chain-risks", "training-data-poisoning", "insecure-output-handling", "excessive-agency", "system-prompt-leakage", "vector-embedding-weaknesses", "ai-misinformation", "unbounded-consumption"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -42,11 +42,8 @@ This is a domain the field is still actively building shared practice around, an
 ## Related Topics
 
 - **Explore AI Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/#ai-security)
-  has dedicated, worked-example pages for [Prompt Injection](../../vulnerabilities/prompt-injection/),
-  [Insecure Output Handling](../../vulnerabilities/insecure-output-handling/), [Excessive
-  Agency](../../vulnerabilities/excessive-agency/), [AI Sensitive Information
-  Disclosure](../../vulnerabilities/ai-sensitive-information-disclosure/), [AI Model & Training Data
-  Supply Chain Risks](../../vulnerabilities/ai-supply-chain-risks/), and [Training Data
+  has all ten dedicated, worked-example pages behind [The OWASP Top 10 for LLM
+  Applications](../../frameworks/ai-llm-top-10/), plus [Training Data
   Poisoning](../../vulnerabilities/training-data-poisoning/).
 - [AI Red Teaming](../../methodology/ai-red-teaming/): the adversarial testing methodology for the systems this domain covers.
 - [The OWASP Top 10 for LLM Applications](../../frameworks/ai-llm-top-10/): the named risk list this domain's concerns map onto.

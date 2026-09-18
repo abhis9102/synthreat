@@ -1,10 +1,11 @@
 ---
 title: Excessive Agency
 surface: "AI Security"
+owasp: "LLM06:2025 – Excessive Agency"
 summary: An AI system given more real-world tool access, permission, or autonomy than its actual task requires, so any manipulation of its behavior can trigger real, unauthorized actions.
 cwe: []
 typicalSeverityCeiling: Critical
-related: ["prompt-injection", "broken-access-control"]
+related: ["prompt-injection", "broken-access-control", "unbounded-consumption", "ai-misinformation"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -143,3 +144,8 @@ manipulated.
 - **Broken Access Control** ([../broken-access-control/](../broken-access-control/)): the same
   underlying least-privilege failure, applied here to an AI agent's own tool access rather than a
   traditional user or service account's permissions.
+- **Unbounded Consumption** ([../unbounded-consumption/](../unbounded-consumption/)): what an
+  excessively agentic system without a step limit or timeout turns into when a task goes wrong.
+- **Misinformation** ([../ai-misinformation/](../ai-misinformation/)): the failure mode that most
+  often triggers an agent to take an unwarranted action, when it acts on a fact it fabricated for
+  itself earlier in the same task.

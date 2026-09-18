@@ -7,6 +7,10 @@ const entries = (await getCollection('vulnerabilities', ({ data }) => data.statu
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
 const base = import.meta.env.BASE_URL;
 
+// Cards shown before a "View all" toggle takes over, matching the homepage's own 4-card-cap pattern
+// (src/pages/index.astro) so the two pages read consistently.
+const CARD_CAP = 4;
+
 // Kebab-case anchor id for a surface, e.g. "Web Application" -> "web-application". Used both for
 // this page's <details id> targets and for the "explore X vulnerabilities" links other collections
 // (domains in particular) point at. Degrades gracefully: linking to an anchor with zero entries
@@ -21,12 +25,12 @@ const surfaceSlug = (surface: string) => surface.toLowerCase().replace(/\s+/g, '
 // read-aloud, but a section can be collapsed once it's not needed.
 const groups = VULN_SURFACES.map((surface) => {
   const surfaceEntries = entries.filter((entry) => entry.data.surface === surface);
-  let subgroups: { label: string; entries: typeof entries }[] | null = null;
+  let subgroups: { code: string; label: string; entries: typeof entries }[] | null = null;
   if (surface === 'Web Application') {
-    const byCode = new Map<string, { label: string; entries: typeof entries }>();
+    const byCode = new Map<string, { code: string; label: string; entries: typeof entries }>();
     for (const entry of surfaceEntries) {
       const code = entry.data.owasp?.match(/^A\d{2}/)?.[0] ?? 'Other';
-      if (!byCode.has(code)) byCode.set(code, { label: entry.data.owasp ?? 'Other', entries: [] });
+      if (!byCode.has(code)) byCode.set(code, { code, label: entry.data.owasp ?? 'Other', entries: [] });
       byCode.get(code)!.entries.push(entry);
     }
     subgroups = [...byCode.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
@@ -61,10 +65,10 @@ const groups = VULN_SURFACES.map((surface) => {
         {group.subgroups ? (
           <div style="margin-top:18px;display:flex;flex-direction:column;gap:26px;">
             {group.subgroups.map((sub) => (
-              <div>
+              <div id={`${surfaceSlug(group.surface)}-${sub.code.toLowerCase()}`}>
                 <div class="subgroup-label">{sub.label}</div>
                 <div class="card-grid" style="margin-top:12px;">
-                  {sub.entries.map((entry) => (
+                  {sub.entries.slice(0, CARD_CAP).map((entry) => (
                     <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
                       <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
                       <h3>{entry.data.title}</h3>
@@ -72,19 +76,49 @@ const groups = VULN_SURFACES.map((surface) => {
                     </a>
                   ))}
                 </div>
+                {sub.entries.length > CARD_CAP && (
+                  <details class="view-all-toggle">
+                    <summary>View all {sub.entries.length} {sub.label} pages →</summary>
+                    <div class="card-grid" style="margin-top:14px;">
+                      {sub.entries.slice(CARD_CAP).map((entry) => (
+                        <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
+                          <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
+                          <h3>{entry.data.title}</h3>
+                          <p>{entry.data.summary}</p>
+                        </a>
+                      ))}
+                    </div>
+                  </details>
+                )}
               </div>
             ))}
           </div>
         ) : (
-          <div class="card-grid" style="margin-top:18px;">
-            {group.entries.map((entry) => (
-              <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
-                <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
-                <h3>{entry.data.title}</h3>
-                <p>{entry.data.summary}</p>
-              </a>
-            ))}
-          </div>
+          <>
+            <div class="card-grid" style="margin-top:18px;">
+              {group.entries.slice(0, CARD_CAP).map((entry) => (
+                <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
+                  <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
+                  <h3>{entry.data.title}</h3>
+                  <p>{entry.data.summary}</p>
+                </a>
+              ))}
+            </div>
+            {group.entries.length > CARD_CAP && (
+              <details class="view-all-toggle">
+                <summary>View all {group.entries.length} {group.surface} pages →</summary>
+                <div class="card-grid" style="margin-top:14px;">
+                  {group.entries.slice(CARD_CAP).map((entry) => (
+                    <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
+                      <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
+                      <h3>{entry.data.title}</h3>
+                      <p>{entry.data.summary}</p>
+                    </a>
+                  ))}
+                </div>
+              </details>
+            )}
+          </>
         )}
       </details>
     ))}

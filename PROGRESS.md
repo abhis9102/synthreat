@@ -4,6 +4,91 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Mobile + Network Security batches, full LLM Top 10, index/nav UI fixes
+
+**What happened (Content Architect + Design/Frontend Lead + Subject-Matter Writer, all direct user
+requests in the same session):** Four separate asks, handled in sequence.
+
+**1. Card cap on the vulnerabilities index page.** Each surface accordion was rendering every card at
+once (up to 22 for Web Application). Added a `CARD_CAP = 4` constant to
+`src/pages/vulnerabilities/index.astro`: the first 4 cards show directly, anything beyond that sits
+behind a native `<details class="view-all-toggle">` "View all N →" toggle, applied both at the
+surface level and inside each Web Application OWASP subgroup. No JS needed, matches the homepage's own
+existing 4-card-cap-plus-link pattern in spirit without literally reusing that component (this page
+needs an in-place reveal, not a link elsewhere, since it *is* the destination).
+
+**2. Web Application nav flyout redesign.** The prior nested flyout exploded into a 3-column,
+10-group, 22-link breakdown that was too wide and cluttered for a hover dropdown. Replaced it with a
+single compact column listing the 10 OWASP category names themselves (short label + count, e.g. "A01 ·
+Broken Access Control · 5"), each linking to that category's own anchor on the index page
+(`#web-application-a01`, added as a real element id this batch). The full per-page breakdown lives on
+the index page, which is what an index page is for; the nav dropdown for every surface (Cloud, Web
+Application, Mobile, Network, AI) is now a plain single-column list, no multi-column grids anywhere in
+it. Removed the now-dead `.vuln-surface-panel-wide` CSS this created and then un-created.
+
+**3. Two real, unrelated UI bugs fixed along the way (user-reported, screenshot on mobile Safari):**
+- Horizontal scroll/margin on mobile: `.site-header` has `backdrop-filter: blur(10px)`, and the
+  mobile slide-in `.site-nav` (`position: fixed`) is a descendant of it. In WebKit, `backdrop-filter`
+  on an ancestor becomes the containing block for `position: fixed` descendants, so the "hidden"
+  off-canvas nav was computing its offset against the header's box instead of the true viewport and
+  bleeding past the right edge. Fixed with `overflow-x: hidden` on `html, body` (deliberately
+  `overflow-x`, not the `overflow` shorthand, so it doesn't break the header's `position: sticky`
+  vertical behavior).
+- No dedicated close control inside the open mobile menu itself: the hamburger already animated into
+  an X, but only via the same button back up in the header. Added a second, explicit `.nav-close`
+  button at the top of the slide-in panel itself, wired to the same existing `closeNav()` function.
+
+**4. Full OWASP Top 10 for LLM Applications, plus Mobile Security and Network Security batches.**
+`frameworks/ai-llm-top-10.md` previously named only 5 of the list's categories informally, without
+numbers, specifically because this project's own rule is to never cite an ID without confidence in it.
+Retrofitted the 6 already-published AI Security pages with real `LLM0X:2025` IDs in their `owasp`
+field (reusing that field across surfaces, not just Web Application) and drafted the missing 4:
+System Prompt Leakage (LLM07), Vector and Embedding Weaknesses (LLM08), Misinformation (LLM09), and
+Unbounded Consumption (LLM10). AI Security is now a complete, standards-grounded 10-page set.
+Mobile Security (6 pages: Insecure Mobile Data Storage, Insecure Mobile Communication, Insecure Mobile
+Authentication & Session Management, Insufficient Binary Protections, Excessive Mobile Permissions &
+Insecure Platform Usage, Insecure WebView & Deep Link Handling) and Network Security (6 pages: Network
+Segmentation Failures, Weak or Missing Network Access Controls, Insecure Wireless Network
+Configuration, Unencrypted Network Protocols in Use, Insecure VPN & Remote Access Configuration,
+Insufficient Network Monitoring & Intrusion Detection) both went from zero pages to full batches
+mirroring their domain pages' own already-named failure-mode lists. The vulnerabilities collection is
+now 50 pages across all 5 surfaces.
+
+**Decided against citing OWASP's Cloud-Native Application Security Top 10 (CNAS) for Cloud Security,**
+after the user asked for it directly. Checked the primary source before doing anything (this project's
+own rule): CNAS's GitHub README literally lists its table of contents as "Top 10 **(TBD)**" and the
+project was archived in April 2025 without ever publishing a finished, numbered list, unlike the real,
+completed OWASP Top 10 (2021) and OWASP Top 10 for LLM Applications (2025). Citing "CNAS-1" through
+"CNAS-10" would mean presenting an abandoned draft as a settled standard. User agreed to keep Cloud
+Security as a flat list; added one honest sentence to `domains/cloud-security.md` naming CNAS as a
+named-but-unfinished effort rather than building any structure around it.
+
+**Cross-linked:** every new page both to its siblings within the same batch and back into whichever
+existing page it specializes (`insecure-webview-deeplink-handling` <-> `cross-site-scripting`,
+`ai-misinformation` <-> `excessive-agency` and `ai-supply-chain-risks`, etc.). `domains/mobile-
+security.md` and `domains/network-security.md` had their `relatedVulnerabilities` and Related Topics
+filled in for the first time (previously empty/roadmap placeholders from last batch), and their prose
+now links each named failure pattern directly to its dedicated page.
+
+**Editorial Reviewer pass:** `npm run validate:content` (104 files) and `npm run build` (111 pages)
+both clean after fixing four summaries over the 200-char schema limit. Zero em-dashes across all 16 new
+files this batch. Vendor-name grep flagged only generic platform-mechanism references (Android, iOS,
+Keychain, Keystore) that name real OS mechanisms the same way the Cloud batch named S3/Azure Blob/GCS
+generically, not a real client engagement. A corrected relative-link resolver (the previous one
+false-flagged anchor links to collection index pages) confirmed zero actual broken links across all 6
+collections. Verified the rendered dev-server HTML directly: all 5 surfaces render with correct counts
+(Cloud 6, Web Application 22, Mobile 6, Network 6, AI 10 = 50 total), exactly 5 view-all toggles appear
+in the expected places, the nav flyout lists all 5 surfaces as a single column each, and both UI bug
+fixes (`overflow-x: hidden`, `#navClose`) compiled into the build output.
+
+**Next (not yet drafted):** the lower-priority domains/methodology backlog from three batches ago
+(Identity & Access Management, IoT/OT, Cryptography as domains; Purple Teaming, Secure Code Review,
+Social Engineering Assessment, Bug Bounty, Tabletop Exercises as methodology pages) is still open. AI
+Security backlog beyond the now-complete LLM Top 10: Model Theft / IP protection of weights and
+Adversarial Robustness / Evasion, both named in `domains/ai-security.md`'s "Model security" bullet.
+
+---
+
 ## 2026-09-18 — AI Security vulnerability batch; re-architected the taxonomy to surface-based
 
 **What happened (Content Architect, direct user request, superseding the previous batch's taxonomy):**

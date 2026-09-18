@@ -2,7 +2,7 @@
 title: The OWASP Top 10 for LLM Applications
 summary: The risk categories specific to applications built on large language models, and how they differ from both traditional AppSec risks and general AI safety concerns.
 related: ["frameworks-standards"]
-relatedVulnerabilities: ["prompt-injection", "insecure-output-handling", "ai-supply-chain-risks", "excessive-agency", "ai-sensitive-information-disclosure"]
+relatedVulnerabilities: ["prompt-injection", "ai-sensitive-information-disclosure", "ai-supply-chain-risks", "training-data-poisoning", "insecure-output-handling", "excessive-agency", "system-prompt-leakage", "vector-embedding-weaknesses", "ai-misinformation", "unbounded-consumption"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -25,34 +25,49 @@ to say about prompt injection. This list fills that specific gap.
 
 ## How It Works
 
-The project describes a set of representative risk categories rather than a single narrow bug
-type, similar in spirit to how the general OWASP Top 10 groups related weaknesses into categories.
-Several worth knowing by name:
+The project describes ten representative risk categories rather than a single narrow bug type,
+similar in spirit to how the general OWASP Top 10 groups related weaknesses into categories. The
+numbering below reflects the project's 2025 revision; treat the exact numbering as a snapshot rather
+than permanent, the same way the general OWASP Top 10's own numbering shifts release to release.
 
-- **[Prompt injection](../../vulnerabilities/prompt-injection/)**: getting a model to follow
-  attacker-supplied instructions hidden inside its input. Direct prompt injection means typing the
-  malicious instruction straight into a chat window; indirect prompt injection hides it inside a
-  document, webpage, or email the model is later asked to process, so the model encounters and
-  follows the instruction without a human ever seeing it.
-- **[Insecure output handling](../../vulnerabilities/insecure-output-handling/)**: trusting a model's
-  output enough to render or execute it without applying the same validation any other untrusted
-  input would get. If that output is rendered directly into a web page, this becomes a very familiar
-  problem wearing new clothes: see [Cross-Site Scripting](../../vulnerabilities/cross-site-scripting/)
-  for what happens when untrusted content reaches a browser without proper encoding.
-- **[Training data and model supply chain risks](../../vulnerabilities/ai-supply-chain-risks/)**: a
-  model, a fine-tuning dataset, or a third-party model component compromised before it ever reaches
-  the application, the same underlying pattern covered on [Supply Chain
-  Attack](../../attacks/supply-chain-attack/), applied to the AI pipeline specifically. A related,
-  more targeted mechanism, deliberately corrupting the training data itself rather than compromising
-  a dependency, has its own dedicated page: [Training Data
-  Poisoning](../../vulnerabilities/training-data-poisoning/).
-- **[Excessive agency](../../vulnerabilities/excessive-agency/)**: an AI system or agent given more
-  real-world tool access and permission than its actual task requires. See [AI Red
-  Teaming](../../methodology/ai-red-teaming/) for how this becomes a serious problem the moment a
-  model can take real actions, not just produce text.
-- **[Sensitive information disclosure](../../vulnerabilities/ai-sensitive-information-disclosure/)**:
-  a model revealing fragments of its training data, or being manipulated into disclosing data it was
-  given legitimate access to for a narrower purpose.
+1. **[LLM01: Prompt Injection](../../vulnerabilities/prompt-injection/)**: getting a model to follow
+   attacker-supplied instructions hidden inside its input. Direct prompt injection means typing the
+   malicious instruction straight into a chat window; indirect prompt injection hides it inside a
+   document, webpage, or email the model is later asked to process, so the model encounters and
+   follows the instruction without a human ever seeing it.
+2. **[LLM02: Sensitive Information Disclosure](../../vulnerabilities/ai-sensitive-information-disclosure/)**:
+   a model revealing fragments of its training data, another user's session content in a shared
+   deployment, or being manipulated into disclosing data it was given legitimate access to for a
+   narrower purpose.
+3. **[LLM03: Supply Chain](../../vulnerabilities/ai-supply-chain-risks/)**: a pre-trained model, a
+   fine-tuning dataset, or a third-party plugin compromised before it ever reaches the application,
+   the same underlying pattern covered on [Supply Chain Attack](../../attacks/supply-chain-attack/),
+   applied to the AI pipeline specifically.
+4. **[LLM04: Data and Model Poisoning](../../vulnerabilities/training-data-poisoning/)**: an attacker
+   deliberately corrupting the data used to train or fine-tune a model, to make it learn a specific,
+   hidden behavior that benefits them once it's deployed.
+5. **[LLM05: Improper Output Handling](../../vulnerabilities/insecure-output-handling/)**: trusting a
+   model's output enough to render or execute it without applying the same validation any other
+   untrusted input would get. If that output is rendered directly into a web page, this becomes a
+   very familiar problem wearing new clothes: see [Cross-Site
+   Scripting](../../vulnerabilities/cross-site-scripting/) for what happens when untrusted content
+   reaches a browser without proper encoding.
+6. **[LLM06: Excessive Agency](../../vulnerabilities/excessive-agency/)**: an AI system or agent given
+   more real-world tool access and permission than its actual task requires. See [AI Red
+   Teaming](../../methodology/ai-red-teaming/) for how this becomes a serious problem the moment a
+   model can take real actions, not just produce text.
+7. **[LLM07: System Prompt Leakage](../../vulnerabilities/system-prompt-leakage/)**: a model's
+   confidential developer instructions, meant to stay hidden, extracted through the same conversation
+   channel a user talks to it through.
+8. **[LLM08: Vector and Embedding Weaknesses](../../vulnerabilities/vector-embedding-weaknesses/)**:
+   access-control and integrity gaps specific to a retrieval-augmented system's vector database, the
+   index a model searches for context before answering.
+9. **[LLM09: Misinformation](../../vulnerabilities/ai-misinformation/)**: a model stating false or
+   unsupported information with the same fluent confidence as a correct answer, commonly called
+   hallucination, and a user or downstream system relying on it as fact.
+10. **[LLM10: Unbounded Consumption](../../vulnerabilities/unbounded-consumption/)**: no effective
+    limit on how much computation, context length, or metered cost a single request or user can drive,
+    turning metered inference into a denial-of-service and denial-of-wallet risk.
 
 ## Where This Shows Up in Practice
 

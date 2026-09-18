@@ -1,10 +1,11 @@
 ---
 title: AI Sensitive Information Disclosure
 surface: "AI Security"
+owasp: "LLM02:2025 – Sensitive Information Disclosure"
 summary: A model reveals fragments of its training data, another user's conversation context, or internal instructions it was never meant to disclose, through nothing more than an ordinary-looking query.
 cwe: []
 typicalSeverityCeiling: Critical
-related: ["prompt-injection", "cryptographic-failures"]
+related: ["prompt-injection", "cryptographic-failures", "system-prompt-leakage", "vector-embedding-weaknesses"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -132,3 +133,8 @@ or isolation gap that made the disclosure possible in the first place.
 - **Cryptographic Failures** ([../cryptographic-failures/](../cryptographic-failures/)): the
   traditional data-protection class this is the AI-specific analogue of, sensitive data ending up
   somewhere it shouldn't through a mechanism specific to how the system actually works.
+- **System Prompt Leakage** ([../system-prompt-leakage/](../system-prompt-leakage/)): a narrower,
+  dedicated treatment of one specific disclosure target, the system's own confidential instructions.
+- **Vector and Embedding Weaknesses** ([../vector-embedding-weaknesses/](../vector-embedding-weaknesses/)):
+  the retrieval-layer mechanism behind a common real-world path to this same outcome in
+  retrieval-augmented systems.

@@ -32,21 +32,30 @@ const vulnEntries = (
 ).sort((a, b) => a.data.title.localeCompare(b.data.title));
 
 // Nested nav dropdown for Vulnerabilities: surface (top level, same grouping and order as the index
-// page) -> a flyout panel of that surface's entries, sub-grouped by OWASP category for Web
-// Application specifically, the same one place that grouping logic lives (index.astro) duplicated
-// here since Astro components don't share a runtime module for this kind of derived view data.
+// page) -> a flyout panel of that surface's entries. For Web Application specifically, the flyout
+// lists the 10 OWASP categories themselves (short label + count, linking to that category's anchor
+// on the index page) rather than exploding into a 22-link, multi-column breakdown: the full
+// per-page breakdown is what the index page itself is for, and a hover dropdown reading that deep
+// stopped being a dropdown and became its own page. Cloud/AI/Mobile/Network stay a flat list of
+// their actual entries since none of them are large enough yet to need this treatment.
 const surfaceSlug = (surface: string) => surface.toLowerCase().replace(/\s+/g, '-');
+// "A01:2021 – Broken Access Control" -> "A01 · Broken Access Control"
+const owaspShortLabel = (owasp: string) => {
+  const code = owasp.match(/^A\d{2}/)?.[0] ?? '';
+  const name = owasp.split('–')[1]?.trim() ?? owasp;
+  return `${code} · ${name}`;
+};
 const vulnGroups = VULN_SURFACES.map((surface) => {
   const surfaceEntries = vulnEntries.filter((entry) => entry.data.surface === surface);
-  let subgroups: { label: string; entries: typeof vulnEntries }[] | null = null;
+  let subgroups: { code: string; label: string; count: number }[] | null = null;
   if (surface === 'Web Application') {
-    const byCode = new Map<string, { label: string; entries: typeof vulnEntries }>();
+    const byCode = new Map<string, { code: string; label: string; count: number }>();
     for (const entry of surfaceEntries) {
       const code = entry.data.owasp?.match(/^A\d{2}/)?.[0] ?? 'Other';
-      if (!byCode.has(code)) byCode.set(code, { label: entry.data.owasp ?? 'Other', entries: [] });
-      byCode.get(code)!.entries.push(entry);
+      if (!byCode.has(code)) byCode.set(code, { code, label: entry.data.owasp ? owaspShortLabel(entry.data.owasp) : 'Other', count: 0 });
+      byCode.get(code)!.count++;
     }
-    subgroups = [...byCode.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
+    subgroups = [...byCode.values()].sort((a, b) => a.code.localeCompare(b.code));
   }
   return { surface, entries: surfaceEntries, subgroups };
 }).filter((group) => group.entries.length > 0);
@@ -88,6 +97,9 @@ const NAV_SECTIONS = [
         </button>
 
         <nav class="site-nav" id="siteNav">
+          <button class="nav-close" id="navClose" aria-label="Close navigation menu">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
           {NAV_SECTIONS.map((section) => (
             <div class="nav-item">
               <div class="nav-row">
@@ -150,18 +162,13 @@ const NAV_SECTIONS = [
                       <span>{group.surface}</span>
                       <span class="vuln-surface-count">{group.entries.length}</span>
                     </a>
-                    <div class:list={['vuln-surface-panel', { 'vuln-surface-panel-wide': !!group.subgroups }]}>
+                    <div class="vuln-surface-panel">
                       {group.subgroups ? (
-                        <div class="nav-panel-inner nav-panel-cols">
-                          {group.subgroups.map((sub) => (
-                            <div class="nav-col">
-                              <div class="nav-col-title">{sub.label}</div>
-                              {sub.entries.map((item) => (
-                                <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
-                              ))}
-                            </div>
-                          ))}
-                        </div>
+                        group.subgroups.map((sub) => (
+                          <a href={`${base}vulnerabilities/#${surfaceSlug(group.surface)}-${sub.code.toLowerCase()}`}>
+                            {sub.label} <span class="vuln-surface-count">{sub.count}</span>
+                          </a>
+                        ))
                       ) : (
                         group.entries.map((item) => (
                           <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
@@ -331,6 +338,7 @@ const NAV_SECTIONS = [
         navScrim?.classList.toggle('open', !!isOpen);
       });
       navScrim?.addEventListener('click', closeNav);
+      document.getElementById('navClose')?.addEventListener('click', closeNav);
 
       document.querySelectorAll<HTMLButtonElement>('.nav-chevron').forEach((btn) => {
         btn.addEventListener('click', () => {

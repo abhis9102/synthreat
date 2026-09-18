@@ -1,6 +1,7 @@
 ---
 title: Training Data Poisoning
 surface: "AI Security"
+owasp: "LLM04:2025 – Data and Model Poisoning"
 summary: An attacker deliberately corrupts the data used to train or fine-tune a model, so the model learns a behavior that benefits the attacker later, without anyone reviewing the training data noticing.
 cwe: []
 typicalSeverityCeiling: Critical
