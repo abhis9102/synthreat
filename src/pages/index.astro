@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ContentVisuals from '../components/ContentVisuals.astro';
 
 const publishedVulns = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
 const publishedDomains = (await getCollection('domains', ({ data }) => data.status === 'published'))
@@ -34,8 +33,6 @@ const base = import.meta.env.BASE_URL;
       <a href={`${base}vulnerabilities/`} class="btn btn-secondary">Browse vulnerability classes →</a>
     </div>
   </section>
-
-  <ContentVisuals kind="domain" title="The Synthreat learning system" summary="A visual map of the library: start with the domain, follow the technique, then learn how the vulnerability fails in practice." category="Learning system" />
 
   {publishedDomains.length > 0 && (
     <div style="margin-top:64px;">
