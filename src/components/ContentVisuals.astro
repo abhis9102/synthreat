@@ -1,0 +1,104 @@
+---
+interface Props {
+  kind: 'domain' | 'attack' | 'vulnerability';
+  title: string;
+  summary: string;
+  category?: string;
+  severity?: string;
+  capec?: string[];
+  mitreAttack?: string[];
+  owasp?: string;
+  cwe?: string[];
+}
+
+const { kind, title, summary, category, severity = 'High', capec = [], mitreAttack = [], owasp, cwe = [] } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const imageByKind = {
+  domain: 'synthreat-domain-security.jpg',
+  attack: 'synthreat-attack-technique.jpg',
+  vulnerability: 'synthreat-vulnerability.jpg',
+};
+const kindLabel = kind === 'domain' ? 'Security domain' : kind === 'attack' ? 'Attack technique' : 'Vulnerability class';
+const visualHeading = kind === 'domain' ? 'See where this fits' : kind === 'attack' ? 'Follow the attack path' : 'See how the flaw becomes real';
+const visualIntro = kind === 'domain'
+  ? 'A practical map of the people, process, and technology decisions this topic connects.'
+  : kind === 'attack'
+    ? 'Use the sequence below to connect the technique to a real entry point, business consequence, and defensive move.'
+    : 'Trace the trust boundary from untrusted input to the behavior that creates real-world impact.';
+const flow = kind === 'domain'
+  ? [
+      { label: 'Context', detail: 'What the domain protects' },
+      { label: 'Method', detail: 'How practitioners work' },
+      { label: 'Evidence', detail: 'What good looks like' },
+      { label: 'Explain', detail: 'Why clients care' },
+    ]
+  : kind === 'attack'
+    ? [
+        { label: 'Entry point', detail: 'Where access begins' },
+        { label: 'Technique', detail: 'What the attacker does' },
+        { label: 'Impact', detail: 'What changes for the business' },
+        { label: 'Defend', detail: 'Where to interrupt it' },
+      ]
+    : [
+        { label: 'Input', detail: 'What the user controls' },
+        { label: 'Trust boundary', detail: 'Where assumptions fail' },
+        { label: 'Unsafe behavior', detail: 'What the app does' },
+        { label: 'Impact', detail: 'What an attacker reaches' },
+      ];
+const severityScore = severity === 'Critical' ? 100 : severity === 'High' ? 76 : severity === 'Medium' ? 52 : 28;
+const references = [...capec, ...mitreAttack.map((id) => 'ATT&CK ' + id), ...(owasp ? [owasp] : []), ...cwe].slice(0, 4);
+---
+
+<section class={'learning-visual learning-visual-' + kind} aria-labelledby={'learning-visual-title-' + kind}>
+  <div class="learning-visual-media">
+    <img
+      src={base + 'images/' + imageByKind[kind]}
+      alt={'Realistic editorial scene representing ' + title}
+      loading="lazy"
+    />
+    <div class="learning-visual-media-caption">
+      <span>{kindLabel}</span>
+      <span>Visual guide</span>
+    </div>
+  </div>
+  <div class="learning-visual-copy">
+    <span class="eyebrow">Learn it visually</span>
+    <h2 id={'learning-visual-title-' + kind}>{visualHeading}</h2>
+    <p>{visualIntro}</p>
+    {kind === 'domain' ? (
+      <div class="learning-lens" aria-label="Three lenses for understanding a security domain">
+        <span><strong>People</strong> judgment and ownership</span>
+        <span><strong>Process</strong> repeatable practice</span>
+        <span><strong>Technology</strong> controls and evidence</span>
+      </div>
+    ) : (
+      <div class="learning-meter" aria-label={'Typical severity ceiling: ' + severity}>
+        <div class="learning-meter-label"><span>Typical severity ceiling</span><strong>{severity}</strong></div>
+        <div class="learning-meter-track"><span style={'width: ' + severityScore + '%'}></span></div>
+        <div class="learning-meter-scale"><span>Low</span><span>Medium</span><span>High</span><span>Critical</span></div>
+      </div>
+    )}
+    {references.length > 0 && (
+      <div class="learning-references">
+        <span>Reference points</span>
+        <div>{references.map((reference) => <span class="chip">{reference}</span>)}</div>
+      </div>
+    )}
+  </div>
+</section>
+
+<section class={'learning-map learning-map-' + kind} aria-label={'Learning map for ' + title}>
+  <div class="learning-map-heading">
+    <span class="eyebrow">The mental model</span>
+    <p>Read left to right. Each step answers the question a newcomer usually asks next.</p>
+  </div>
+  <div class="learning-flow">
+    {flow.map((step, index) => (
+      <div class="learning-flow-step">
+        <span class="learning-flow-number">{String(index + 1).padStart(2, '0')}</span>
+        <strong>{step.label}</strong>
+        <span>{step.detail}</span>
+      </div>
+    ))}
+  </div>
+</section>
