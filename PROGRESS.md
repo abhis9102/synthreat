@@ -4,6 +4,31 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Renamed "Web Application" surface to "WebApp Security"
+
+**What happened (direct user request):** Four of the five vulnerability surfaces already followed an
+"X Security" naming pattern (Cloud Security, Mobile Security, Network Security, AI Security); "Web
+Application" was the odd one out. Renamed it to "WebApp Security" everywhere: the `VULN_SURFACES`
+enum in `content.config.ts`, all 22 Web Application vulnerability pages' `surface` frontmatter field,
+the landing page and dedicated surface page's label/blurb records, the nav dropdown's conditional
+logic, and every cross-collection link and link-text mention (`domains/web-security.md`,
+`domains/application-security.md`, `domains/mobile-security.md`). The route changed accordingly, from
+`/vulnerabilities/web-application/` to `/vulnerabilities/webapp-security/`. Kept the original
+rationale intact (still deliberately distinct from the separate, narrower `domains/web-security` page)
+and noted in the `content.config.ts` comment that this rename also restores the "X Security" pattern
+the other four surfaces share.
+
+**Editorial Reviewer pass:** Grepped for every literal "Web Application" and "web-application"
+occurrence first to separate real surface-label references from incidental prose matches (a
+`sans-top-25.md` mention of "web-application-specific" as a generic adjective, unrelated to this
+surface, was correctly left untouched). `npm run validate:content` (104 files) and `npm run build`
+(116 pages) both clean; confirmed `dist/vulnerabilities/webapp-security/` exists and the old
+`web-application/` directory no longer generates. Verified rendered dev-server HTML directly: all 5
+surface labels read as "X Security" consistently on the landing page cards, the dedicated surface
+page's `<h1>`, and the nav dropdown's flyout rows.
+
+---
+
 ## 2026-09-18 — Vulnerabilities restructured into a landing page + 5 dedicated surface pages
 
 **What happened (Design/Frontend Lead, direct user request):** `/vulnerabilities/` previously

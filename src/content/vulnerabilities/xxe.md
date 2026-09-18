@@ -1,6 +1,6 @@
 ---
 title: XML External Entity (XXE) Injection
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How an XML parser configured to resolve external entities lets an attacker read local files or reach internal systems through a single malicious XML document.
 owasp: "A05:2021 – Security Misconfiguration"
 cwe: ["CWE-611"]

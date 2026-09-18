@@ -1,6 +1,6 @@
 ---
 title: Software and Data Integrity Failures
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How trusting a piece of software or data without verifying it is what it claims to be turns an update mechanism or a serialized object into a way in.
 owasp: "A08:2021 – Software and Data Integrity Failures"
 cwe: ["CWE-502", "CWE-829"]

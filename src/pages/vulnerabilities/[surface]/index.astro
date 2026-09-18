@@ -26,12 +26,12 @@ const { surface, entries } = Astro.props as Props;
 const base = import.meta.env.BASE_URL;
 
 // Cap on how many OWASP categories show before a "View all" toggle takes over, matching the
-// homepage's own 4-card-cap-then-reveal pattern. Only meaningful for Web Application, the one
+// homepage's own 4-card-cap-then-reveal pattern. Only meaningful for WebApp Security, the one
 // surface large enough to need this second level of grouping (see content.config.ts).
 const CATEGORY_CAP = 4;
 
 let subgroups: { code: string; label: string; entries: typeof entries }[] | null = null;
-if (surface === 'Web Application') {
+if (surface === 'WebApp Security') {
   const byCode = new Map<string, { code: string; label: string; entries: typeof entries }>();
   for (const entry of entries) {
     const code = entry.data.owasp?.match(/^A\d{2}/)?.[0] ?? 'Other';
@@ -43,7 +43,7 @@ if (surface === 'Web Application') {
 
 const SURFACE_INTROS: Record<(typeof VULN_SURFACES)[number], string> = {
   'Cloud Security': "The misconfigurations that cause most real cloud incidents: an access setting, an identity permission, or a template left wrong, rather than a coding bug.",
-  'Web Application': "The OWASP Top 10 (2021), grouped by its own official categories, plus the specific classes (IDOR, CSRF, path traversal, and others) that specialize each one.",
+  'WebApp Security': "The OWASP Top 10 (2021), grouped by its own official categories, plus the specific classes (IDOR, CSRF, path traversal, and others) that specialize each one.",
   'Mobile Security': "What's different about testing an app that ships its own compiled code onto a device the attacker fully controls.",
   'Network Security': "The building blocks of a network that actually contains a compromise instead of handing an attacker everything at once.",
   'AI Security': "The full OWASP Top 10 for LLM Applications, the standard, practitioner-focused list of what goes wrong in production AI systems.",

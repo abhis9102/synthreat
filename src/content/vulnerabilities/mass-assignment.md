@@ -1,6 +1,6 @@
 ---
 title: Mass Assignment
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How an API that blindly binds every submitted field to an object lets an attacker set fields they were never supposed to touch.
 owasp: "A08:2021 – Software and Data Integrity Failures"
 cwe: ["CWE-915"]

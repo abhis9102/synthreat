@@ -1,6 +1,6 @@
 ---
 title: Insecure Direct Object Reference (IDOR)
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How changing an ID in a request lets an attacker reach another user's data, and why this is the single most common real-world access control pattern.
 owasp: "A01:2021 – Broken Access Control"
 cwe: ["CWE-639"]

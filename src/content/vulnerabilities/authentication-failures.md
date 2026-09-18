@@ -1,6 +1,6 @@
 ---
 title: Identification and Authentication Failures
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How weaknesses in confirming who someone is, not in what they're allowed to do once confirmed, open the door to account takeover at scale.
 owasp: "A07:2021 – Identification and Authentication Failures"
 cwe: ["CWE-287", "CWE-384"]

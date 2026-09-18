@@ -32,7 +32,7 @@ const vulnEntries = (
 ).sort((a, b) => a.data.title.localeCompare(b.data.title));
 
 // Nested nav dropdown for Vulnerabilities: surface (top level, same grouping and order as the index
-// page) -> a flyout panel of that surface's entries. For Web Application specifically, the flyout
+// page) -> a flyout panel of that surface's entries. For WebApp Security specifically, the flyout
 // lists the 10 OWASP categories themselves (short label + count, linking to that category's anchor
 // on the index page) rather than exploding into a 22-link, multi-column breakdown: the full
 // per-page breakdown is what the index page itself is for, and a hover dropdown reading that deep
@@ -48,7 +48,7 @@ const owaspShortLabel = (owasp: string) => {
 const vulnGroups = VULN_SURFACES.map((surface) => {
   const surfaceEntries = vulnEntries.filter((entry) => entry.data.surface === surface);
   let subgroups: { code: string; label: string; count: number }[] | null = null;
-  if (surface === 'Web Application') {
+  if (surface === 'WebApp Security') {
     const byCode = new Map<string, { code: string; label: string; count: number }>();
     for (const entry of surfaceEntries) {
       const code = entry.data.owasp?.match(/^A\d{2}/)?.[0] ?? 'Other';

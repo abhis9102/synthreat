@@ -1,6 +1,6 @@
 ---
 title: Security Logging and Monitoring Failures
-surface: "Web Application"
+surface: "WebApp Security"
 summary: Why a breach that runs undetected for months is usually a failure to notice a defense had already failed, not a failure of the defense itself.
 owasp: "A09:2021 – Security Logging and Monitoring Failures"
 cwe: ["CWE-778"]

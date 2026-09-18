@@ -1,6 +1,6 @@
 ---
 title: OS Command Injection
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How untrusted input reaching a system shell command lets an attacker run arbitrary operating system commands, not just influence the application's own logic.
 owasp: "A03:2021 – Injection"
 cwe: ["CWE-78"]

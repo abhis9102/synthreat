@@ -1,6 +1,6 @@
 ---
 title: Vulnerable and Outdated Components
-surface: "Web Application"
+surface: "WebApp Security"
 summary: Why a vulnerability in code the team never wrote a single line of is still the team's own vulnerability the moment it ships in production.
 owasp: "A06:2021 – Vulnerable and Outdated Components"
 cwe: ["CWE-1104"]

@@ -1,6 +1,6 @@
 ---
 title: Subdomain Takeover
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How a forgotten DNS record pointing at a deprovisioned cloud resource lets an attacker claim that resource and serve their own content from a trusted subdomain.
 owasp: "A05:2021 – Security Misconfiguration"
 cwe: ["CWE-284"]

@@ -41,7 +41,7 @@ An overly permissive CORS policy, or a cookie missing a security flag, can under
 
 ## Related Topics
 
-- **Explore Web Application vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/web-application/) has dedicated, worked-example pages for the OWASP Top 10 categories this protocol layer sits underneath.
+- **Explore WebApp Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/webapp-security/) has dedicated, worked-example pages for the OWASP Top 10 categories this protocol layer sits underneath.
 - [Application Security](../application-security/): the broader software-security practice this protocol layer sits underneath.
 - [Cloud Security](../cloud-security/): the infrastructure layer beneath the web platform itself.
 - [Cross-Site Scripting](../../vulnerabilities/cross-site-scripting/): the vulnerability class Content-Security-Policy exists to add defense-in-depth against.

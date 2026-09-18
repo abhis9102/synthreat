@@ -1,6 +1,6 @@
 ---
 title: Clickjacking
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How an invisible, overlaid page can trick a user into clicking something completely different from what they think they're clicking.
 owasp: "A05:2021 – Security Misconfiguration"
 cwe: ["CWE-1021"]

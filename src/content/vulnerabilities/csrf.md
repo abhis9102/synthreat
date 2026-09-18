@@ -1,6 +1,6 @@
 ---
 title: Cross-Site Request Forgery (CSRF)
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How a logged-in user's own browser can be tricked into sending a real, authenticated request the user never intended to make.
 owasp: "A01:2021 – Broken Access Control"
 cwe: ["CWE-352"]

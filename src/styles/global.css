@@ -723,7 +723,7 @@ article.vuln-body tbody tr { background: var(--surface); }
 }
 .view-all-toggle > summary:active { text-decoration: underline; }
 
-/* Sub-grouping on a surface's dedicated page (currently: Web Application entries by OWASP category). */
+/* Sub-grouping on a surface's dedicated page (currently: WebApp Security entries by OWASP category). */
 .subgroup-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12.5px;

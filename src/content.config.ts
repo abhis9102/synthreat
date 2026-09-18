@@ -20,13 +20,14 @@ export const REQUIRED_VULN_SECTIONS = [
 
 // Top-level grouping for the vulnerabilities index page and nav dropdown, mirroring the `domains`
 // collection's own surface names exactly (Cloud Security, Mobile Security, Network Security, AI
-// Security) so the two collections read as one coherent taxonomy. "Web Application" is used instead
-// of bare "Web" specifically to avoid colliding with the separate, narrower `domains/web-security`
-// page (protocol- and browser-layer topics), since these are OWASP-Top-10-style application
-// vulnerabilities, not that. Order here is the display order everywhere it's grouped.
+// Security) so the two collections read as one coherent taxonomy. "WebApp Security" is used instead
+// of bare "Web" (and keeps the "X Security" pattern the other four surfaces share) specifically to
+// avoid colliding with the separate, narrower `domains/web-security` page (protocol- and
+// browser-layer topics), since these are OWASP-Top-10-style application vulnerabilities, not that.
+// Order here is the display order everywhere it's grouped.
 export const VULN_SURFACES = [
   'Cloud Security',
-  'Web Application',
+  'WebApp Security',
   'Mobile Security',
   'Network Security',
   'AI Security',
@@ -39,7 +40,7 @@ const vulnerabilities = defineCollection({
     // One-sentence dek shown in listings and search/share previews.
     summary: z.string().max(200),
     surface: z.enum(VULN_SURFACES),
-    // Primary OWASP Top 10 (2021) category this class maps to, if any. Every "Web Application"
+    // Primary OWASP Top 10 (2021) category this class maps to, if any. Every "WebApp Security"
     // surface entry has one; it doubles as that surface's own sub-grouping in the UI, so a second
     // category field isn't needed. Not meaningful for other surfaces.
     owasp: z.string().optional(),

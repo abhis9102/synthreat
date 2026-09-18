@@ -1,6 +1,6 @@
 ---
 title: Cross-Site Scripting (XSS)
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How untrusted input reaching a page without output encoding lets an attacker run script in another user's browser, and why that differs from SQL injection despite the surface similarity.
 owasp: "A03:2021 – Injection"
 cwe: ["CWE-79"]

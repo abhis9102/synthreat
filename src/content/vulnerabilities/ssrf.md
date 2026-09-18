@@ -1,6 +1,6 @@
 ---
 title: Server-Side Request Forgery (SSRF)
-surface: "Web Application"
+surface: "WebApp Security"
 summary: How convincing a server to make a request on an attacker's behalf turns a simple "fetch this URL" feature into a way to reach systems the attacker could never reach directly.
 owasp: "A10:2021 – Server-Side Request Forgery (SSRF)"
 cwe: ["CWE-918"]

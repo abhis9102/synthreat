@@ -129,7 +129,7 @@ around instead of a shared responsibility.
 ## Related Topics
 
 - **Explore Application Security vulnerabilities:** the [Vulnerabilities
-  section](../../vulnerabilities/web-application/) has dedicated, worked-example pages for the OWASP
+  section](../../vulnerabilities/webapp-security/) has dedicated, worked-example pages for the OWASP
   Top 10 categories and every other class this domain's tooling and practices exist to catch.
 - [What Is Penetration Testing](../../methodology/what-is-penetration-testing/): the manual, human-driven testing
   practice that sits alongside AppSec's automated tooling.
