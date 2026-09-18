@@ -4,6 +4,53 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Vulnerability/attack gap-fill, reference-link audit, UI polish
+
+**What happened (Content Architect gap analysis, re-derived without external browsing, confirmed
+by user, then drafted):** Did a fresh completeness pass against general, non-vendor-specific attack
+and vulnerability taxonomies (explicitly not fetching the external page the user referenced, per
+this project's own no-HackerOne rule and to avoid any risk of reproducing another site's exact
+structure). Found real gaps, mostly in `vulnerabilities`:
+
+- `vulnerabilities` (11 new pages): CSRF, Path Traversal, OS Command Injection, Clickjacking, XXE,
+  File Inclusion (LFI/RFI, combined into one page since they're the same class differing only in
+  local vs. remote), IDOR, Business Logic Vulnerabilities, Open Redirect, Mass Assignment,
+  Subdomain Takeover.
+- `attacks` (3 new pages): DNS Tunneling, IP Spoofing, AI-Powered Attacks.
+- Added forward links from `broken-access-control` and `insecure-design` to the new pages that
+  specialize them (IDOR, CSRF, Path Traversal, Open Redirect; Business Logic Vulnerabilities), and
+  fixed two mutual "a dedicated page is planned" placeholders between Path Traversal and File
+  Inclusion now that both exist.
+- Expanded the `types-of-cyberattacks` taxonomy table with all 14 new rows, each linked.
+
+**Reference-link audit (user-requested):** found and fixed 7 real citations across `methodology`
+and `domains` that named a standard (MITRE ATT&CK, MITRE ATLAS, OWASP Top 10, OWASP Mobile Top 10,
+CWE, Cloud Security Alliance) with a bare parenthetical domain instead of an actual hyperlink.
+Swept every collection afterward; confirmed clean.
+
+**UI/UX fixes (user-reported):**
+- Headline/brand font swapped from Newsreader to Fraunces for more visual character; refined
+  heading weight and letter-spacing; added a visible hover/focus underline-thickening on inline
+  links generally.
+- Fixed a real alignment bug: the header was always 1080px wide, but article/detail pages
+  independently centered their content at 720px, so an article's content didn't line up with the
+  header/logo above it. Per direct user feedback (citing the CTEM page specifically) that this
+  read as wasted side space rather than intentional narrow-column typography, unified every page
+  to the same 1080px width rather than reintroducing a narrower reading column.
+- Fixed mobile "sticky hover": several `:hover` effects (cards, nav links, footer links, buttons,
+  tagline links) weren't scoped to real pointer devices, so a tap on a touchscreen could leave the
+  hover style visibly stuck until the user tapped elsewhere. Wrapped all of them in
+  `@media (hover: hover)` and added matching `:active` states so touch devices get instant tap
+  feedback instead.
+- Trimmed excess space between page content and the footer (100px page padding plus a 64px footer
+  margin stacked to 164px of dead space; reduced to a combined ~72px).
+
+**Status:** all 14 content pages reviewed (zero em-dashes, zero vendor names, zero broken links,
+summaries within schema limits) and published; CSS fixes verified via a local preview build.
+Shipping now.
+
+---
+
 ## 2026-09-18 — Domains and Methodology gap-fill
 
 **What happened (Content Architect gap analysis, confirmed by user, then drafted):** Audited the

@@ -109,5 +109,7 @@ The common bad fix is relying on obscurity: assuming that because an ID is a lon
 ## Related Classes
 
 - **SQL Injection**: a structurally different root cause, but access control failures are frequently what a chained SQL injection exploit ultimately unlocks once an attacker is inside a system.
-
-*(Dedicated pages for other OWASP Top 10 categories are being added; links will go live once published.)*
+- [Insecure Direct Object Reference (IDOR)](../idor/): the single most common real-world realization of this exact vulnerability class, covered in its own dedicated depth.
+- [Cross-Site Request Forgery (CSRF)](../csrf/): a different mechanism for reaching the same outcome, tricking a user's own browser into an unauthorized action rather than directly manipulating an object reference.
+- [Path Traversal](../path-traversal/): another access-control failure, at the filesystem layer instead of the object-reference layer.
+- [Open Redirect](../open-redirect/): a lower-severity, but structurally related, access-control gap around trusting an unvalidated destination.

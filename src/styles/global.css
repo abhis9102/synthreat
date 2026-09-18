@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,500&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
   --bg: #EEF0F2;
@@ -75,14 +75,24 @@ img { max-width: 100%; }
 ::selection { background: var(--accent-soft); color: var(--accent-ink); }
 
 h1, h2, h3, h4 {
-  font-family: 'Newsreader', Georgia, serif;
+  font-family: 'Fraunces', Georgia, serif;
+  font-optical-sizing: auto;
   color: var(--ink);
   font-weight: 600;
+  letter-spacing: -0.012em;
   text-wrap: balance;
   margin: 0;
 }
+h1 { font-weight: 700; letter-spacing: -0.02em; }
 code, .mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace; }
-a { color: var(--accent-ink); }
+a {
+  color: var(--accent-ink);
+  text-underline-offset: 0.14em;
+  text-decoration-thickness: 1px;
+}
+@media (hover: hover) {
+  a:hover { text-decoration-thickness: 1.5px; }
+}
 p { margin: 0 0 1em 0; }
 
 .skip-link {
@@ -120,7 +130,7 @@ p { margin: 0 0 1em 0; }
   gap: 16px;
 }
 .site-header .brand {
-  font-family: 'Newsreader', serif;
+  font-family: 'Fraunces', serif;
   font-weight: 700;
   font-size: 19px;
   letter-spacing: -0.01em;
@@ -150,9 +160,11 @@ p { margin: 0 0 1em 0; }
   transition: color 0.12s ease, background 0.12s ease;
 }
 .nav-link .chev { color: var(--ink-faint); transition: transform 0.15s ease; }
-.nav-link:hover,
+@media (hover: hover) {
+  .nav-link:hover { color: var(--ink); background: var(--surface-2); }
+  .nav-item:hover .chev { transform: rotate(180deg); }
+}
 .nav-item:focus-within .nav-link { color: var(--ink); background: var(--surface-2); }
-.nav-item:hover .chev,
 .nav-item:focus-within .chev { transform: rotate(180deg); }
 .nav-chevron { display: none; }
 
@@ -197,7 +209,10 @@ p { margin: 0 0 1em 0; }
   font-size: 13.5px;
   line-height: 1.4;
 }
-.nav-panel a:hover { background: var(--surface-2); color: var(--ink); }
+@media (hover: hover) {
+  .nav-panel a:hover { background: var(--surface-2); color: var(--ink); }
+}
+.nav-panel a:active { background: var(--surface-2); color: var(--ink); }
 .nav-panel-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 20px; }
 .nav-panel .nav-viewall {
   display: block;
@@ -208,7 +223,10 @@ p { margin: 0 0 1em 0; }
   color: var(--accent-ink);
   font-size: 13px;
 }
-.nav-panel .nav-viewall:hover { background: none; text-decoration: underline; }
+@media (hover: hover) {
+  .nav-panel .nav-viewall:hover { background: none; text-decoration: underline; }
+}
+.nav-panel .nav-viewall:active { text-decoration: underline; }
 
 /* --- Mobile hamburger + slide-in nav --- */
 .nav-toggle {
@@ -292,11 +310,10 @@ p { margin: 0 0 1em 0; }
 }
 
 main.page {
-  max-width: 720px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 56px 20px 100px 20px;
+  padding: 56px 20px 48px 20px;
 }
-main.page.page-wide { max-width: 1080px; }
 
 .tagline {
   font-family: 'JetBrains Mono', monospace;
@@ -313,7 +330,10 @@ main.page.page-wide { max-width: 1080px; }
   text-decoration: none;
   transition: background 0.12s ease, border-color 0.12s ease;
 }
-a.tagline:hover { background: var(--accent-soft-line); border-color: var(--accent-ink); }
+@media (hover: hover) {
+  a.tagline:hover { background: var(--accent-soft-line); border-color: var(--accent-ink); }
+}
+a.tagline:active { background: var(--accent-soft-line); border-color: var(--accent-ink); }
 
 .vuln-meta {
   display: flex;
@@ -395,7 +415,7 @@ article.vuln-body tbody tr { background: var(--surface); }
 
 .site-footer {
   border-top: 1px solid var(--line);
-  margin-top: 64px;
+  margin-top: 24px;
   background: var(--surface);
 }
 .site-footer .inner { max-width: 1080px; margin: 0 auto; padding: 48px 24px 28px 24px; }
@@ -421,7 +441,10 @@ article.vuln-body tbody tr { background: var(--surface); }
   margin-bottom: 4px;
 }
 .footer-col a { font-size: 13.5px; color: var(--ink-soft); text-decoration: none; }
-.footer-col a:hover { color: var(--accent-ink); text-decoration: underline; }
+@media (hover: hover) {
+  .footer-col a:hover { color: var(--accent-ink); text-decoration: underline; }
+}
+.footer-col a:active { color: var(--accent-ink); text-decoration: underline; }
 .footer-col a.footer-more { color: var(--accent-ink); font-weight: 600; margin-top: 2px; }
 
 .footer-bottom {
@@ -433,7 +456,9 @@ article.vuln-body tbody tr { background: var(--surface); }
   color: var(--ink-faint);
 }
 .footer-bottom a { color: var(--ink-faint); }
-.footer-bottom a:hover { color: var(--ink); }
+@media (hover: hover) {
+  .footer-bottom a:hover { color: var(--ink); }
+}
 
 @media (max-width: 900px) {
   .footer-grid { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }
@@ -473,12 +498,18 @@ article.vuln-body tbody tr { background: var(--surface); }
   opacity: 0;
   transition: opacity 0.15s ease;
 }
-.card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent-soft-line);
-  box-shadow: 0 4px 8px rgba(20, 23, 27, 0.06), 0 16px 32px -16px rgba(20, 23, 27, 0.22);
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-soft-line);
+    box-shadow: 0 4px 8px rgba(20, 23, 27, 0.06), 0 16px 32px -16px rgba(20, 23, 27, 0.22);
+  }
+  .card:hover::before { opacity: 1; }
 }
-.card:hover::before { opacity: 1; }
+/* Touch devices get instant tap feedback instead of a hover state that can stick after the tap
+   lifts, which is the classic "hover never goes away on mobile" bug. */
+.card:active { border-color: var(--accent-soft-line); box-shadow: var(--shadow); }
+.card:active::before { opacity: 1; }
 .card .card-icon {
   width: 34px;
   height: 34px;
@@ -532,7 +563,10 @@ article.vuln-body tbody tr { background: var(--surface); }
   font-size: 14.5px;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
-.btn:hover { transform: translateY(-1px); }
+@media (hover: hover) {
+  .btn:hover { transform: translateY(-1px); }
+}
+.btn:active { transform: translateY(0); opacity: 0.9; }
 .btn-primary {
   background: linear-gradient(135deg, var(--accent), var(--accent-ink));
   color: #fff;
@@ -543,7 +577,10 @@ article.vuln-body tbody tr { background: var(--surface); }
   color: var(--ink);
   border: 1px solid var(--line);
 }
-.btn-secondary:hover { border-color: var(--accent-soft-line); }
+@media (hover: hover) {
+  .btn-secondary:hover { border-color: var(--accent-soft-line); }
+}
+.btn-secondary:active { border-color: var(--accent-soft-line); background: var(--surface-2); }
 
 .hero {
   position: relative;
