@@ -30,7 +30,7 @@ Custom application code didn't get the same structural improvement. Every organi
 own login flow, its own payment logic, its own file-upload handler: bespoke code, shipped fast, under
 deadline pressure, by people who are experts in the product they're building and not necessarily in
 security. The result is that the same handful of mistakes get reintroduced constantly, across
-completely unrelated companies and codebases. This isn't speculation: the OWASP Top 10 (owasp.org), the
+completely unrelated companies and codebases. This isn't speculation: the [OWASP Top 10](https://owasp.org/www-project-top-ten/), the
 most widely referenced ranking of application security risks in the industry, is built from real,
 aggregated vulnerability data and has kept surfacing the same handful of root-cause categories
 (broken access control, injection flaws, cryptographic failures) release after release. AppSec exists
@@ -52,7 +52,7 @@ mistake:
   exist once several pieces of code interact at runtime.
 - **SCA (Software Composition Analysis)** checks the third-party and open-source libraries an
   application depends on against databases of known, publicly disclosed vulnerabilities (tracked
-  through the CWE, or Common Weakness Enumeration, system maintained at cwe.mitre.org). Modern
+  through the [CWE, or Common Weakness Enumeration](https://cwe.mitre.org/), system). Modern
   applications are assembled from dozens or hundreds of dependencies; SCA exists because a vulnerability
   in someone else's code is still a vulnerability in your application.
 - **Secure code review** and **threat modeling** are the human-driven practices that happen earlier

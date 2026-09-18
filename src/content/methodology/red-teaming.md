@@ -69,10 +69,10 @@ loop back and repeat steps as new information comes in:
    the deliverable.
 6. **Debrief, including the blue team.** The engagement ends with a full readout that brings the
    defenders into the conversation: what was detected, what wasn't, and why. Most mature red teams
-   map their actions against **MITRE ATT&CK**, a publicly maintained, industry-standard knowledge base
-   of real-world adversary tactics and techniques (attack.mitre.org), so the findings translate
-   directly into "here is the specific technique that got past your defenses," rather than a vague
-   narrative.
+   map their actions against [MITRE ATT&CK](https://attack.mitre.org/), a publicly maintained,
+   industry-standard knowledge base of real-world adversary tactics and techniques, so the findings
+   translate directly into "here is the specific technique that got past your defenses," rather than
+   a vague narrative.
 
 ## Where This Shows Up in Practice
 

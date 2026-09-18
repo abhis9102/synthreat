@@ -25,7 +25,7 @@ web-focused application security practices don't fully cover it.
 
 ## How It Works
 
-OWASP maintains a dedicated Mobile Top 10 list (owasp.org) covering mobile-specific risk categories,
+OWASP maintains a dedicated [Mobile Top 10](https://owasp.org/www-project-mobile-top-10/) list covering mobile-specific risk categories,
 worth knowing exists without treating any specific current wording as fixed. Several representative
 failure patterns recur constantly in real mobile assessments:
 

@@ -22,7 +22,7 @@ normally defended against, and what it costs a business when it succeeds.
 
 Attackers don't invent a new technique for every attack: they reuse a relatively small, well-
 understood set of tactics, adapting the specific delivery method while the underlying approach stays
-recognizable. This is exactly what MITRE ATT&CK (attack.mitre.org) formalizes: it's the security
+recognizable. This is exactly what [MITRE ATT&CK](https://attack.mitre.org/) formalizes: it's the security
 industry's standard, publicly maintained taxonomy of adversary tactics (the *why*: what an attacker is
 trying to accomplish, like gaining initial access or moving laterally through a network) and
 techniques (the *how*: the specific method used to accomplish it). You don't need to memorize ATT&CK

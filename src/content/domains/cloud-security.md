@@ -34,7 +34,7 @@ equivalent in a traditional data center.
 ## How It Works
 
 The foundational concept in cloud security is the **Shared Responsibility Model**, a framework
-formalized and widely referenced by the Cloud Security Alliance (cloudsecurityalliance.org). In plain
+formalized and widely referenced by the [Cloud Security Alliance](https://cloudsecurityalliance.org/). In plain
 terms: the cloud provider is responsible for the security *of* the cloud: the physical data centers,
 the hardware, the core virtualization layer, the global network backbone. The customer is responsible
 for security *in* the cloud: how they configure everything they build on top of that foundation. Where

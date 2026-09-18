@@ -46,12 +46,12 @@ attempt to force it into an existing checklist.
 Two emerging, publicly maintained references anchor most serious work in this space right now, and
 both are worth citing by name rather than relying on informal folklore about "AI safety":
 
-- The **OWASP Top 10 for Large Language Model Applications**: a project from OWASP, the same
+- The [OWASP Top 10 for Large Language Model Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/): a project from OWASP, the same
   organization behind the general OWASP Top 10, specifically cataloging the most common and impactful
-  ways LLM-based applications go wrong (owasp.org).
-- **MITRE ATLAS** (Adversarial Threat Landscape for Artificial-Intelligence Systems): a MITRE
+  ways LLM-based applications go wrong. Also see this site's own [dedicated page](../../frameworks/ai-llm-top-10/) on it.
+- [MITRE ATLAS](https://atlas.mitre.org/) (Adversarial Threat Landscape for Artificial-Intelligence Systems): a MITRE
   project, structured similarly to the well-known MITRE ATT&CK framework, cataloging real-world
-  adversary tactics and techniques specifically against AI/ML systems (atlas.mitre.org).
+  adversary tactics and techniques specifically against AI/ML systems.
 
 Testing generally works through representative technique categories at the model layer:
 
