@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
+import { VULN_CATEGORIES } from '../content.config';
 
 interface Props {
   title: string;
@@ -29,6 +30,13 @@ const attackEntries = (await getCollection('attacks', ({ data }) => data.status 
 const vulnEntries = (
   await getCollection('vulnerabilities', ({ data }) => data.status === 'published')
 ).sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+// Grouped by category for the nav dropdown, same grouping and order as the index page, now that a
+// single flat column of ~28 entries doesn't fit one column readably.
+const vulnGroups = VULN_CATEGORIES.map((category) => ({
+  category,
+  entries: vulnEntries.filter((entry) => entry.data.category === category),
+})).filter((group) => group.entries.length > 0);
 
 // Flat-list nav dropdown: label + base path + entries. Attacks gets the wide multi-column
 // treatment separately below since 20 entries doesn't fit one column.
@@ -121,13 +129,16 @@ const NAV_SECTIONS = [
                 <svg width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
-            <div class="nav-panel">
-              <div class="nav-panel-inner">
-                <div class="nav-col">
-                  {vulnEntries.map((item) => (
-                    <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
-                  ))}
-                </div>
+            <div class="nav-panel nav-panel-wide">
+              <div class="nav-panel-inner nav-panel-cols">
+                {vulnGroups.map((group) => (
+                  <div class="nav-col">
+                    <div class="nav-col-title">{group.category}</div>
+                    {group.entries.map((item) => (
+                      <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
+                    ))}
+                  </div>
+                ))}
               </div>
               <a class="nav-viewall" href={`${base}vulnerabilities/`}>View all Vulnerabilities →</a>
             </div>

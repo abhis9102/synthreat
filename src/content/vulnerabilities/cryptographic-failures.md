@@ -1,5 +1,6 @@
 ---
 title: Cryptographic Failures
+category: "Configuration & Supply Chain"
 summary: How sensitive data ends up exposed not because encryption is hard, but because it's skipped, weakened, or applied to the wrong things.
 owasp: "A02:2021 – Cryptographic Failures"
 cwe: ["CWE-327", "CWE-311"]

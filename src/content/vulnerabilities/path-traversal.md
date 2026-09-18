@@ -1,5 +1,6 @@
 ---
 title: Path Traversal
+category: "Access Control"
 summary: How manipulating a file path with sequences like ../ lets an attacker read files far outside what an application ever meant to expose.
 owasp: "A01:2021 – Broken Access Control"
 cwe: ["CWE-22"]

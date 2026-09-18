@@ -1,10 +1,11 @@
 ---
 title: Server-Side Request Forgery (SSRF)
+category: "Access Control"
 summary: How convincing a server to make a request on an attacker's behalf turns a simple "fetch this URL" feature into a way to reach systems the attacker could never reach directly.
 owasp: "A10:2021 – Server-Side Request Forgery (SSRF)"
 cwe: ["CWE-918"]
 typicalSeverityCeiling: Critical
-related: ["sql-injection"]
+related: ["sql-injection", "exposed-cloud-credentials"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -146,3 +147,6 @@ time.
 - **SQL Injection** ([../sql-injection/](../sql-injection/)): a different technical mechanism, but the
   same underlying pattern of trusting where a value points rather than validating what it actually
   resolves to.
+- **Exposed Cloud Credentials & Secrets Sprawl** ([../exposed-cloud-credentials/](../exposed-cloud-credentials/)):
+  reaching a cloud metadata endpoint through this flaw is one runtime path to the same outcome that
+  class covers from a storage-at-rest angle, live cloud credentials ending up somewhere they shouldn't.

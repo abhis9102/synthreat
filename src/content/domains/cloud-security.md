@@ -3,7 +3,7 @@ title: Cloud Security
 summary: What changes about security when infrastructure moves to the cloud, the shared responsibility model, and the misconfigurations that cause most real cloud incidents.
 category: Domain Overview
 related: ["application-security", "continuous-threat-exposure-management", "types-of-penetration-testing"]
-relatedVulnerabilities: []
+relatedVulnerabilities: ["cloud-storage-exposure", "cloud-iam-misconfiguration", "insecure-infrastructure-as-code", "exposed-cloud-credentials", "container-kubernetes-misconfiguration", "cross-tenant-isolation-failure"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -113,3 +113,10 @@ side platform failure.
   point-in-time check.
 - [Types of Penetration Testing](../../methodology/types-of-penetration-testing/): where cloud-specific testing fits
   among the different engagement types.
+- [Public Cloud Storage Exposure](../../vulnerabilities/cloud-storage-exposure/), [Overly Permissive
+  Cloud IAM](../../vulnerabilities/cloud-iam-misconfiguration/), [Insecure Infrastructure as
+  Code](../../vulnerabilities/insecure-infrastructure-as-code/), [Exposed Cloud Credentials & Secrets
+  Sprawl](../../vulnerabilities/exposed-cloud-credentials/), [Container & Kubernetes
+  Misconfiguration](../../vulnerabilities/container-kubernetes-misconfiguration/), and [Cross-Tenant
+  Isolation Failure](../../vulnerabilities/cross-tenant-isolation-failure/): the dedicated
+  vulnerability-class pages behind the failure modes listed above.

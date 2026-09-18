@@ -1,10 +1,11 @@
 ---
 title: Broken Access Control
+category: "Access Control"
 summary: How an app that correctly identifies a user can still let them reach data or actions they were never authorized for.
 owasp: "A01:2021 – Broken Access Control"
 cwe: ["CWE-284", "CWE-639"]
 typicalSeverityCeiling: Critical
-related: ["sql-injection"]
+related: ["sql-injection", "cross-tenant-isolation-failure"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -113,3 +114,4 @@ The common bad fix is relying on obscurity: assuming that because an ID is a lon
 - [Cross-Site Request Forgery (CSRF)](../csrf/): a different mechanism for reaching the same outcome, tricking a user's own browser into an unauthorized action rather than directly manipulating an object reference.
 - [Path Traversal](../path-traversal/): another access-control failure, at the filesystem layer instead of the object-reference layer.
 - [Open Redirect](../open-redirect/): a lower-severity, but structurally related, access-control gap around trusting an unvalidated destination.
+- [Cross-Tenant Isolation Failure](../cross-tenant-isolation-failure/): the same missing-authorization-check pattern at the scale of an entire customer tenant on a shared platform, rather than a single object or user.

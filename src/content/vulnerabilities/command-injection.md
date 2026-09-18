@@ -1,5 +1,6 @@
 ---
 title: OS Command Injection
+category: "Injection"
 summary: How untrusted input reaching a system shell command lets an attacker run arbitrary operating system commands, not just influence the application's own logic.
 owasp: "A03:2021 – Injection"
 cwe: ["CWE-78"]

@@ -1,5 +1,6 @@
 ---
 title: Insecure Design
+category: "Design & Business Logic"
 summary: Why a flaw that was never a coding bug, but a missing security control baked into the architecture from day one, cannot be patched the way an ordinary vulnerability can.
 owasp: "A04:2021 – Insecure Design"
 cwe: []

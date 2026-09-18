@@ -4,6 +4,53 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Cloud Security vulnerability batch, and categorized the vulnerabilities collection
+
+**What happened (Content Architect proposal, confirmed by user, then drafted):** Audited the
+`vulnerabilities` collection against `domains/cloud-security.md`, whose own "How It Works" section
+already names the standard cloud failure-mode list (public storage, overly permissive IAM, exposed
+metadata endpoints, unencrypted data, missing logging), and found none of it had a dedicated
+vulnerability-class page yet; `relatedVulnerabilities` on that page had been sitting empty since it
+was written. Two adjacent classes (SSRF reaching a cloud metadata endpoint, subdomain takeover of a
+dangling cloud DNS record) were already covered elsewhere and deliberately left alone rather than
+duplicated.
+
+**Batch (6 new pages, category "Cloud Security"):** Public Cloud Storage Exposure, Overly Permissive
+Cloud IAM, Insecure Infrastructure as Code (IaC), Exposed Cloud Credentials & Secrets Sprawl,
+Container & Kubernetes Misconfiguration, Cross-Tenant Isolation Failure. All 11 locked sections,
+genericized worked examples (invented companies), inline SVG diagrams, real CWE IDs. Cross-linked
+both directions: from the new pages back to `security-misconfiguration`, `broken-access-control`, and
+`ssrf`, and forward from those three into the relevant new pages. `domains/cloud-security.md`'s
+`relatedVulnerabilities` and Related Topics section now point at all six.
+
+**Structural change (mid-batch, direct user request):** the `vulnerabilities` collection had grown to
+22 pages before this batch (28 after), past the point a single flat list or single-column nav
+dropdown reads well. Added a `category` field to the collection's schema (`VULN_CATEGORIES` in
+`src/content.config.ts`: Injection, Access Control, Authentication & Identity, Client-Side & UI,
+Design & Business Logic, Configuration & Supply Chain, Cloud Security) and back-filled it on all 22
+pre-existing pages. The index page now renders each category as an open-by-default `<details>`
+accordion (collapsible, but nothing hidden from a first-time visitor, search, or the read-aloud
+feature) instead of one flat grid. The nav dropdown groups the same way, using `.nav-col-title`, a
+CSS class that already existed in `global.css` for exactly this purpose but had never actually been
+wired up anywhere. The detail page's breadcrumb now shows the category alongside the "back to index"
+link, matching the pattern the `domains` collection already used for its own `category` field.
+
+**Editorial Reviewer pass:** `npm run validate:content` and `npm run build` both clean (89 pages).
+Zero em-dashes across the 6 new files. A relative-link resolver script confirmed every cross-link
+across all 6 collections resolves to a real slug. The two provider-service names used generically in
+`cloud-storage-exposure.md` (S3, Azure Blob, GCS) are naming real product categories the way
+`cloud-security.md` itself already does, not a real client engagement, so they don't trigger the
+genericization rule; no other vendor names appear anywhere in the batch. Verified the rendered
+dev-server HTML directly: all 7 category groups render on the index page and in the nav dropdown,
+counts per category (4/8/1/1/2/6/6 = 28) match the assigned mapping exactly.
+
+**Next (not yet drafted):** the lower-priority backlog from the last domains/methodology gap-fill
+(Identity & Access Management, IoT/OT & Industrial Control Systems, Cryptography as domains; Purple
+Teaming, Secure Code Review, Social Engineering Assessment, Bug Bounty, Tabletop Exercises as
+methodology pages) is still open.
+
+---
+
 ## 2026-09-18 — Read-aloud feature, font size, footer link, minor fixes
 
 **What happened:**

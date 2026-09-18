@@ -1,5 +1,6 @@
 ---
 title: Open Redirect
+category: "Access Control"
 summary: How an unvalidated redirect parameter turns a trusted domain into the first hop of a convincing phishing link.
 owasp: "A01:2021 – Broken Access Control"
 cwe: ["CWE-601"]

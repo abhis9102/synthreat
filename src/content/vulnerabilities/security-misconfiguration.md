@@ -1,10 +1,11 @@
 ---
 title: Security Misconfiguration
+category: "Configuration & Supply Chain"
 summary: How a secure product still ships with an insecure default, an unnecessary feature left enabled, or an error message that hands an attacker what they need.
 owasp: "A05:2021 – Security Misconfiguration"
 cwe: ["CWE-16"]
 typicalSeverityCeiling: High
-related: []
+related: ["cloud-storage-exposure"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -164,5 +165,8 @@ someone without authorization to be looking.
   [Vulnerable and Outdated Components](../vulnerable-outdated-components/).
 - **Broken Access Control**, since a misconfigured administrative interface often becomes an access
   control failure the moment it's actually reachable by someone who shouldn't be able to reach it.
+- **Public Cloud Storage Exposure** ([../cloud-storage-exposure/](../cloud-storage-exposure/)): the
+  single highest-frequency real-world instance of this class, a permissive default left unreviewed on
+  a cloud storage resource specifically.
 
 *(A dedicated Broken Access Control page is planned; the link will go live once it's published.)*

@@ -18,12 +18,26 @@ export const REQUIRED_VULN_SECTIONS = [
   'Related Classes',
 ] as const;
 
+// Groups the vulnerabilities collection for the index page and nav dropdown now that it's grown
+// past a single flat list. Order here is the display order everywhere it's grouped, not alphabetical:
+// broad, well-known classes first, Cloud Security last as the newest addition.
+export const VULN_CATEGORIES = [
+  'Injection',
+  'Access Control',
+  'Authentication & Identity',
+  'Client-Side & UI',
+  'Design & Business Logic',
+  'Configuration & Supply Chain',
+  'Cloud Security',
+] as const;
+
 const vulnerabilities = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/vulnerabilities' }),
   schema: z.object({
     title: z.string(),
     // One-sentence dek shown in listings and search/share previews.
     summary: z.string().max(200),
+    category: z.enum(VULN_CATEGORIES),
     // Primary OWASP Top 10 (2021) category this class maps to, if any.
     owasp: z.string().optional(),
     // CWE identifier(s), e.g. "CWE-89".

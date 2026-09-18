@@ -1,10 +1,20 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { VULN_CATEGORIES } from '../../content.config';
 
 const entries = (await getCollection('vulnerabilities', ({ data }) => data.status === 'published'))
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
 const base = import.meta.env.BASE_URL;
+
+// Grouped by category (locked display order, see content.config.ts) now that the flat list has
+// grown past the point a single list reads well. Each group renders as an open-by-default <details>
+// accordion: nothing is hidden from a first-time visitor or from search/read-aloud, but the section
+// can be collapsed once its content is no longer needed.
+const groups = VULN_CATEGORIES.map((category) => ({
+  category,
+  entries: entries.filter((entry) => entry.data.category === category),
+})).filter((group) => group.entries.length > 0);
 ---
 
 <BaseLayout
@@ -21,13 +31,25 @@ const base = import.meta.env.BASE_URL;
     get what they need.
   </p>
 
-  <div class="card-grid" style="margin-top:36px;">
-    {entries.map((entry) => (
-      <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
-        <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
-        <h3>{entry.data.title}</h3>
-        <p>{entry.data.summary}</p>
-      </a>
+  <div class="category-groups" style="margin-top:36px;">
+    {groups.map((group) => (
+      <details class="category-group" open>
+        <summary class="category-group-summary">
+          <span class="category-group-title">{group.category}</span>
+          <span class="category-group-line" aria-hidden="true"></span>
+          <span class="category-group-count">{group.entries.length}</span>
+          <svg class="category-group-chev" width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="card-grid" style="margin-top:18px;">
+          {group.entries.map((entry) => (
+            <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
+              <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
+              <h3>{entry.data.title}</h3>
+              <p>{entry.data.summary}</p>
+            </a>
+          ))}
+        </div>
+      </details>
     ))}
     {entries.length === 0 && (
       <p style="color:var(--ink-faint);">Nothing published yet. Check back soon.</p>

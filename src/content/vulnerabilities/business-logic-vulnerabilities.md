@@ -1,5 +1,6 @@
 ---
 title: Business Logic Vulnerabilities
+category: "Design & Business Logic"
 summary: How abusing the intended workflow of a feature, rather than breaking its code, produces damaging findings a scanner will never catch.
 owasp: "A04:2021 – Insecure Design"
 cwe: []

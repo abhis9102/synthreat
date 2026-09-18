@@ -602,6 +602,42 @@ article.vuln-body tbody tr { background: var(--surface); }
 }
 .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 
+/* Category accordions on the vulnerabilities index page: open by default (nothing hidden from a
+   first-time visitor, search, or read-aloud), collapsible once a section's content isn't needed. */
+.category-groups { display: flex; flex-direction: column; gap: 8px; }
+.category-group { border-bottom: 1px solid var(--line); padding-bottom: 28px; }
+.category-group:last-child { border-bottom: none; padding-bottom: 0; }
+.category-group-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 0;
+  user-select: none;
+}
+.category-group-summary::-webkit-details-marker { display: none; }
+.category-group-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  font-weight: 600;
+}
+.category-group-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-faint);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 9px;
+}
+.category-group-line { flex: 1; height: 1px; background: var(--line); }
+.category-group-chev { color: var(--ink-faint); transition: transform 0.15s ease; flex-shrink: 0; }
+.category-group[open] .category-group-chev { transform: rotate(180deg); }
+
 .btn {
   display: inline-flex;
   align-items: center;
