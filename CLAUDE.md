@@ -85,12 +85,16 @@ when the first one of that type is actually drafted — not guessed in the abstr
 ## The locked content template — domain & concept pages
 
 The second repeating unit, defined once the first batch of this type was actually drafted (see rule
-above). This is for pages that explain a *domain* (application security, cloud security), a
-*methodology* (penetration testing, red teaming, continuous threat exposure management), a *service
-model* (penetration testing as a service), or an *attack landscape* (a taxonomy of attack types) —
-anything broader than one vulnerability class, where the 11-section vulnerability template doesn't
-fit because there's no single trust boundary or single remediation to anchor on. These pages live in
-the `domains` content collection, at `/domains/`, separate from `/vulnerabilities/`.
+above). This is for pages that explain a *domain* (application security, cloud security, mobile
+security), a *methodology* (penetration testing, red teaming, continuous threat exposure
+management), a *service model* (penetration testing as a service), an *attack landscape* (a
+taxonomy of attack types), a *framework or standard* (OWASP Top 10, SANS Top 25, NIST CSF), or a
+*compliance/regulatory regime* (GDPR, HIPAA, PCI-DSS, SOC 2) — anything broader than one
+vulnerability class, where the 11-section vulnerability template doesn't fit because there's no
+single trust boundary or single remediation to anchor on. These pages live in the `domains` content
+collection, at `/domains/`, separate from `/vulnerabilities/`. The framework and compliance
+categories each get one reference/overview page (following the same attack-landscape taxonomy
+pattern) plus a dedicated page per named framework or regulation, cross-linked from the overview.
 
 Every domain/concept page follows this structure, in this order. Do not skip a section; write "not
 yet documented" rather than omit it.

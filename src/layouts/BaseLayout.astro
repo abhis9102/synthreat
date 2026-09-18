@@ -21,7 +21,14 @@ const vulnEntries = (
   await getCollection('vulnerabilities', ({ data }) => data.status === 'published')
 ).sort((a, b) => a.data.title.localeCompare(b.data.title));
 
-const DOMAIN_CATEGORY_ORDER = ['Methodology', 'Domain Overview', 'Service Model', 'Attack Landscape'];
+const DOMAIN_CATEGORY_ORDER = [
+  'Methodology',
+  'Domain Overview',
+  'Service Model',
+  'Framework & Standard',
+  'Compliance & Regulation',
+  'Attack Landscape',
+];
 const domainGroups = DOMAIN_CATEGORY_ORDER.map((category) => ({
   category,
   items: domainEntries.filter((e) => e.data.category === category),

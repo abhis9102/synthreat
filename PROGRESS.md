@@ -4,6 +4,53 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Frameworks, compliance, Mobile Security, full OWASP Top 10 shipped
+
+**What happened (Content Architect):** Extended the `domains` collection's `category` enum with two
+new values: `Framework & Standard` and `Compliance & Regulation`. Both follow the existing 7-section
+domain template exactly, no new template needed. Per explicit user direction, both get a merged
+treatment: one reference/overview page each (same pattern as `types-of-cyberattacks`, a taxonomy
+page with a comparison table) plus a full dedicated page per named framework or regulation,
+cross-linked from the overview.
+
+**Batch:**
+- `vulnerabilities` (9 new pages): the remaining OWASP Top 10 (2021) categories not already covered
+  by SQL Injection / XSS under Injection (A03) — Broken Access Control (A01), Cryptographic Failures
+  (A02), Insecure Design (A04), Security Misconfiguration (A05), Vulnerable and Outdated Components
+  (A06), Identification and Authentication Failures (A07), Software and Data Integrity Failures
+  (A08), Security Logging and Monitoring Failures (A09), Server-Side Request Forgery (A10). This
+  brings vulnerability-class coverage to the full OWASP Top 10.
+- `domains` (1 new page, Domain Overview): Mobile Security.
+- `domains` (6 new pages, Framework & Standard): an overview/reference page, plus OWASP Top 10,
+  SANS Top 25, the OWASP Top 10 for LLM Applications, the NIST Cybersecurity Framework, and CIS
+  Controls as individual dedicated pages.
+- `domains` (7 new pages, Compliance & Regulation): an overview/reference page, plus GDPR, HIPAA,
+  PCI-DSS, SOC 2, ISO/IEC 27001, and India's DPDP Act as individual dedicated pages.
+
+**Decided:** ISO/IEC 27001 lives under Compliance & Regulation, not Framework & Standard, since it's
+most commonly pursued as a certification/audit target (like SOC 2) rather than a prioritization
+framework (like NIST CSF or CIS Controls) — a judgment call, not a hard rule, since it's genuinely
+both.
+
+**Written without em-dashes from the start this batch** (see the copyedit-pass entry above) rather
+than relying on another cleanup pass. Confirmed clean across all 23 new files, no cleanup pass
+needed this time.
+
+**Editorial Reviewer pass:** One template bug caught and fixed: `logging-monitoring-failures.md`
+used the attack-template heading "How to Detect It" instead of the vulnerability template's "How to
+Find It" (the writing fork mixed the two templates' headings on this one file), caught by the
+build-time validator exactly as designed. Several framework/compliance pages came in shorter than
+the requested 1400-2000 word target (as low as ~500 words); read a sample in full (SANS Top 25, CIS
+Controls, HIPAA) and judged them complete rather than thin: they correctly hedge on exact figures
+(control counts, fine amounts, edition numbers) they weren't confident were current rather than
+inventing them, which is the right call, just naturally shorter than a worked-example-heavy
+vulnerability page. Verified zero broken internal cross-links across all 54 published files, zero
+vendor-name leakage, zero em-dashes. All flipped `draft` → `published`.
+
+**Shipped live:** 58 static pages now live at https://abhis9102.github.io/synthreat/.
+
+---
+
 ## 2026-09-18 — Em-dash copyedit pass; concurrent-session note
 
 **What happened:** All 31 published content files (2 vulnerabilities, 9 domains, 20 attacks)
