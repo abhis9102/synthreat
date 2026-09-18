@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ContentVisuals from '../../components/ContentVisuals.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('domains', ({ data }) => data.status === 'published');
@@ -20,7 +19,6 @@ const { title, summary, category } = entry.data;
   <span class="tagline">{category}</span>
   <h1>{title}</h1>
   <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
-  <ContentVisuals kind="domain" title={title} summary={summary} category={category} />
   <article class="vuln-body">
     <Content />
   </article>
