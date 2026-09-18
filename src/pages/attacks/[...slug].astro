@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentVisuals from '../../components/ContentVisuals.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('attacks', ({ data }) => data.status === 'published');
@@ -24,6 +25,7 @@ const { title, summary, capec, mitreAttack, typicalSeverityCeiling } = entry.dat
     {capec.map((id: string) => <span class="chip">{id}</span>)}
     {mitreAttack.map((id: string) => <span class="chip">ATT&amp;CK {id}</span>)}
   </div>
+  <ContentVisuals kind="attack" title={title} summary={summary} severity={typicalSeverityCeiling} capec={capec} mitreAttack={mitreAttack} />
   <article class="vuln-body">
     <Content />
   </article>
