@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CollectionOverview from '../../components/CollectionOverview.astro';
 
 const entries = (await getCollection('attacks', ({ data }) => data.status === 'published'))
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
@@ -20,8 +19,6 @@ const base = import.meta.env.BASE_URL;
     exploits, how to detect it, what it costs a real business, and how it's prevented or responded
     to. Grounded in CAPEC and MITRE ATT&amp;CK where an ID is confidently known, not guessed.
   </p>
-
-  <CollectionOverview kind="attacks" entries={entries} />
 
   <div class="card-grid" style="margin-top:36px;">
     {entries.map((entry) => (
