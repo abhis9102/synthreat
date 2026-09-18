@@ -2,74 +2,91 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const published = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
+const publishedVulns = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
 const publishedDomains = (await getCollection('domains', ({ data }) => data.status === 'published'))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+const publishedAttacks = (await getCollection('attacks', ({ data }) => data.status === 'published'))
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
 const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout
+  wide
   title="Cybersecurity, taught straight"
   description="A free, evidence-based cybersecurity education resource — for newcomers and client-facing security people alike."
 >
-  <span class="tagline">The AI era is not waiting for you to catch up</span>
-  <h1 style="font-size:38px;line-height:1.15;max-width:15ch;">
-    Cybersecurity, taught by people who actually broke things.
-  </h1>
-  <p style="font-size:17.5px;color:var(--ink-soft);max-width:60ch;margin-top:18px;">
-    Most security writing picks one reader: an engineer, or an executive. Synthreat is written for
-    both on the same page — real, evidence-based material, not rehashed tutorials, built for anyone
-    starting out in the field and for anyone who has to explain <em>why this matters</em> to a client
-    who isn't technical.
-  </p>
+  <section class="hero">
+    <span class="tagline">The AI era is not waiting for you to catch up</span>
+    <h1 class="hero-title">
+      Cybersecurity, taught by <span class="accent-text">people who actually broke things.</span>
+    </h1>
+    <p style="font-size:17.5px;color:var(--ink-soft);max-width:60ch;margin-top:18px;">
+      Most security writing picks one reader: an engineer, or an executive. Synthreat is written for
+      both on the same page — real, evidence-based material, not rehashed tutorials, built for anyone
+      starting out in the field and for anyone who has to explain <em>why this matters</em> to a client
+      who isn't technical.
+    </p>
 
-  <div style="margin-top:44px;display:flex;gap:14px;flex-wrap:wrap;">
-    <a
-      href={`${base}domains/`}
-      style="display:inline-block;padding:12px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:14.5px;"
-    >
-      Start with the fundamentals →
-    </a>
-    <a
-      href={`${base}vulnerabilities/`}
-      style="display:inline-block;padding:12px 20px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;text-decoration:none;font-weight:600;font-size:14.5px;"
-    >
-      Browse vulnerability classes →
-    </a>
-  </div>
+    <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
+      <a href={`${base}domains/`} class="btn btn-primary">Start with the fundamentals →</a>
+      <a href={`${base}attacks/`} class="btn btn-secondary">Browse attack techniques →</a>
+      <a href={`${base}vulnerabilities/`} class="btn btn-secondary">Browse vulnerability classes →</a>
+    </div>
+  </section>
 
   {publishedDomains.length > 0 && (
-    <div style="margin-top:56px;">
-      <h2 style="font-size:14px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);border:none;padding:0;margin-bottom:16px;">
-        New to cybersecurity? Start here
-      </h2>
-      <div style="display:flex;flex-direction:column;gap:12px;">
+    <div style="margin-top:64px;">
+      <h2 class="section-label">New to cybersecurity? Start here</h2>
+      <div class="card-grid">
         {publishedDomains.map((entry) => (
-          <a
-            href={`${base}domains/${entry.id}/`}
-            style="display:block;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-decoration:none;box-shadow:var(--shadow);"
-          >
-            <strong style="color:var(--ink);font-size:16px;">{entry.data.title}</strong>
-            <p style="font-size:13.5px;color:var(--ink-soft);margin:4px 0 0 0;">{entry.data.summary}</p>
+          <a href={`${base}domains/${entry.id}/`} class="card">
+            <span class="card-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="badge">{entry.data.category}</span>
+            <h3>{entry.data.title}</h3>
+            <p>{entry.data.summary}</p>
           </a>
         ))}
       </div>
     </div>
   )}
 
-  {published.length > 0 && (
+  {publishedAttacks.length > 0 && (
     <div style="margin-top:56px;">
-      <h2 style="font-size:14px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);border:none;padding:0;margin-bottom:16px;">
-        Vulnerability classes
-      </h2>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        {published.map((entry) => (
-          <a
-            href={`${base}vulnerabilities/${entry.id}/`}
-            style="display:block;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-decoration:none;box-shadow:var(--shadow);"
-          >
-            <strong style="color:var(--ink);font-size:16px;">{entry.data.title}</strong>
-            <p style="font-size:13.5px;color:var(--ink-soft);margin:4px 0 0 0;">{entry.data.summary}</p>
+      <h2 class="section-label">Attack techniques</h2>
+      <div class="card-grid">
+        {publishedAttacks.slice(0, 6).map((entry) => (
+          <a href={`${base}attacks/${entry.id}/`} class="card">
+            <span class="card-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <h3>{entry.data.title}</h3>
+            <p>{entry.data.summary}</p>
+          </a>
+        ))}
+      </div>
+      {publishedAttacks.length > 6 && (
+        <div style="margin-top:16px;">
+          <a href={`${base}attacks/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
+            View all {publishedAttacks.length} attack techniques →
+          </a>
+        </div>
+      )}
+    </div>
+  )}
+
+  {publishedVulns.length > 0 && (
+    <div style="margin-top:56px;">
+      <h2 class="section-label">Vulnerability classes</h2>
+      <div class="card-grid">
+        {publishedVulns.map((entry) => (
+          <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
+            <span class="card-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M3 12h2M19 12h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="8" y="8" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
+            </span>
+            <h3>{entry.data.title}</h3>
+            <p>{entry.data.summary}</p>
           </a>
         ))}
       </div>

@@ -70,4 +70,44 @@ const domains = defineCollection({
   }),
 });
 
-export const collections = { vulnerabilities, domains };
+// The 11 section headings the locked attack-technique page template (CLAUDE.md) requires, in
+// order. Same shape as the vulnerability template, with two sections renamed to fit a technique
+// (phishing, ransomware, DDoS) rather than a code-level weakness.
+export const REQUIRED_ATTACK_SECTIONS = [
+  'Definition',
+  'What Makes It Work',
+  'Where It Actually Shows Up',
+  'Why It Keeps Succeeding',
+  'How to Detect It',
+  'Impact by Scenario',
+  'Why a Business Should Care',
+  'A Worked Example',
+  'Severity Calibration',
+  'Prevention & Response',
+  'Related Attacks & Vulnerabilities',
+] as const;
+
+const attacks = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/attacks' }),
+  schema: z.object({
+    title: z.string(),
+    // One-sentence dek shown in listings and search/share previews.
+    summary: z.string().max(200),
+    // CAPEC (Common Attack Pattern Enumeration and Classification) ID(s), e.g. "CAPEC-98".
+    // Left empty rather than guessed when no ID is confidently known — see CLAUDE.md.
+    capec: z.array(z.string()).default([]),
+    // MITRE ATT&CK technique ID(s), e.g. "T1566". Same rule: empty over guessed.
+    mitreAttack: z.array(z.string()).default([]),
+    // Not a fixed severity — the technique's typical ceiling, for sorting/filtering only.
+    typicalSeverityCeiling: z.enum(['Critical', 'High', 'Medium', 'Low']),
+    // Slugs of other entries in this collection, for the Related section's cross-links.
+    related: z.array(z.string()).default([]),
+    // Slugs of vulnerabilities-collection entries this technique connects to.
+    relatedVulnerabilities: z.array(z.string()).default([]),
+    status: z.enum(['draft', 'published']).default('draft'),
+    datePublished: z.coerce.date().optional(),
+    dateUpdated: z.coerce.date().optional(),
+  }),
+});
+
+export const collections = { vulnerabilities, domains, attacks };

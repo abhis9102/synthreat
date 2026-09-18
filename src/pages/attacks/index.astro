@@ -2,28 +2,27 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const entries = (await getCollection('vulnerabilities', ({ data }) => data.status === 'published'))
+const entries = (await getCollection('attacks', ({ data }) => data.status === 'published'))
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
 const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout
   wide
-  title="Vulnerability Classes"
-  description="Deep, evidence-based writeups of vulnerability classes — technical and business impact, together, on every page."
+  title="Attack Techniques"
+  description="Deep, evidence-based writeups of real attack techniques — how each one actually works, how to detect it, and what it costs a business."
 >
   <span class="tagline">Index</span>
-  <h1>Vulnerability Classes</h1>
+  <h1>Attack Techniques</h1>
   <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;max-width:70ch;">
-    Every page here follows the same locked structure: what it is, why the trust that enables it
-    fails, where it actually shows up, how to find it, what it costs a real business, and how it gets
-    fixed. Written for a newcomer and a client-facing security person to read the same page and both
-    get what they need.
+    Every page here follows the same locked structure: what the technique is, what it actually
+    exploits, how to detect it, what it costs a real business, and how it's prevented or responded
+    to. Grounded in CAPEC and MITRE ATT&amp;CK where an ID is confidently known, not guessed.
   </p>
 
   <div class="card-grid" style="margin-top:36px;">
     {entries.map((entry) => (
-      <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
+      <a href={`${base}attacks/${entry.id}/`} class="card">
         <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
         <h3>{entry.data.title}</h3>
         <p>{entry.data.summary}</p>

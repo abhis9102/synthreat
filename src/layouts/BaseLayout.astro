@@ -1,12 +1,31 @@
 ---
 import '../styles/global.css';
+import { getCollection } from 'astro:content';
 
 interface Props {
   title: string;
   description: string;
+  /** Widens main.page for grid/index layouts; article pages keep the narrower reading width. */
+  wide?: boolean;
 }
-const { title, description } = Astro.props;
+const { title, description, wide = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
+
+const domainEntries = (await getCollection('domains', ({ data }) => data.status === 'published')).sort(
+  (a, b) => a.data.title.localeCompare(b.data.title)
+);
+const attackEntries = (await getCollection('attacks', ({ data }) => data.status === 'published')).sort(
+  (a, b) => a.data.title.localeCompare(b.data.title)
+);
+const vulnEntries = (
+  await getCollection('vulnerabilities', ({ data }) => data.status === 'published')
+).sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+const DOMAIN_CATEGORY_ORDER = ['Methodology', 'Domain Overview', 'Service Model', 'Attack Landscape'];
+const domainGroups = DOMAIN_CATEGORY_ORDER.map((category) => ({
+  category,
+  items: domainEntries.filter((e) => e.data.category === category),
+})).filter((g) => g.items.length > 0);
 ---
 
 <!doctype html>
@@ -19,26 +38,131 @@ const base = import.meta.env.BASE_URL;
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="inner">
         <a class="brand" href={base}>Synthreat<span class="dot">.</span></a>
-        <nav>
-          <a href={`${base}domains/`}>Domains</a>
-          <a href={`${base}vulnerabilities/`}>Vulnerabilities</a>
+
+        <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle navigation menu">
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="site-nav" id="siteNav">
+          <div class="nav-item">
+            <div class="nav-row">
+              <a href={`${base}domains/`} class="nav-link">
+                Domains
+                <svg class="chev" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+              <button class="nav-chevron" aria-expanded="false" aria-label="Show Domains submenu">
+                <svg width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="nav-panel">
+              <div class="nav-panel-inner">
+                {domainGroups.map((group) => (
+                  <div class="nav-col">
+                    <span class="nav-col-title">{group.category}</span>
+                    {group.items.map((item) => (
+                      <a href={`${base}domains/${item.id}/`}>{item.data.title}</a>
+                    ))}
+                  </div>
+                ))}
+              </div>
+              <a class="nav-viewall" href={`${base}domains/`}>View all Domains →</a>
+            </div>
+          </div>
+
+          <div class="nav-item">
+            <div class="nav-row">
+              <a href={`${base}attacks/`} class="nav-link">
+                Attacks
+                <svg class="chev" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+              <button class="nav-chevron" aria-expanded="false" aria-label="Show Attacks submenu">
+                <svg width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="nav-panel nav-panel-wide">
+              <div class="nav-panel-inner nav-panel-cols">
+                {attackEntries.map((item) => (
+                  <a href={`${base}attacks/${item.id}/`}>{item.data.title}</a>
+                ))}
+              </div>
+              <a class="nav-viewall" href={`${base}attacks/`}>View all Attack Techniques →</a>
+            </div>
+          </div>
+
+          <div class="nav-item">
+            <div class="nav-row">
+              <a href={`${base}vulnerabilities/`} class="nav-link">
+                Vulnerabilities
+                <svg class="chev" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+              <button class="nav-chevron" aria-expanded="false" aria-label="Show Vulnerabilities submenu">
+                <svg width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="nav-panel">
+              <div class="nav-panel-inner">
+                <div class="nav-col">
+                  {vulnEntries.map((item) => (
+                    <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
+                  ))}
+                </div>
+              </div>
+              <a class="nav-viewall" href={`${base}vulnerabilities/`}>View all Vulnerabilities →</a>
+            </div>
+          </div>
         </nav>
       </div>
     </header>
-    <main class="page">
+
+    <div class="nav-scrim" id="navScrim"></div>
+
+    <main class="page" id="main" class:list={[{ 'page-wide': wide }]}>
       <slot />
     </main>
+
     <footer class="site-footer">
       <div class="inner">
-        Synthreat is a free, evidence-based cybersecurity education resource. Real-engagement
-        material referenced anywhere on this site is fully genericized before publishing — no real
-        client, system, or data is ever identified.
-        <a href="https://github.com/abhis9102/synthreat" target="_blank" rel="noopener">Source on GitHub</a>
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href={base}>Synthreat<span class="dot">.</span></a>
+            <p>
+              A free, evidence-based cybersecurity education resource for newcomers and client-facing
+              security people alike. Real-engagement material referenced anywhere on this site is
+              fully genericized before publishing — no real client, system, or data is ever identified.
+            </p>
+          </div>
+          <div class="footer-col">
+            <span class="footer-col-title">Domains</span>
+            {domainEntries.slice(0, 6).map((item) => (
+              <a href={`${base}domains/${item.id}/`}>{item.data.title}</a>
+            ))}
+            <a href={`${base}domains/`} class="footer-more">View all →</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-col-title">Attacks</span>
+            {attackEntries.slice(0, 6).map((item) => (
+              <a href={`${base}attacks/${item.id}/`}>{item.data.title}</a>
+            ))}
+            <a href={`${base}attacks/`} class="footer-more">View all →</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-col-title">Vulnerabilities</span>
+            {vulnEntries.map((item) => (
+              <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
+            ))}
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>Synthreat</span>
+          <a href="https://github.com/abhis9102/synthreat" target="_blank" rel="noopener">Source on GitHub</a>
+        </div>
       </div>
     </footer>
+
     <script>
       // Markdown-rendered tables have no wrapper element to scroll horizontally on narrow
       // screens — add one programmatically rather than pulling in a build-time rehype plugin
@@ -49,6 +173,38 @@ const base = import.meta.env.BASE_URL;
         wrap.className = 'table-wrap';
         table.parentNode?.insertBefore(wrap, table);
         wrap.appendChild(table);
+      });
+
+      // Mobile nav: hover/focus-within handles the desktop dropdowns with no JS at all. Below the
+      // desktop breakpoint there's no hover, so the hamburger and per-item chevrons need a toggle.
+      const navToggle = document.getElementById('navToggle');
+      const siteNav = document.getElementById('siteNav');
+      const navScrim = document.getElementById('navScrim');
+
+      function closeNav() {
+        siteNav?.classList.remove('open');
+        navToggle?.setAttribute('aria-expanded', 'false');
+        navScrim?.classList.remove('open');
+        document.querySelectorAll('.nav-item.open').forEach((el) => el.classList.remove('open'));
+      }
+
+      navToggle?.addEventListener('click', () => {
+        const isOpen = siteNav?.classList.toggle('open');
+        navToggle.setAttribute('aria-expanded', String(!!isOpen));
+        navScrim?.classList.toggle('open', !!isOpen);
+      });
+      navScrim?.addEventListener('click', closeNav);
+
+      document.querySelectorAll<HTMLButtonElement>('.nav-chevron').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.nav-item');
+          const isOpen = item?.classList.toggle('open');
+          btn.setAttribute('aria-expanded', String(!!isOpen));
+        });
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeNav();
       });
     </script>
   </body>

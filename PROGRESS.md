@@ -4,6 +4,86 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Attack Techniques section shipped, site redesigned, live
+
+**What happened (Content Architect):** Added a third content collection, `attacks` (site path
+`/attacks/`), specifically for attacker *techniques* (phishing, ransomware, DDoS, credential
+stuffing, social engineering, supply chain compromise, etc.) as distinct from code-level
+*vulnerability classes*. Defined its own 11-section locked template in `CLAUDE.md` — deliberately
+kept close to the vulnerability template's shape (same rigor: a worked example, severity
+calibration, impact-by-scenario table) with two sections renamed to fit a technique rather than a
+coding bug ("The Trust Boundary That Breaks" → "What Makes It Work", "Remediation" →
+"Prevention & Response"), and grounded in CAPEC / MITRE ATT&CK IDs instead of CWE — only cited when
+actually confident the ID is correct, left blank rather than guessed otherwise. Enforced by
+`scripts/validate-content.mjs` the same way as the other two collections. Added
+`src/pages/attacks/index.astro` and `[...slug].astro`, a nav link, and a homepage CTA (no full
+listing on the homepage this time — 20 entries is too many for that treatment; the `/attacks/`
+index page itself is the browse surface).
+
+**Why:** The `domains/types-of-cyberattacks` reference page (previous batch) covered ~16 attack
+types in table-row summaries. The user asked for every category — attack technique or vulnerability
+class — to get its own full deep-dive page with a worked example, the same treatment SQL Injection
+already got. Also expanded that reference table itself with several types it didn't originally
+cover: drive-by downloads, watering hole attacks, cryptojacking, IoT-based attacks, advanced
+persistent threats (APT), and rootkits — bringing it to 22 entries, sourced from general
+industry-standard attack taxonomy, not any single external source.
+
+**Also added:** Diagrams. Every new page (and, as a follow-up pass, the already-published pages)
+gets one inline SVG process/flow diagram — theme-aware via `currentColor` and the site's existing
+CSS custom properties, styled with a new shared `figure.diagram` class in `global.css`. Deliberately
+*not* adding fabricated statistical charts (e.g. invented breach-cost percentages) — there's no real
+dataset behind those, and inventing one would violate the evidence-grounding rule. A real mechanism
+diagram is the honest version of "show the real thing" for content that has no real screenshot to
+show (per the genericization rule, nothing here can be a real system's UI anyway).
+
+**Split across collections:**
+- `vulnerabilities` (new): Cross-Site Scripting (CWE-79) — a genuine code-level weakness, gets the
+  standard 11-section vulnerability template like SQL Injection.
+- `attacks` (new, 20 pages): Phishing, Business Email Compromise, Ransomware, Malware, Rootkit,
+  Man-in-the-Middle, DDoS, Credential Stuffing, Brute Force, Social Engineering, Supply Chain Attack,
+  Zero-Day Exploit, Insider Threat, DNS Spoofing, Session Hijacking, Drive-by Download, Watering Hole
+  Attack, Cryptojacking, IoT-Based Attacks, Advanced Persistent Threat.
+
+**Editorial Reviewer pass:** All 21 files checked for template compliance, vendor-name leakage,
+fabricated statistics, and genericization — clean. Two schema bugs caught and fixed: 5 pages had a
+`summary` field over the 200-character Zod limit (would have failed CI, not just a lint warning);
+one fork wrote an unplanned `rootkit.md` on top of the one its sibling fork was separately assigned
+to write (the two prompts overlapped by an example filename) — no data lost, the surviving file was
+reviewed and is complete and on-template. Verified zero broken internal cross-links across all 31
+published files with a script comparing every relative link against actual slugs. All flipped
+`draft` → `published`.
+
+**Design & Frontend Lead pass (same session, separate from content work):** Rebuilt the header into
+a mega-menu nav — Domains grouped by category, Attacks and Vulnerabilities as flat indexes, all
+pulled live from the collections via `getCollection` rather than hardcoded — open on desktop via
+pure CSS `:hover`/`:focus-within` (no JS dependency), collapsing to a hamburger + slide-in panel
+with per-item expand chevrons below 880px (small vanilla JS for the mobile toggle only). Rebuilt the
+footer into a 4-column sitemap (brand blurb + Domains/Attacks/Vulnerabilities link columns). Added a
+shared `.card`/`.card-grid` component system replacing the old stacked-list styling on the homepage
+and all three index pages, a `.hero` treatment with a gradient wash and gradient hero-text accent,
+and `.btn-primary`/`.btn-secondary` button styles. Homepage and index pages now render at a wider
+1080px column (`wide` prop on `BaseLayout`); article/detail pages stay at the original 720px reading
+width.
+
+**Shipped live:** Pushed to `main`; GitHub Actions rebuilt and deployed automatically. 35 static
+pages now live at https://abhis9102.github.io/synthreat/.
+
+**Next:**
+- A copyedit pass across all published content removing em-dash usage in favor of more
+  conventional punctuation, per direct user feedback that the writing reads as AI-stylized. This
+  needs real sentence-level rewriting (a blind find/replace would break grammar), planned as its own
+  follow-up pass rather than bundled into this commit.
+- Cross-link the new `attacks` pages into `vulnerabilities` and `domains` pages that predate them
+  where relevant (e.g. `types-of-cyberattacks` domain page ↔ each attack page already links one
+  direction; audit the reverse direction).
+- Retrofit one diagram each onto the 10 pages published before this batch (SQL Injection + the 9
+  original domain pages), per the same request that prompted diagrams on every new page this batch.
+
+**Status:** drafted via parallel forks, editorial review and publish pending — see next entry once
+that pass completes.
+
+---
+
 ## 2026-09-18 — Domains section launched, site deployed live
 
 **What happened (Content Architect):** Added a second content collection, `domains` (site path

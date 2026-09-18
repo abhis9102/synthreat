@@ -39,6 +39,23 @@ const COLLECTIONS = [
       'Related Topics',
     ],
   },
+  {
+    name: 'attacks',
+    dir: join(process.cwd(), 'src/content/attacks'),
+    sections: [
+      'Definition',
+      'What Makes It Work',
+      'Where It Actually Shows Up',
+      'Why It Keeps Succeeding',
+      'How to Detect It',
+      'Impact by Scenario',
+      'Why a Business Should Care',
+      'A Worked Example',
+      'Severity Calibration',
+      'Prevention & Response',
+      'Related Attacks & Vulnerabilities',
+    ],
+  },
 ];
 
 const H2_RE = /^##\s+(.+?)\s*$/gm;

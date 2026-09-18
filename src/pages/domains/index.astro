@@ -8,27 +8,25 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout
+  wide
   title="Domains & Concepts"
   description="Plain-language explainers for cybersecurity domains, methodologies, and service models — technical and business impact, together, on every page."
 >
   <span class="tagline">Index</span>
-  <h1>Domains & Concepts</h1>
-  <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;">
+  <h1>Domains &amp; Concepts</h1>
+  <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;max-width:70ch;">
     The bigger picture around vulnerability classes: what penetration testing actually is, how
     security domains like application and cloud security fit together, and the methodologies and
     service models behind them. Written assuming zero prior knowledge, with a dedicated section on
     every page for explaining it to a client.
   </p>
 
-  <div style="margin-top:40px;display:flex;flex-direction:column;gap:14px;">
+  <div class="card-grid" style="margin-top:36px;">
     {entries.map((entry) => (
-      <a
-        href={`${base}domains/${entry.id}/`}
-        style="display:block;padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-radius:12px;text-decoration:none;box-shadow:var(--shadow);"
-      >
-        <span class="chip" style="margin-bottom:8px;display:inline-block;">{entry.data.category}</span>
-        <h3 style="font-size:18px;color:var(--ink);margin-bottom:6px;">{entry.data.title}</h3>
-        <p style="font-size:14px;color:var(--ink-soft);margin-bottom:0;">{entry.data.summary}</p>
+      <a href={`${base}domains/${entry.id}/`} class="card">
+        <span class="badge">{entry.data.category}</span>
+        <h3>{entry.data.title}</h3>
+        <p>{entry.data.summary}</p>
       </a>
     ))}
     {entries.length === 0 && (

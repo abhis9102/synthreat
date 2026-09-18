@@ -114,6 +114,41 @@ yet documented" rather than omit it.
 Case studies and cheatsheets that don't fit either template above still get their own template,
 defined when the first one is actually drafted.
 
+## The locked content template — attack technique pages
+
+The third repeating unit. Most real-world attacks (phishing, ransomware, DDoS, credential stuffing,
+social engineering, supply chain compromise) are attacker *techniques*, not code-level *weaknesses* —
+there's no single CWE for "phishing," and forcing one onto the vulnerability template would be
+dishonest. These map instead to CAPEC (the standard attack-pattern taxonomy) and MITRE ATT&CK
+(the standard adversary-tactics taxonomy), cited by ID only when actually confident the ID is
+correct — never guessed or invented to look authoritative. These pages live in the `attacks`
+collection, at `/attacks/`. A vulnerability that genuinely is a code-level weakness with a real CWE
+(SQL injection, XSS, session fixation) stays in `/vulnerabilities/` even if it's also referenced from
+the attack-landscape taxonomy page — the two collections aren't a strict either/or by topic, they're
+a distinction between "a weakness in code" and "a technique an attacker uses."
+
+Deliberately kept close to the vulnerability template's shape — same 11 sections, two renamed to fit
+a technique rather than a coding bug — so the site still reads as one connected system:
+
+1. **Definition** — one paragraph, no jargon-stacking.
+2. **What Makes It Work** — the vulnerability template's "trust boundary" section, generalized: the
+   assumption (human, technical, or systemic) the attack exploits, why that assumption normally
+   holds, why it fails here, and what security property (confidentiality, integrity, availability,
+   authenticity) actually breaks.
+3. **Where It Actually Shows Up** — real surface patterns, not abstractions.
+4. **Why It Keeps Succeeding** — the recurring human or organizational gap behind it.
+5. **How to Detect It** — practical detection signals, at a level a newcomer can follow.
+6. **Impact by Scenario** — a table: this context → this realistic consequence.
+7. **Why a Business Should Care** — same non-negotiable rule as both other templates.
+8. **A Worked Example** — a full, generalized reasoning chain, genericized per the rule above.
+9. **Severity Calibration** — how severity depends on demonstrated impact, not the technique alone.
+10. **Prevention & Response** — the vulnerability template's "Remediation," renamed: these aren't bugs
+    to patch, they're controls to put in place and, for several of these (ransomware, insider threat),
+    a response plan for when prevention already failed. Still names the real fix and the common
+    *inadequate* fix people rely on instead.
+11. **Related Attacks & Vulnerabilities** — cross-links to other attack-technique pages and to any
+    vulnerability-class pages the technique connects to.
+
 ## Team architecture — roles, not headcount
 
 One person (plus Claude) is doing this work, but the *roles* below are real and should be kept
