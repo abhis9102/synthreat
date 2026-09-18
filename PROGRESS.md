@@ -4,6 +4,36 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Domains and Methodology gap-fill
+
+**What happened (Content Architect gap analysis, confirmed by user, then drafted):** Audited the
+newly-trimmed `domains` and `methodology` collections against the project's own mission statement
+and standard field practice, proposed a prioritized list in chat, got it confirmed, and drafted:
+
+- `domains` (5 new pages, 4 → 9 total): Network Security, Web Security, AI Security, Blue Team &
+  Security Operations, GRC (Governance, Risk & Compliance).
+- `methodology` (3 new pages, 6 → 9 total): Vulnerability Assessment & Management, Incident
+  Response, Threat Modeling.
+
+**Why:** `CLAUDE.md`'s own mission statement names network, blue team, GRC, and (eventually) AI
+security as domains this site is meant to grow into; those were still missing. Vulnerability
+Assessment/Management and Incident Response were referenced only in passing elsewhere (e.g. inside
+the ransomware attack page) with no page of their own despite being genuinely standard, named
+methodologies; Threat Modeling is the direct "how it's actually done" companion to the existing
+Insecure Design vulnerability page.
+
+**Editorial Reviewer pass:** zero em-dashes, zero vendor-name leakage, zero broken cross-links,
+all summaries under the schema limit, verified across all 8 files before publish. Flipped
+`draft` → `published`.
+
+**Still open (lower-priority backlog, not drafted this batch):** Identity & Access Management,
+IoT/OT & Industrial Control Systems, and Cryptography as domains; Purple Teaming, Secure Code
+Review, Social Engineering Assessment (the methodology, distinct from the attack-technique page),
+Bug Bounty/crowdsourced testing (generic, no platform names), and Tabletop Exercises as
+methodology pages.
+
+---
+
 ## 2026-09-18 — Split domains into four separate collections
 
 **What happened (Content Architect):** The previous batch folded Frameworks & Standards and
