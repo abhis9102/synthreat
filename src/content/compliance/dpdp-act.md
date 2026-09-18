@@ -1,7 +1,6 @@
 ---
 title: India's DPDP Act (Digital Personal Data Protection Act)
 summary: How India's own data protection law compares to GDPR, who it applies to, and what it requires from a security standpoint.
-category: Compliance & Regulation
 related: ["compliance-regulations", "gdpr"]
 relatedVulnerabilities: []
 status: published
@@ -96,7 +95,7 @@ uses.
 - [Cybersecurity Compliance & Regulations](../compliance-regulations/) for how the DPDP Act fits
   among the other major compliance regimes.
 - [GDPR](../gdpr/), the closest comparison point, worth contrasting directly with this Act.
-- [Continuous Threat Exposure Management](../continuous-threat-exposure-management/), relevant to
+- [Continuous Threat Exposure Management](../../methodology/continuous-threat-exposure-management/), relevant to
   the ongoing detection capability the Act's breach notification obligation depends on.
 
 *General security-education content, not legal or compliance advice. Work with qualified counsel for

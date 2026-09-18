@@ -85,16 +85,33 @@ when the first one of that type is actually drafted — not guessed in the abstr
 ## The locked content template — domain & concept pages
 
 The second repeating unit, defined once the first batch of this type was actually drafted (see rule
-above). This is for pages that explain a *domain* (application security, cloud security, mobile
-security), a *methodology* (penetration testing, red teaming, continuous threat exposure
-management), a *service model* (penetration testing as a service), an *attack landscape* (a
-taxonomy of attack types), a *framework or standard* (OWASP Top 10, SANS Top 25, NIST CSF), or a
-*compliance/regulatory regime* (GDPR, HIPAA, PCI-DSS, SOC 2) — anything broader than one
-vulnerability class, where the 11-section vulnerability template doesn't fit because there's no
-single trust boundary or single remediation to anchor on. These pages live in the `domains` content
-collection, at `/domains/`, separate from `/vulnerabilities/`. The framework and compliance
-categories each get one reference/overview page (following the same attack-landscape taxonomy
-pattern) plus a dedicated page per named framework or regulation, cross-linked from the overview.
+above). This is for anything broader than one vulnerability class, where the 11-section
+vulnerability template doesn't fit because there's no single trust boundary or single remediation to
+anchor on. Four separate top-level content collections share this exact template rather than one
+`domains` collection split by a category field — each reads as its own real section of the site:
+
+- **`domains`**, at `/domains/`: a whole *field* of security practice (application security, cloud
+  security, mobile security), plus the attack-landscape taxonomy page that maps `/attacks/`. The
+  question this answers: *what's being secured.*
+- **`methodology`**, at `/methodology/`: how security is actually *tested and delivered*
+  (penetration testing and its types, red teaming, AI red teaming, continuous threat exposure
+  management, penetration testing as a service). The question: *how is it tested.*
+- **`frameworks`**, at `/frameworks/`: named, publicly maintained prioritization lists and control
+  catalogs (OWASP Top 10, SANS/CWE Top 25, the OWASP Top 10 for LLM Applications, NIST CSF, CIS
+  Controls). The question: *what named standard shapes the work.*
+- **`compliance`**, at `/compliance/`: laws, contractual industry standards, and voluntary
+  certifications a business might actually be on the hook for (GDPR, HIPAA, PCI-DSS, SOC 2, ISO
+  27001, India's DPDP Act). The question: *what's actually mandatory, and for whom.*
+
+Do not fold a page into `domains` just because it "feels conceptual" — check which of the four
+questions above it's actually answering. `frameworks` and `compliance` in particular are frequently
+confused with each other and with `domains`; if unsure, the deciding question is enforceability
+(compliance = something to actually comply with) versus reference (framework = a list to prioritize
+against) versus subject matter (domain = the field itself).
+
+Each of `methodology`, `frameworks`, and `compliance` gets one reference/overview page (following
+the same pattern as the `domains` collection's attack-landscape taxonomy page) plus a dedicated page
+per named methodology, framework, or regulation, cross-linked from the overview.
 
 Every domain/concept page follows this structure, in this order. Do not skip a section; write "not
 yet documented" rather than omit it.

@@ -14,6 +14,15 @@ const base = import.meta.env.BASE_URL;
 const domainEntries = (await getCollection('domains', ({ data }) => data.status === 'published')).sort(
   (a, b) => a.data.title.localeCompare(b.data.title)
 );
+const methodologyEntries = (
+  await getCollection('methodology', ({ data }) => data.status === 'published')
+).sort((a, b) => a.data.title.localeCompare(b.data.title));
+const frameworkEntries = (
+  await getCollection('frameworks', ({ data }) => data.status === 'published')
+).sort((a, b) => a.data.title.localeCompare(b.data.title));
+const complianceEntries = (
+  await getCollection('compliance', ({ data }) => data.status === 'published')
+).sort((a, b) => a.data.title.localeCompare(b.data.title));
 const attackEntries = (await getCollection('attacks', ({ data }) => data.status === 'published')).sort(
   (a, b) => a.data.title.localeCompare(b.data.title)
 );
@@ -21,18 +30,14 @@ const vulnEntries = (
   await getCollection('vulnerabilities', ({ data }) => data.status === 'published')
 ).sort((a, b) => a.data.title.localeCompare(b.data.title));
 
-const DOMAIN_CATEGORY_ORDER = [
-  'Methodology',
-  'Domain Overview',
-  'Service Model',
-  'Framework & Standard',
-  'Compliance & Regulation',
-  'Attack Landscape',
+// Flat-list nav dropdown: label + base path + entries. Attacks gets the wide multi-column
+// treatment separately below since 20 entries doesn't fit one column.
+const NAV_SECTIONS = [
+  { label: 'Domains', path: 'domains', entries: domainEntries },
+  { label: 'Methodology', path: 'methodology', entries: methodologyEntries },
+  { label: 'Frameworks', path: 'frameworks', entries: frameworkEntries },
+  { label: 'Compliance', path: 'compliance', entries: complianceEntries },
 ];
-const domainGroups = DOMAIN_CATEGORY_ORDER.map((category) => ({
-  category,
-  items: domainEntries.filter((e) => e.data.category === category),
-})).filter((g) => g.items.length > 0);
 ---
 
 <!doctype html>
@@ -62,30 +67,29 @@ const domainGroups = DOMAIN_CATEGORY_ORDER.map((category) => ({
         </button>
 
         <nav class="site-nav" id="siteNav">
-          <div class="nav-item">
-            <div class="nav-row">
-              <a href={`${base}domains/`} class="nav-link">
-                Domains
-                <svg class="chev" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </a>
-              <button class="nav-chevron" aria-expanded="false" aria-label="Show Domains submenu">
-                <svg width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-            <div class="nav-panel">
-              <div class="nav-panel-inner">
-                {domainGroups.map((group) => (
+          {NAV_SECTIONS.map((section) => (
+            <div class="nav-item">
+              <div class="nav-row">
+                <a href={`${base}${section.path}/`} class="nav-link">
+                  {section.label}
+                  <svg class="chev" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <button class="nav-chevron" aria-expanded="false" aria-label={`Show ${section.label} submenu`}>
+                  <svg width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div class="nav-panel">
+                <div class="nav-panel-inner">
                   <div class="nav-col">
-                    <span class="nav-col-title">{group.category}</span>
-                    {group.items.map((item) => (
-                      <a href={`${base}domains/${item.id}/`}>{item.data.title}</a>
+                    {section.entries.map((item) => (
+                      <a href={`${base}${section.path}/${item.id}/`}>{item.data.title}</a>
                     ))}
                   </div>
-                ))}
+                </div>
+                <a class="nav-viewall" href={`${base}${section.path}/`}>View all {section.label} →</a>
               </div>
-              <a class="nav-viewall" href={`${base}domains/`}>View all Domains →</a>
             </div>
-          </div>
+          ))}
 
           <div class="nav-item">
             <div class="nav-row">
@@ -151,34 +155,37 @@ const domainGroups = DOMAIN_CATEGORY_ORDER.map((category) => ({
 
     <footer class="site-footer">
       <div class="inner">
+        <div class="footer-brand-row">
+          <a class="brand" href={base}>Synthreat<span class="dot">.</span></a>
+          <p>
+            A free, evidence-based cybersecurity education resource for newcomers and client-facing
+            security people alike. Real-engagement material referenced anywhere on this site is
+            fully genericized before publishing: no real client, system, or data is ever identified.
+          </p>
+        </div>
         <div class="footer-grid">
-          <div class="footer-brand">
-            <a class="brand" href={base}>Synthreat<span class="dot">.</span></a>
-            <p>
-              A free, evidence-based cybersecurity education resource for newcomers and client-facing
-              security people alike. Real-engagement material referenced anywhere on this site is
-              fully genericized before publishing — no real client, system, or data is ever identified.
-            </p>
-          </div>
-          <div class="footer-col">
-            <span class="footer-col-title">Domains</span>
-            {domainEntries.slice(0, 6).map((item) => (
-              <a href={`${base}domains/${item.id}/`}>{item.data.title}</a>
-            ))}
-            <a href={`${base}domains/`} class="footer-more">View all →</a>
-          </div>
+          {NAV_SECTIONS.map((section) => (
+            <div class="footer-col">
+              <span class="footer-col-title">{section.label}</span>
+              {section.entries.slice(0, 5).map((item) => (
+                <a href={`${base}${section.path}/${item.id}/`}>{item.data.title}</a>
+              ))}
+              <a href={`${base}${section.path}/`} class="footer-more">View all →</a>
+            </div>
+          ))}
           <div class="footer-col">
             <span class="footer-col-title">Attacks</span>
-            {attackEntries.slice(0, 6).map((item) => (
+            {attackEntries.slice(0, 5).map((item) => (
               <a href={`${base}attacks/${item.id}/`}>{item.data.title}</a>
             ))}
             <a href={`${base}attacks/`} class="footer-more">View all →</a>
           </div>
           <div class="footer-col">
             <span class="footer-col-title">Vulnerabilities</span>
-            {vulnEntries.map((item) => (
+            {vulnEntries.slice(0, 5).map((item) => (
               <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
             ))}
+            <a href={`${base}vulnerabilities/`} class="footer-more">View all →</a>
           </div>
         </div>
         <div class="footer-bottom">

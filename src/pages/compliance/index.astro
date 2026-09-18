@@ -1,0 +1,34 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entries = (await getCollection('compliance', ({ data }) => data.status === 'published'))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  wide
+  title="Compliance & Regulations"
+  description="GDPR, HIPAA, PCI-DSS, SOC 2, ISO/IEC 27001, and India's DPDP Act: who each applies to, what it requires, and the services a security practice offers to help meet them."
+>
+  <span class="tagline">Index</span>
+  <h1>Compliance & Regulations</h1>
+  <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;max-width:70ch;">
+    Laws, contractual industry standards, and voluntary certifications a business might actually be
+    on the hook for. General security-education content, not legal advice — work with qualified
+    counsel and auditors for an actual compliance determination.
+  </p>
+
+  <div class="card-grid" style="margin-top:36px;">
+    {entries.map((entry) => (
+      <a href={`${base}compliance/${entry.id}/`} class="card">
+        <h3>{entry.data.title}</h3>
+        <p>{entry.data.summary}</p>
+      </a>
+    ))}
+    {entries.length === 0 && (
+      <p style="color:var(--ink-faint);">Nothing published yet — check back soon.</p>
+    )}
+  </div>
+</BaseLayout>

@@ -1,7 +1,6 @@
 ---
 title: What Is Penetration Testing?
 summary: A plain-language walkthrough of what a penetration test actually is, who does it, and the steps a real engagement follows from scoping to report.
-category: Methodology
 related: ["types-of-penetration-testing", "penetration-testing-as-a-service", "red-teaming"]
 relatedVulnerabilities: ["sql-injection"]
 status: published

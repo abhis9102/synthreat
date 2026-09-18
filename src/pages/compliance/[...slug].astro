@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('compliance', ({ data }) => data.status === 'published');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, summary } = entry.data;
+---
+
+<BaseLayout title={title} description={summary}>
+  <span class="tagline">Compliance & Regulation</span>
+  <h1>{title}</h1>
+  <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
+  <article class="vuln-body">
+    <Content />
+  </article>
+</BaseLayout>

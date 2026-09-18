@@ -1,7 +1,6 @@
 ---
 title: Cybersecurity Frameworks & Standards
 summary: A map of the major frameworks referenced across this site, what problem each one actually solves, and how they relate to each other.
-category: Framework & Standard
 related: ["owasp-top-10", "sans-top-25", "ai-llm-top-10", "nist-cybersecurity-framework", "cis-controls"]
 relatedVulnerabilities: []
 status: published
@@ -36,8 +35,8 @@ involved, the security team, the client, the auditor, the same reference point.
 
 Two other names show up constantly elsewhere on this site and are worth placing on this map even
 though they don't get their own row here: MITRE ATT&CK, a taxonomy of real adversary tactics and
-techniques covered in depth on the [Red Teaming](../red-teaming/) page, and PTES, the Penetration
-Testing Execution Standard, covered on the [What Is Penetration Testing?](../what-is-penetration-testing/)
+techniques covered in depth on the [Red Teaming](../../methodology/red-teaming/) page, and PTES, the Penetration
+Testing Execution Standard, covered on the [What Is Penetration Testing?](../../methodology/what-is-penetration-testing/)
 page.
 
 The distinction that actually matters, and the one beginners and clients most often blur together,
@@ -47,7 +46,7 @@ AI Top 10) names the most common or dangerous specific risk categories in a give
 risks. A **control catalog** (CIS Controls) is a concrete, actionable list of things to actually
 implement. None of these four is a **compliance regime**, a legal or contractual requirement with
 real penalties for failing it. That's a genuinely different category, covered on its own
-[Cybersecurity Compliance & Regulations](../compliance-regulations/) overview page.
+[Cybersecurity Compliance & Regulations](../../compliance/compliance-regulations/) overview page.
 
 ## Where This Shows Up in Practice
 
@@ -78,7 +77,7 @@ need.
 **"Following one of these guarantees compliance with a legal regulation."** A framework is not
 automatically a compliance requirement. An organization can follow CIS Controls closely and still
 be out of compliance with a specific regulation that has its own distinct legal requirements. See
-the [Compliance & Regulations](../compliance-regulations/) overview for that separate category.
+the [Compliance & Regulations](../../compliance/compliance-regulations/) overview for that separate category.
 
 ## Related Topics
 
@@ -87,5 +86,5 @@ the [Compliance & Regulations](../compliance-regulations/) overview for that sep
 - [The OWASP Top 10 for LLM Applications](../ai-llm-top-10/)
 - [The NIST Cybersecurity Framework](../nist-cybersecurity-framework/)
 - [CIS Controls](../cis-controls/)
-- [Cybersecurity Compliance & Regulations](../compliance-regulations/): the related but distinct
+- [Cybersecurity Compliance & Regulations](../../compliance/compliance-regulations/): the related but distinct
   category of legal and contractual requirements, as opposed to voluntary frameworks.

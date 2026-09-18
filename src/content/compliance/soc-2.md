@@ -1,7 +1,6 @@
 ---
 title: SOC 2
 summary: Why SOC 2 is a voluntary attestation rather than a legal requirement, what it actually covers, and why B2B SaaS companies pursue it anyway.
-category: Compliance & Regulation
 related: ["compliance-regulations", "iso-27001"]
 relatedVulnerabilities: []
 status: published
@@ -129,7 +128,7 @@ report, not one from two years ago.
   other major compliance regimes.
 - [ISO/IEC 27001](../iso-27001/), the closest international comparison point, worth understanding
   alongside SOC 2 since different customers expect different evidence.
-- [What Is Penetration Testing](../what-is-penetration-testing/), since a penetration test is
+- [What Is Penetration Testing](../../methodology/what-is-penetration-testing/), since a penetration test is
   frequently one of the pieces of evidence gathered as part of preparing for a SOC 2 audit.
 
 *General security-education content, not legal or compliance advice. Work with a qualified auditor

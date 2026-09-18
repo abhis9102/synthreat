@@ -1,7 +1,6 @@
 ---
 title: Types of Penetration Testing
 summary: How penetration tests differ by target surface (network, web, mobile, cloud, wireless, social engineering) and by how much access the tester starts with (black-box, gray-box, white-box).
-category: Methodology
 related: ["what-is-penetration-testing", "red-teaming", "cloud-security", "application-security"]
 relatedVulnerabilities: []
 status: published
@@ -76,7 +75,7 @@ Those are different questions, and paying for the wrong one to answer the other 
   possible with full information."
 - A company migrating core infrastructure to a cloud provider commonly adds a **white-box cloud
   configuration review**, because the highest-risk mistakes in cloud environments are misconfigured
-  permissions, not undiscovered code-level bugs (see [Cloud Security](../cloud-security/)).
+  permissions, not undiscovered code-level bugs (see [Cloud Security](../../domains/cloud-security/)).
 
 ## Why a Business Should Care
 
@@ -113,6 +112,6 @@ useful.
   followed regardless of which type of engagement is scoped.
 - [Red Teaming](../red-teaming/): a related but distinct discipline that simulates a specific
   adversary's goal rather than maximizing coverage across a scope.
-- [Cloud Security](../cloud-security/): the domain behind cloud configuration testing specifically.
-- [Application Security](../application-security/): the domain behind web and mobile application
+- [Cloud Security](../../domains/cloud-security/): the domain behind cloud configuration testing specifically.
+- [Application Security](../../domains/application-security/): the domain behind web and mobile application
   testing specifically.

@@ -1,7 +1,6 @@
 ---
 title: The CIS Critical Security Controls
 summary: A prioritized, actionable list of specific technical safeguards, and how it differs from a broader risk-management framework like NIST CSF.
-category: Framework & Standard
 related: ["frameworks-standards", "nist-cybersecurity-framework"]
 relatedVulnerabilities: []
 status: published

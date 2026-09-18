@@ -4,6 +4,46 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — Split domains into four separate collections
+
+**What happened (Content Architect):** The previous batch folded Frameworks & Standards and
+Compliance & Regulations into the `domains` collection as extra `category` values. Direct user
+feedback: don't merge domain, compliance, framework, and methodology together. Split into four
+separate top-level collections, each still sharing the same 7-section domain/concept template:
+
+- `domains` (trimmed to 4 pages): Application Security, Cloud Security, Mobile Security, and the
+  attack-landscape taxonomy page (`types-of-cyberattacks`, which stays here for the same reason it
+  always has: it maps `/attacks/`, the way the other three collections' own overview pages now map
+  `/methodology/`, `/frameworks/`, `/compliance/`).
+- `methodology` (new, 6 pages, moved from domains): What Is Penetration Testing, Types of
+  Penetration Testing, Penetration Testing as a Service, Red Teaming, AI Red Teaming, Continuous
+  Threat Exposure Management.
+- `frameworks` (new, 6 pages, moved from domains): the Frameworks & Standards overview, OWASP Top
+  10, SANS/CWE Top 25, the OWASP Top 10 for LLM Applications, NIST CSF, CIS Controls.
+- `compliance` (new, 7 pages, moved from domains): the Compliance & Regulations overview, GDPR,
+  HIPAA, PCI-DSS, SOC 2, ISO/IEC 27001, India's DPDP Act.
+
+Mechanically: `git mv` for all 19 relocated files, `category` field dropped from all of them (no
+longer needed, each collection is now homogeneous), an automated script rewrote every relative
+cross-link whose target moved collections (14 files touched), and a broken-link check across all 6
+collections confirmed zero dangling links afterward. Added `src/pages/methodology/`,
+`src/pages/frameworks/`, `src/pages/compliance/` (index + `[...slug]` each), a nav entry per new
+section, a homepage section per new section (same 8-card-cap-plus-view-all pattern as the rest, per
+user request to keep that consistent everywhere), and a rebuilt footer (brand statement on its own
+row, then a 6-column link grid: Domains / Methodology / Frameworks / Compliance / Attacks /
+Vulnerabilities).
+
+**Why:** These are genuinely different questions (what's being secured / how it's tested / what
+named standard shapes it / what's actually mandatory), and folding them into one collection's
+category field was the same mistake the site had already corrected once before (attacks were
+originally going to be domains-collection entries too, before becoming their own collection).
+
+**Next (Content Architect gap analysis, requested but not yet drafted):** audit what's missing from
+the now-trimmed `domains` collection and from `methodology`, and propose a batch before drafting —
+see chat for the actual list; not duplicating it here until it's confirmed and acted on.
+
+---
+
 ## 2026-09-18 — Frameworks, compliance, Mobile Security, full OWASP Top 10 shipped
 
 **What happened (Content Architect):** Extended the `domains` collection's `category` enum with two

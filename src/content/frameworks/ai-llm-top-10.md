@@ -1,7 +1,6 @@
 ---
 title: The OWASP Top 10 for LLM Applications
 summary: The risk categories specific to applications built on large language models, and how they differ from both traditional AppSec risks and general AI safety concerns.
-category: Framework & Standard
 related: ["frameworks-standards"]
 relatedVulnerabilities: []
 status: published
@@ -44,7 +43,7 @@ Several worth knowing by name:
   covered on [Supply Chain Attack](../../attacks/supply-chain-attack/), applied to the AI pipeline
   specifically.
 - **Excessive agency**: an AI system or agent given more real-world tool access and permission than
-  its actual task requires. See [AI Red Teaming](../ai-red-teaming/) for how this becomes a serious
+  its actual task requires. See [AI Red Teaming](../../methodology/ai-red-teaming/) for how this becomes a serious
   problem the moment a model can take real actions, not just produce text.
 - **Sensitive information disclosure**: a model revealing fragments of its training data, or being
   manipulated into disclosing data it was given legitimate access to for a narrower purpose.
@@ -73,7 +72,7 @@ injection and training data supply chain risk in particular, have no direct equi
 traditional web application risk lists. This is a genuinely distinct taxonomy, not a relabeled copy.
 
 **"If the model itself is 'safe,' the application built around it is safe."** [AI Red
-Teaming](../ai-red-teaming/) makes this exact distinction directly: the model is one layer, and the
+Teaming](../../methodology/ai-red-teaming/) makes this exact distinction directly: the model is one layer, and the
 ordinary application code, APIs, and tool access wrapped around it is a completely separate,
 ordinary attack surface that needs its own testing regardless of how well-aligned the underlying
 model is.
@@ -82,5 +81,5 @@ model is.
 
 - [Security Frameworks & Standards](../frameworks-standards/): how this list fits among the other
   named frameworks covered on this site.
-- [AI Red Teaming](../ai-red-teaming/): the adversarial testing discipline built to test against
+- [AI Red Teaming](../../methodology/ai-red-teaming/): the adversarial testing discipline built to test against
   the risk categories described here.

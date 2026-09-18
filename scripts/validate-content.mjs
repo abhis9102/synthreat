@@ -56,6 +56,48 @@ const COLLECTIONS = [
       'Related Attacks & Vulnerabilities',
     ],
   },
+  // methodology, frameworks, and compliance all share the domain/concept template — same
+  // structure, deliberately separate top-level collections rather than one collection split by a
+  // category field. See CLAUDE.md and src/content.config.ts.
+  {
+    name: 'methodology',
+    dir: join(process.cwd(), 'src/content/methodology'),
+    sections: [
+      'What It Is',
+      'Why It Exists',
+      'How It Works',
+      'Where This Shows Up in Practice',
+      'Why a Business Should Care',
+      'Common Misconceptions',
+      'Related Topics',
+    ],
+  },
+  {
+    name: 'frameworks',
+    dir: join(process.cwd(), 'src/content/frameworks'),
+    sections: [
+      'What It Is',
+      'Why It Exists',
+      'How It Works',
+      'Where This Shows Up in Practice',
+      'Why a Business Should Care',
+      'Common Misconceptions',
+      'Related Topics',
+    ],
+  },
+  {
+    name: 'compliance',
+    dir: join(process.cwd(), 'src/content/compliance'),
+    sections: [
+      'What It Is',
+      'Why It Exists',
+      'How It Works',
+      'Where This Shows Up in Practice',
+      'Why a Business Should Care',
+      'Common Misconceptions',
+      'Related Topics',
+    ],
+  },
 ];
 
 const H2_RE = /^##\s+(.+?)\s*$/gm;

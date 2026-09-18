@@ -1,7 +1,6 @@
 ---
 title: Penetration Testing as a Service (PTaaS)
 summary: How the PTaaS delivery model differs from a traditional annual pentest engagement, and when the tradeoff actually favors continuous testing.
-category: Service Model
 related: ["what-is-penetration-testing", "continuous-threat-exposure-management"]
 relatedVulnerabilities: []
 status: published

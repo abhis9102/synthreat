@@ -1,7 +1,6 @@
 ---
 title: GDPR (General Data Protection Regulation)
 summary: Who the EU's data protection law actually applies to, what it requires from a security standpoint, and how it differs from a generic privacy policy.
-category: Compliance & Regulation
 related: ["compliance-regulations", "dpdp-act"]
 relatedVulnerabilities: []
 status: published

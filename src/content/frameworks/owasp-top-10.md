@@ -1,7 +1,6 @@
 ---
 title: The OWASP Top 10
 summary: What the OWASP Top 10 actually is, how it gets built from real data, and how to use it without treating it as a complete checklist.
-category: Framework & Standard
 related: ["frameworks-standards", "sans-top-25"]
 relatedVulnerabilities: []
 status: published

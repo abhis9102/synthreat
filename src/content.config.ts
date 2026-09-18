@@ -40,8 +40,10 @@ const vulnerabilities = defineCollection({
 });
 
 // The 7 section headings the locked domain & concept page template (CLAUDE.md) requires, in order.
-// Covers domain overviews, methodology explainers, service models, and attack-landscape taxonomies —
-// anything broader than a single vulnerability class. Enforced the same way as the vuln template.
+// Shared by four collections below (domains, methodology, frameworks, compliance) — same template,
+// deliberately kept as separate top-level collections rather than one collection split by a
+// `category` field, so each reads as its own real section of the site rather than a subcategory of
+// "domains." Enforced the same way as the vuln template.
 export const REQUIRED_DOMAIN_SECTIONS = [
   'What It Is',
   'Why It Exists',
@@ -52,24 +54,64 @@ export const REQUIRED_DOMAIN_SECTIONS = [
   'Related Topics',
 ] as const;
 
+// Pure domain overviews: a whole field of security practice (application security, cloud security,
+// mobile security), plus the attack-landscape taxonomy page that maps the `attacks` collection.
 const domains = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/domains' }),
   schema: z.object({
     title: z.string(),
-    // One-sentence dek shown in listings and search/share previews.
     summary: z.string().max(200),
-    // What kind of domain/concept page this is, for grouping and filtering on the index.
-    category: z.enum([
-      'Domain Overview',
-      'Methodology',
-      'Service Model',
-      'Attack Landscape',
-      'Framework & Standard',
-      'Compliance & Regulation',
-    ]),
-    // Slugs of other entries in this collection, for the Related Topics section's cross-links.
+    category: z.enum(['Domain Overview', 'Attack Landscape']),
+    // Slugs of entries in this or other collections this page connects to. Documentation metadata
+    // only (not currently rendered as UI), so loosely typed rather than split per target collection.
     related: z.array(z.string()).default([]),
-    // Slugs of vulnerabilities-collection entries this page connects to.
+    relatedVulnerabilities: z.array(z.string()).default([]),
+    status: z.enum(['draft', 'published']).default('draft'),
+    datePublished: z.coerce.date().optional(),
+    dateUpdated: z.coerce.date().optional(),
+  }),
+});
+
+// Testing and assessment methodologies: penetration testing, red teaming, AI red teaming, CTEM,
+// PTaaS. "How is security actually tested and delivered," as distinct from "what field of practice
+// is being tested" (domains) or "what named external standard governs it" (frameworks/compliance).
+const methodology = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/methodology' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string().max(200),
+    related: z.array(z.string()).default([]),
+    relatedVulnerabilities: z.array(z.string()).default([]),
+    status: z.enum(['draft', 'published']).default('draft'),
+    datePublished: z.coerce.date().optional(),
+    dateUpdated: z.coerce.date().optional(),
+  }),
+});
+
+// Named external frameworks and standards (OWASP Top 10, SANS/CWE Top 25, NIST CSF, CIS Controls):
+// prioritization lists and control catalogs, not legal or contractual requirements. See `compliance`
+// for the regimes that actually are.
+const frameworks = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/frameworks' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string().max(200),
+    related: z.array(z.string()).default([]),
+    relatedVulnerabilities: z.array(z.string()).default([]),
+    status: z.enum(['draft', 'published']).default('draft'),
+    datePublished: z.coerce.date().optional(),
+    dateUpdated: z.coerce.date().optional(),
+  }),
+});
+
+// Compliance and regulatory regimes (GDPR, HIPAA, PCI-DSS, SOC 2, ISO 27001, DPDP Act): laws,
+// contractual standards, and voluntary certifications a business may actually be on the hook for.
+const compliance = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/compliance' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string().max(200),
+    related: z.array(z.string()).default([]),
     relatedVulnerabilities: z.array(z.string()).default([]),
     status: z.enum(['draft', 'published']).default('draft'),
     datePublished: z.coerce.date().optional(),
@@ -117,4 +159,4 @@ const attacks = defineCollection({
   }),
 });
 
-export const collections = { vulnerabilities, domains, attacks };
+export const collections = { vulnerabilities, domains, attacks, methodology, frameworks, compliance };

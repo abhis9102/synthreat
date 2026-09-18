@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entries = (await getCollection('frameworks', ({ data }) => data.status === 'published'))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  wide
+  title="Frameworks & Standards"
+  description="OWASP Top 10, SANS/CWE Top 25, the OWASP Top 10 for LLM Applications, NIST CSF, and CIS Controls: what each one actually is and how they relate."
+>
+  <span class="tagline">Index</span>
+  <h1>Frameworks & Standards</h1>
+  <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;max-width:70ch;">
+    Named, publicly maintained frameworks and standards: prioritization lists and control catalogs
+    that shape how security work gets scoped and communicated. Not a legal requirement by
+    themselves — see <a href={`${base}compliance/`}>Compliance & Regulations</a> for the regimes
+    that are.
+  </p>
+
+  <div class="card-grid" style="margin-top:36px;">
+    {entries.map((entry) => (
+      <a href={`${base}frameworks/${entry.id}/`} class="card">
+        <h3>{entry.data.title}</h3>
+        <p>{entry.data.summary}</p>
+      </a>
+    ))}
+    {entries.length === 0 && (
+      <p style="color:var(--ink-faint);">Nothing published yet — check back soon.</p>
+    )}
+  </div>
+</BaseLayout>

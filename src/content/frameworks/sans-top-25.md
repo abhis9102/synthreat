@@ -1,7 +1,6 @@
 ---
 title: The SANS/CWE Top 25
 summary: How the SANS Top 25 differs from the OWASP Top 10, why it's built directly from real vulnerability and exploit data, and when to reach for one list over the other.
-category: Framework & Standard
 related: ["frameworks-standards", "owasp-top-10"]
 relatedVulnerabilities: []
 status: published

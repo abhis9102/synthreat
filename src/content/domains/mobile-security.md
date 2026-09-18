@@ -50,7 +50,7 @@ layer commonly surfaces the same kinds of findings web apps do, such as
 ## Where This Shows Up in Practice
 
 Dedicated mobile penetration testing engagements are commonly scoped separately from web application
-testing (see [Types of Penetration Testing](../types-of-penetration-testing/)). Organizations that
+testing (see [Types of Penetration Testing](../../methodology/types-of-penetration-testing/)). Organizations that
 ship a companion mobile app for an existing web product frequently discover, the first time it's
 actually tested, that the mobile client carries its own, entirely separate attack surface.
 
@@ -75,7 +75,7 @@ testing on their own terms.
 
 - [Application Security](../application-security/): the broader discipline mobile security is a
   specialized branch of.
-- [Types of Penetration Testing](../types-of-penetration-testing/): where mobile-specific engagements
+- [Types of Penetration Testing](../../methodology/types-of-penetration-testing/): where mobile-specific engagements
   fit among other testing types.
 - [Man-in-the-Middle](../../attacks/man-in-the-middle/): the attack technique behind insecure mobile
   communication findings.

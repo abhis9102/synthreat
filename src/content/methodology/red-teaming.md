@@ -1,7 +1,6 @@
 ---
 title: Red Teaming
 summary: What separates a red team engagement from a penetration test, why it exists, and how it simulates a real adversary rather than a checklist of vulnerabilities.
-category: Methodology
 related: ["what-is-penetration-testing", "ai-red-teaming", "types-of-penetration-testing"]
 relatedVulnerabilities: []
 status: published

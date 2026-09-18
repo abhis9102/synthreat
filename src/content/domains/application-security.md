@@ -65,7 +65,7 @@ mistake:
   together into a single proven, real-world impact the way a skilled human attacker does, or reason
   about business logic that's only wrong in context (a discount code that's technically valid but was
   never supposed to be combinable with another one, for instance). See
-  [What Is Penetration Testing](../what-is-penetration-testing/) for how that manual process actually
+  [What Is Penetration Testing](../../methodology/what-is-penetration-testing/) for how that manual process actually
   runs end to end.
 
 None of these replace each other. A mature AppSec program runs all of them, because each one is blind
@@ -128,7 +128,7 @@ around instead of a shared responsibility.
 
 ## Related Topics
 
-- [What Is Penetration Testing](../what-is-penetration-testing/): the manual, human-driven testing
+- [What Is Penetration Testing](../../methodology/what-is-penetration-testing/): the manual, human-driven testing
   practice that sits alongside AppSec's automated tooling.
 - [Common Types of Cyberattacks](../types-of-cyberattacks/): a broader reference for how the flaws
   AppSec exists to catch actually get exploited in the wild.

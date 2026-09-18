@@ -71,7 +71,7 @@ Cloud environments get evaluated through dedicated cloud-focused penetration tes
 configuration review engagements: testing that specifically targets IAM policy structure, storage
 permissions, network segmentation between cloud resources, and the presence of the failure patterns
 listed above, distinct from a traditional network penetration test aimed at on-premises infrastructure
-(see [Types of Penetration Testing](../types-of-penetration-testing/)). Increasingly, cloud
+(see [Types of Penetration Testing](../../methodology/types-of-penetration-testing/)). Increasingly, cloud
 infrastructure is also defined as code (configuration files that get reviewed and version-controlled
 like application source code), which means cloud misconfigurations can now be caught the same way an
 application vulnerability is: in review, before it's ever deployed, rather than after.
@@ -108,8 +108,8 @@ side platform failure.
 
 - [Application Security](../application-security/): securing the software layer, as distinct from the
   infrastructure it runs on.
-- [Continuous Threat Exposure Management](../continuous-threat-exposure-management/): an ongoing
+- [Continuous Threat Exposure Management](../../methodology/continuous-threat-exposure-management/): an ongoing
   process for tracking exposure across an environment, cloud included, rather than relying on a single
   point-in-time check.
-- [Types of Penetration Testing](../types-of-penetration-testing/): where cloud-specific testing fits
+- [Types of Penetration Testing](../../methodology/types-of-penetration-testing/): where cloud-specific testing fits
   among the different engagement types.

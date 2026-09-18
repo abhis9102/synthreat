@@ -397,15 +397,17 @@ article.vuln-body tbody tr { background: var(--surface); }
 }
 .site-footer .inner { max-width: 1080px; margin: 0 auto; padding: 48px 24px 28px 24px; }
 
+.footer-brand-row { margin-bottom: 32px; }
+.footer-brand-row .brand { margin-bottom: 12px; }
+.footer-brand-row p { font-size: 13px; color: var(--ink-faint); line-height: 1.6; max-width: 60ch; }
+
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 24px;
   padding-bottom: 32px;
   border-bottom: 1px solid var(--line);
 }
-.footer-brand .brand { margin-bottom: 12px; }
-.footer-brand p { font-size: 13px; color: var(--ink-faint); line-height: 1.6; max-width: 40ch; }
 .footer-col { display: flex; flex-direction: column; gap: 9px; }
 .footer-col-title {
   font-family: 'JetBrains Mono', monospace;
@@ -430,14 +432,13 @@ article.vuln-body tbody tr { background: var(--surface); }
 .footer-bottom a { color: var(--ink-faint); }
 .footer-bottom a:hover { color: var(--ink); }
 
-@media (max-width: 780px) {
-  .footer-grid { grid-template-columns: 1fr 1fr; row-gap: 28px; }
-  .footer-brand { grid-column: 1 / -1; }
+@media (max-width: 900px) {
+  .footer-grid { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }
 }
 
 @media (max-width: 560px) {
   article.vuln-body h2 { font-size: 20px; }
-  .footer-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* --- Card grid: used on the homepage and every collection index page --- */

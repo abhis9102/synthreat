@@ -1,7 +1,6 @@
 ---
 title: Continuous Threat Exposure Management (CTEM)
 summary: A structured, ongoing program for finding, prioritizing, and validating an organization's real exposure, instead of relying on one point-in-time test a year.
-category: Methodology
 related: ["penetration-testing-as-a-service", "cloud-security", "what-is-penetration-testing"]
 relatedVulnerabilities: []
 status: published
@@ -63,7 +62,7 @@ formally "finishes."
 
 CTEM shows up most clearly in organizations whose infrastructure changes fast enough that a
 once-a-year test is stale almost immediately: heavy cloud users with frequent deployments (see
-[Cloud Security](../cloud-security/)) and continuous delivery pipelines being the clearest case. It
+[Cloud Security](../../domains/cloud-security/)) and continuous delivery pipelines being the clearest case. It
 also shows up as the organizing structure around services like
 [penetration testing as a service](../penetration-testing-as-a-service/), where more frequent,
 rolling testing is delivered specifically to feed a continuous exposure-management cycle rather than
@@ -94,7 +93,7 @@ clean report from eight months ago answers neither question well; a running CTEM
 
 - [Penetration Testing as a Service](../penetration-testing-as-a-service/): a delivery model that
   fits naturally into CTEM's validation stage.
-- [Cloud Security](../cloud-security/): the environment where CTEM's continuous approach matters
+- [Cloud Security](../../domains/cloud-security/): the environment where CTEM's continuous approach matters
   most, given how fast cloud infrastructure changes.
 - [What Is Penetration Testing](../what-is-penetration-testing/): the underlying testing discipline
   CTEM's validation stage draws on.

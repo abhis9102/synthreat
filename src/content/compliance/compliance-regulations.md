@@ -1,7 +1,6 @@
 ---
 title: Cybersecurity Compliance & Regulations
 summary: A working map of the major compliance regimes a business might face, who each applies to, what it requires, and the services a security practice offers to help meet them.
-category: Compliance & Regulation
 related: ["gdpr", "hipaa", "pci-dss", "soc-2", "iso-27001", "dpdp-act"]
 relatedVulnerabilities: []
 status: published
@@ -27,7 +26,7 @@ experienced people) conflate them:
    partners as a condition of doing business. SOC 2 and ISO/IEC 27001 both fall here.
 
 None of the six regimes below should be confused with a prioritization *framework* like the NIST
-Cybersecurity Framework or the OWASP Top 10, covered on [Security Frameworks & Standards](../frameworks-standards/).
+Cybersecurity Framework or the OWASP Top 10, covered on [Security Frameworks & Standards](../../frameworks/frameworks-standards/).
 A framework tells you how to think about and rank security work. A compliance regime tells you what
 you're legally or contractually obligated to do, whether or not you'd have prioritized it yourself.
 
@@ -59,15 +58,15 @@ just paperwork:
   actual audit stops being a source of genuine uncertainty.
 - **The specific security testing several regimes require as evidence.** PCI-DSS explicitly requires
   regular penetration testing and vulnerability scanning as part of meeting the standard; see
-  [What Is Penetration Testing?](../what-is-penetration-testing/) and
-  [Penetration Testing as a Service](../penetration-testing-as-a-service/) for what that testing
+  [What Is Penetration Testing?](../../methodology/what-is-penetration-testing/) and
+  [Penetration Testing as a Service](../../methodology/penetration-testing-as-a-service/) for what that testing
   actually looks like.
 - **Policy and documentation review.** Most of these regimes require written policies, not just
   technical controls, and a surprising share of audit findings come from documentation gaps rather
   than technical ones.
 - **Ongoing advisory support between audits.** Treating compliance as a continuous state rather than
   a once-a-year event is exactly the mindset behind
-  [Continuous Threat Exposure Management](../continuous-threat-exposure-management/), and it applies
+  [Continuous Threat Exposure Management](../../methodology/continuous-threat-exposure-management/), and it applies
   just as well to staying compliant as it does to staying secure.
 
 ## Where This Shows Up in Practice
@@ -107,5 +106,5 @@ compliance obligations.
 - [GDPR](../gdpr/), [HIPAA](../hipaa/), [PCI-DSS](../pci-dss/), [SOC 2](../soc-2/),
   [ISO/IEC 27001](../iso-27001/), and [India's DPDP Act](../dpdp-act/): the six dedicated pages this
   overview links out to.
-- [Security Frameworks & Standards](../frameworks-standards/): the prioritization frameworks these
+- [Security Frameworks & Standards](../../frameworks/frameworks-standards/): the prioritization frameworks these
   compliance regimes are often confused with, but aren't.

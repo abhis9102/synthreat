@@ -1,7 +1,6 @@
 ---
 title: AI Red Teaming
 summary: Why AI systems need their own adversarial testing discipline, what's actually being tested (the model, the surrounding application, or both), and how it differs from traditional red teaming.
-category: Methodology
 related: ["red-teaming", "application-security"]
 relatedVulnerabilities: []
 status: published
@@ -29,7 +28,7 @@ this space) conflate them:
    tools the model is allowed to call, the database or file system it can read from or write to, the
    authentication in front of it: all of this is ordinary software, built and deployed the same way
    any other application is, and it is vulnerable to completely ordinary application-security flaws
-   (see [Application Security](../application-security/)) that have nothing to do with AI at all. A
+   (see [Application Security](../../domains/application-security/)) that have nothing to do with AI at all. A
    perfectly "safe" model sitting behind a broken authentication check is still a serious problem.
 
 ## Why It Exists
@@ -99,7 +98,7 @@ been made comprehensively "safe."
   and least consequential slice of the actual risk. The application-layer exposure of a connected AI
   agent (what data and systems it can actually touch) is usually the bigger real-world problem, and
   it's tested the same way any other application is tested (see
-  [Application Security](../application-security/)).
+  [Application Security](../../domains/application-security/)).
 - **"If the vendor says the model is 'safety-aligned,' the surrounding application is automatically
   safe."** These are two separate layers, tested two separate ways. A well-aligned model behind a
   broken API, an over-permissioned plugin, or an unauthenticated endpoint is still an insecure
@@ -108,5 +107,5 @@ been made comprehensively "safe."
 ## Related Topics
 
 - [Red Teaming](../red-teaming/): the general adversarial-simulation discipline this page builds on.
-- [Application Security](../application-security/): the ordinary software-security layer that
+- [Application Security](../../domains/application-security/): the ordinary software-security layer that
   every AI-powered application still sits on top of, and still needs.

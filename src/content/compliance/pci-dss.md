@@ -1,7 +1,6 @@
 ---
 title: PCI-DSS (Payment Card Industry Data Security Standard)
 summary: Why this isn't a government law but is effectively mandatory for anyone handling card payments, and why it explicitly requires penetration testing.
-category: Compliance & Regulation
 related: ["compliance-regulations"]
 relatedVulnerabilities: ["cryptographic-failures"]
 status: published
@@ -43,13 +42,13 @@ actually been changed before those devices go live.
 That last area, testing, is worth calling out specifically, because it's one of the clearest places
 on this entire site where a named compliance standard requires a named security practice: PCI-DSS
 explicitly requires regular vulnerability scanning and periodic [penetration
-testing](../what-is-penetration-testing/) as a formal part of staying compliant, not as an optional
+testing](../../methodology/what-is-penetration-testing/) as a formal part of staying compliant, not as an optional
 best practice layered on top. The standard distinguishes between the two: automated scanning happens
 on a tighter recurring schedule and looks for known, catalogued issues, while penetration testing is
 a deeper, human-led exercise expected on a longer cycle and after any significant change to the
 environment, such as a new payment flow or a major infrastructure migration. Many organizations meet
 this requirement through a
-[penetration-testing-as-a-service](../penetration-testing-as-a-service/) arrangement specifically
+[penetration-testing-as-a-service](../../methodology/penetration-testing-as-a-service/) arrangement specifically
 because it fits a recurring compliance cadence better than a single annual engagement scheduled
 months in advance.
 
@@ -129,7 +128,7 @@ carrying real, undiscovered risk.
 
 - [Cybersecurity Compliance & Regulations](../compliance-regulations/) for how PCI-DSS fits among
   the other major compliance regimes.
-- [What Is Penetration Testing](../what-is-penetration-testing/) for the testing discipline PCI-DSS
+- [What Is Penetration Testing](../../methodology/what-is-penetration-testing/) for the testing discipline PCI-DSS
   explicitly names as a requirement.
 - [Cryptographic Failures](../../vulnerabilities/cryptographic-failures/) as the vulnerability class
   most directly relevant to protecting stored cardholder data.

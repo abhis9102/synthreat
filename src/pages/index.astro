@@ -5,9 +5,43 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const publishedVulns = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
 const publishedDomains = (await getCollection('domains', ({ data }) => data.status === 'published'))
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
+const publishedMethodology = (
+  await getCollection('methodology', ({ data }) => data.status === 'published')
+).sort((a, b) => a.data.title.localeCompare(b.data.title));
+const publishedFrameworks = (
+  await getCollection('frameworks', ({ data }) => data.status === 'published')
+).sort((a, b) => a.data.title.localeCompare(b.data.title));
+const publishedCompliance = (
+  await getCollection('compliance', ({ data }) => data.status === 'published')
+).sort((a, b) => a.data.title.localeCompare(b.data.title));
 const publishedAttacks = (await getCollection('attacks', ({ data }) => data.status === 'published'))
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
 const base = import.meta.env.BASE_URL;
+
+const SVG_OPEN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none">';
+const SVG_CLOSE = '</svg>';
+const ICONS = {
+  domain: `${SVG_OPEN}<path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>${SVG_CLOSE}`,
+  methodology: `${SVG_OPEN}<path d="M9 3h6v3H9V3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 6h12v15H6V6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 11h6M9 14h6M9 17h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>${SVG_CLOSE}`,
+  framework: `${SVG_OPEN}<rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="3" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.6"/>${SVG_CLOSE}`,
+  compliance: `${SVG_OPEN}<path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12l2.4 2.4L15.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>${SVG_CLOSE}`,
+  attack: `${SVG_OPEN}<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>${SVG_CLOSE}`,
+  vulnerability: `${SVG_OPEN}<path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M3 12h2M19 12h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="8" y="8" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/>${SVG_CLOSE}`,
+};
+
+interface Entry {
+  id: string;
+  data: { title: string; summary: string; category?: string };
+}
+interface SectionProps {
+  heading: string;
+  base: string;
+  path: string;
+  entries: Entry[];
+  icon: keyof typeof ICONS;
+  noun: string;
+  showBadge?: boolean;
+}
 ---
 
 <BaseLayout
@@ -33,76 +67,33 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
 
-  {publishedDomains.length > 0 && (
-    <div style="margin-top:64px;">
-      <h2 class="section-label">New to cybersecurity? Start here</h2>
-      <div class="card-grid">
-        {publishedDomains.slice(0, 8).map((entry) => (
-          <a href={`${base}domains/${entry.id}/`} class="card">
-            <span class="card-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            </span>
-            <span class="badge">{entry.data.category}</span>
-            <h3>{entry.data.title}</h3>
-            <p>{entry.data.summary}</p>
-          </a>
-        ))}
-      </div>
-      {publishedDomains.length > 8 && (
-        <div style="margin-top:16px;">
-          <a href={`${base}domains/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
-            View all {publishedDomains.length} domains →
-          </a>
-        </div>
-      )}
-    </div>
-  )}
-
-  {publishedAttacks.length > 0 && (
+  {[
+    { heading: 'New to cybersecurity? Start here', path: 'domains', entries: publishedDomains, icon: 'domain' as const, noun: 'domains', showBadge: true },
+    { heading: 'Methodology', path: 'methodology', entries: publishedMethodology, icon: 'methodology' as const, noun: 'methodology pages' },
+    { heading: 'Frameworks & standards', path: 'frameworks', entries: publishedFrameworks, icon: 'framework' as const, noun: 'frameworks' },
+    { heading: 'Compliance & regulations', path: 'compliance', entries: publishedCompliance, icon: 'compliance' as const, noun: 'compliance pages' },
+    { heading: 'Attack techniques', path: 'attacks', entries: publishedAttacks, icon: 'attack' as const, noun: 'attack techniques' },
+    { heading: 'Vulnerability classes', path: 'vulnerabilities', entries: publishedVulns, icon: 'vulnerability' as const, noun: 'vulnerability classes' },
+  ].map((section) => section.entries.length > 0 && (
     <div style="margin-top:56px;">
-      <h2 class="section-label">Attack techniques</h2>
+      <h2 class="section-label">{section.heading}</h2>
       <div class="card-grid">
-        {publishedAttacks.slice(0, 8).map((entry) => (
-          <a href={`${base}attacks/${entry.id}/`} class="card">
-            <span class="card-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </span>
+        {section.entries.slice(0, 8).map((entry) => (
+          <a href={`${base}${section.path}/${entry.id}/`} class="card">
+            <span class="card-icon" set:html={ICONS[section.icon]} />
+            {section.showBadge && entry.data.category && <span class="badge">{entry.data.category}</span>}
             <h3>{entry.data.title}</h3>
             <p>{entry.data.summary}</p>
           </a>
         ))}
       </div>
-      {publishedAttacks.length > 8 && (
+      {section.entries.length > 8 && (
         <div style="margin-top:16px;">
-          <a href={`${base}attacks/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
-            View all {publishedAttacks.length} attack techniques →
+          <a href={`${base}${section.path}/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
+            View all {section.entries.length} {section.noun} →
           </a>
         </div>
       )}
     </div>
-  )}
-
-  {publishedVulns.length > 0 && (
-    <div style="margin-top:56px;">
-      <h2 class="section-label">Vulnerability classes</h2>
-      <div class="card-grid">
-        {publishedVulns.slice(0, 8).map((entry) => (
-          <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
-            <span class="card-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M3 12h2M19 12h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="8" y="8" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
-            </span>
-            <h3>{entry.data.title}</h3>
-            <p>{entry.data.summary}</p>
-          </a>
-        ))}
-      </div>
-      {publishedVulns.length > 8 && (
-        <div style="margin-top:16px;">
-          <a href={`${base}vulnerabilities/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
-            View all {publishedVulns.length} vulnerability classes →
-          </a>
-        </div>
-      )}
-    </div>
-  )}
+  ))}
 </BaseLayout>

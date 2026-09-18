@@ -105,7 +105,7 @@ traffic; it's simply less likely to make the news when it's hit.
 
 - [Application Security](../application-security/): the practices that catch many of these attack
   types (especially injection and XSS) before they ever reach production.
-- [Red Teaming](../red-teaming/): testing an organization's actual detection and response against a
+- [Red Teaming](../../methodology/red-teaming/): testing an organization's actual detection and response against a
   realistic, chained sequence of these attack types, not just individual controls in isolation.
 - [SQL Injection](../../vulnerabilities/sql-injection/): the full, dedicated treatment of one specific
   entry on this list.

@@ -1,7 +1,6 @@
 ---
 title: HIPAA (Health Insurance Portability and Accountability Act)
 summary: Who counts as a covered entity or business associate under US health data law, and what the Security Rule actually requires in practice.
-category: Compliance & Regulation
 related: ["compliance-regulations"]
 relatedVulnerabilities: []
 status: published
@@ -71,7 +70,7 @@ software companies actually get caught out.
 **"Our cloud provider is HIPAA compliant, so we're covered."** False. A cloud provider offering a
 HIPAA-eligible service is necessary but not sufficient. The customer is still responsible for
 configuring and using that service in a compliant way, a division of responsibility similar in
-spirit to the shared responsibility model discussed on [Cloud Security](../cloud-security/).
+spirit to the shared responsibility model discussed on [Cloud Security](../../domains/cloud-security/).
 
 This page describes HIPAA's general security-relevant shape for educational purposes only. It is
 not legal advice; consult qualified legal counsel to determine actual compliance obligations.
@@ -80,5 +79,5 @@ not legal advice; consult qualified legal counsel to determine actual compliance
 
 - [Cybersecurity Compliance & Regulations](../compliance-regulations/): the full map this page is
   one entry in.
-- [Cloud Security](../cloud-security/): the shared responsibility model that applies just as much to
+- [Cloud Security](../../domains/cloud-security/): the shared responsibility model that applies just as much to
   a HIPAA-eligible cloud service as it does to cloud security generally.

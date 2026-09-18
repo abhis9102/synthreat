@@ -1,7 +1,6 @@
 ---
 title: The NIST Cybersecurity Framework (CSF)
 summary: Why the NIST CSF is a way of organizing a security program rather than a checklist of specific technical controls, and how organizations actually use it.
-category: Framework & Standard
 related: ["frameworks-standards", "cis-controls"]
 relatedVulnerabilities: []
 status: published
