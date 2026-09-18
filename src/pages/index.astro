@@ -47,7 +47,7 @@ interface SectionProps {
 <BaseLayout
   wide
   title="Cybersecurity, taught straight"
-  description="A free, evidence-based cybersecurity education resource — for newcomers and client-facing security people alike."
+  description="A free, evidence-based cybersecurity education resource for newcomers and client-facing security people alike."
 >
   <section class="hero">
     <h1 class="hero-title">
@@ -55,7 +55,7 @@ interface SectionProps {
     </h1>
     <p style="font-size:17.5px;color:var(--ink-soft);max-width:60ch;margin-top:18px;">
       Most security writing picks one reader: an engineer, or an executive. Synthreat is written for
-      both on the same page — real, evidence-based material, not rehashed tutorials, built for anyone
+      both on the same page: real, evidence-based material, not rehashed tutorials, built for anyone
       starting out in the field and for anyone who has to explain <em>why this matters</em> to a client
       who isn't technical.
     </p>
@@ -78,7 +78,7 @@ interface SectionProps {
     <div style="margin-top:56px;">
       <h2 class="section-label">{section.heading}</h2>
       <div class="card-grid">
-        {section.entries.slice(0, 8).map((entry) => (
+        {section.entries.slice(0, 4).map((entry) => (
           <a href={`${base}${section.path}/${entry.id}/`} class="card">
             <span class="card-icon" set:html={ICONS[section.icon]} />
             {section.showBadge && entry.data.category && <span class="badge">{entry.data.category}</span>}
@@ -87,7 +87,7 @@ interface SectionProps {
           </a>
         ))}
       </div>
-      {section.entries.length > 8 && (
+      {section.entries.length > 4 && (
         <div style="margin-top:16px;">
           <a href={`${base}${section.path}/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
             View all {section.entries.length} {section.noun} →

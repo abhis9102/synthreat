@@ -17,7 +17,7 @@ const base = import.meta.env.BASE_URL;
   <p style="font-size:17px;color:var(--ink-soft);margin-top:14px;max-width:70ch;">
     Named, publicly maintained frameworks and standards: prioritization lists and control catalogs
     that shape how security work gets scoped and communicated. Not a legal requirement by
-    themselves — see <a href={`${base}compliance/`}>Compliance & Regulations</a> for the regimes
+    themselves; see <a href={`${base}compliance/`}>Compliance & Regulations</a> for the regimes
     that are.
   </p>
 
@@ -29,7 +29,7 @@ const base = import.meta.env.BASE_URL;
       </a>
     ))}
     {entries.length === 0 && (
-      <p style="color:var(--ink-faint);">Nothing published yet — check back soon.</p>
+      <p style="color:var(--ink-faint);">Nothing published yet. Check back soon.</p>
     )}
   </div>
 </BaseLayout>

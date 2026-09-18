@@ -197,7 +197,7 @@ const NAV_SECTIONS = [
 
     <script>
       // Markdown-rendered tables have no wrapper element to scroll horizontally on narrow
-      // screens — add one programmatically rather than pulling in a build-time rehype plugin
+      // screens, so add one programmatically rather than pulling in a build-time rehype plugin
       // for this alone.
       document.querySelectorAll('article.vuln-body table').forEach((table) => {
         if (table.parentElement?.classList.contains('table-wrap')) return;
