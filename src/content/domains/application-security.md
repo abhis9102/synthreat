@@ -133,6 +133,8 @@ around instead of a shared responsibility.
   Top 10 categories and every other class this domain's tooling and practices exist to catch.
 - [What Is Penetration Testing](../../methodology/what-is-penetration-testing/): the manual, human-driven testing
   practice that sits alongside AppSec's automated tooling.
+- [WebApp Penetration Testing](../../methodology/webapp-penetration-testing/): the dedicated
+  engagement type for testing this domain directly.
 - [Common Types of Cyberattacks](../types-of-cyberattacks/): a broader reference for how the flaws
   AppSec exists to catch actually get exploited in the wild.
 - [SQL Injection](../../vulnerabilities/sql-injection/): a specific, worked example of an

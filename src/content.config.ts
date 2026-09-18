@@ -19,16 +19,17 @@ export const REQUIRED_VULN_SECTIONS = [
 ] as const;
 
 // Top-level grouping for the vulnerabilities index page and nav dropdown, mirroring the `domains`
-// collection's own surface names exactly (Cloud Security, Mobile Security, Network Security, AI
-// Security) so the two collections read as one coherent taxonomy. "WebApp Security" is used instead
-// of bare "Web" (and keeps the "X Security" pattern the other four surfaces share) specifically to
-// avoid colliding with the separate, narrower `domains/web-security` page (protocol- and
-// browser-layer topics), since these are OWASP-Top-10-style application vulnerabilities, not that.
-// Order here is the display order everywhere it's grouped.
+// collection's own surface names exactly (Cloud Security, WebApp Security, MobileApp Security,
+// Network Security, AI Security) so the two collections read as one coherent taxonomy: the domain
+// page is the broad field (e.g. `domains/webapp-security` covers the protocol/browser-layer building
+// blocks, distinct from `domains/application-security`'s SDLC tooling and practices), and this
+// collection is the specific vulnerability classes cataloged within that field, the same relationship
+// every other surface already has to its own domain page. Order here is the display order everywhere
+// it's grouped.
 export const VULN_SURFACES = [
   'Cloud Security',
   'WebApp Security',
-  'Mobile Security',
+  'MobileApp Security',
   'Network Security',
   'AI Security',
 ] as const;

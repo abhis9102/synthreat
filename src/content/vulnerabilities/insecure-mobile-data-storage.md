@@ -1,6 +1,6 @@
 ---
 title: Insecure Mobile Data Storage
-surface: "Mobile Security"
+surface: "MobileApp Security"
 cwe: ["CWE-312", "CWE-922"]
 summary: Sensitive data cached in plaintext directly on a mobile device is retrievable by anyone with physical or forensic access to it, regardless of how well the backend is secured.
 typicalSeverityCeiling: Critical

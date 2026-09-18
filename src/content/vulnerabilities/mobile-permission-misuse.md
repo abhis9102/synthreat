@@ -1,6 +1,6 @@
 ---
 title: Excessive Mobile Permissions & Insecure Platform Usage
-surface: "Mobile Security"
+surface: "MobileApp Security"
 cwe: ["CWE-250", "CWE-926"]
 summary: An app requesting far more device permissions than its function requires, or exposing its own components to other apps by mistake, expands what a single compromise of that app can actually reach.
 typicalSeverityCeiling: High

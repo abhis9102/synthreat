@@ -1,6 +1,6 @@
 ---
 title: Insecure Mobile Communication
-surface: "Mobile Security"
+surface: "MobileApp Security"
 cwe: ["CWE-295", "CWE-319"]
 summary: A mobile app that doesn't properly validate the server's TLS certificate, or falls back to unencrypted traffic, exposes everything it sends over the network to interception.
 typicalSeverityCeiling: Critical

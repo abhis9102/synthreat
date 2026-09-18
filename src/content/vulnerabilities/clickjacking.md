@@ -155,5 +155,5 @@ actual header-level control, only a weak, bypassable supplement to it.
 - **Security Misconfiguration** ([../security-misconfiguration/](../security-misconfiguration/)),
   the broader category this class sits under: a missing header is a configuration gap, not a coding
   bug in the traditional sense.
-- **[Web Security](../../domains/web-security/)**, the domain page where this header is discussed
-  alongside the site's other browser-layer security headers.
+- **[WebApp Security](../../domains/webapp-security/)**, the domain page where this header is
+  discussed alongside the site's other browser-layer security headers.

@@ -43,6 +43,20 @@ meaningful, rather than technically true but practically useless.
 - **Physical / social engineering**: whether a person can walk into a building, or be convinced by
   phone or email to hand over access, bypassing technical controls entirely.
 
+Five of these surfaces make up the large majority of real engagements and each has its own dedicated
+page with the full detail (what's tested, typical methodology, common findings):
+
+- **[WebApp Penetration Testing](../webapp-penetration-testing/)**: a specific website or web
+  application's own logic, plus the protocol and browser-layer configuration underneath it.
+- **[MobileApp Penetration Testing](../mobileapp-penetration-testing/)**: the compiled app package,
+  the app running live on a device, and the backend API it talks to.
+- **[Cloud Penetration Testing](../cloud-penetration-testing/)**: IAM policy structure, storage
+  permissions, network segmentation, and container or orchestration configuration.
+- **[Network Penetration Testing](../network-penetration-testing/)**: external perimeter exposure and
+  internal lateral-movement risk, split into two distinct engagement types.
+- **[AI Penetration Testing](../ai-penetration-testing/)**: an AI-powered system tested against the
+  OWASP Top 10 for LLM Applications, almost always practiced under the name "AI red teaming."
+
 **Knowledge level** describes what the tester starts with:
 
 - **Black-box**: no prior information or credentials, matching an anonymous external attacker.
@@ -112,6 +126,11 @@ useful.
   followed regardless of which type of engagement is scoped.
 - [Red Teaming](../red-teaming/): a related but distinct discipline that simulates a specific
   adversary's goal rather than maximizing coverage across a scope.
+- [WebApp Penetration Testing](../webapp-penetration-testing/), [MobileApp Penetration
+  Testing](../mobileapp-penetration-testing/), [Cloud Penetration
+  Testing](../cloud-penetration-testing/), [Network Penetration
+  Testing](../network-penetration-testing/), and [AI Penetration Testing](../ai-penetration-testing/):
+  the dedicated page for each of the five most common target surfaces named above.
 - [Cloud Security](../../domains/cloud-security/): the domain behind cloud configuration testing specifically.
 - [Application Security](../../domains/application-security/): the domain behind web and mobile application
   testing specifically.

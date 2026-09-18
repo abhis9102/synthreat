@@ -119,8 +119,9 @@ side platform failure.
 - [Continuous Threat Exposure Management](../../methodology/continuous-threat-exposure-management/): an ongoing
   process for tracking exposure across an environment, cloud included, rather than relying on a single
   point-in-time check.
-- [Types of Penetration Testing](../../methodology/types-of-penetration-testing/): where cloud-specific testing fits
-  among the different engagement types.
+- [Cloud Penetration Testing](../../methodology/cloud-penetration-testing/): the dedicated engagement
+  type for testing this domain directly, and [Types of Penetration
+  Testing](../../methodology/types-of-penetration-testing/) for where it fits among the others.
 - [Public Cloud Storage Exposure](../../vulnerabilities/cloud-storage-exposure/), [Overly Permissive
   Cloud IAM](../../vulnerabilities/cloud-iam-misconfiguration/), [Insecure Infrastructure as
   Code](../../vulnerabilities/insecure-infrastructure-as-code/), [Exposed Cloud Credentials & Secrets

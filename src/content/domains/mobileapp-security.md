@@ -1,5 +1,5 @@
 ---
-title: Mobile Security
+title: MobileApp Security
 summary: What's structurally different about securing an iOS or Android app compared to a web application, and the mobile-specific failure patterns that show up again and again.
 category: Domain Overview
 related: ["frameworks-standards"]
@@ -10,7 +10,7 @@ datePublished: 2026-09-18
 
 ## What It Is
 
-Mobile security is the practice of securing mobile applications and the platforms they run on. It's
+MobileApp security is the practice of securing mobile applications and the platforms they run on. It's
 distinct from general [application security](../application-security/) because a mobile app runs
 partly or entirely on a device the user, or an attacker with physical access to that device, fully
 controls. A web app mostly keeps its logic on a server the developer owns; a mobile app doesn't have
@@ -80,12 +80,13 @@ testing on their own terms.
 
 ## Related Topics
 
-- **Explore Mobile Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/mobile-security/)
+- **Explore MobileApp Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/mobileapp-security/)
   has dedicated, worked-example pages for every failure pattern named above; the backend layer a
   mobile app talks to is additionally covered by the same [WebApp Security](../../vulnerabilities/webapp-security/) vulnerability classes as any other API.
 - [Application Security](../application-security/): the broader discipline mobile security is a
   specialized branch of.
-- [Types of Penetration Testing](../../methodology/types-of-penetration-testing/): where mobile-specific engagements
-  fit among other testing types.
+- [MobileApp Penetration Testing](../../methodology/mobileapp-penetration-testing/): the dedicated
+  engagement type for testing this domain directly, and [Types of Penetration
+  Testing](../../methodology/types-of-penetration-testing/) for where it fits among the others.
 - [Man-in-the-Middle](../../attacks/man-in-the-middle/): the attack technique behind insecure mobile
   communication findings.

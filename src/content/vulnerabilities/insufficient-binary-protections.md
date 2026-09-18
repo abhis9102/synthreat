@@ -1,6 +1,6 @@
 ---
 title: Insufficient Binary Protections
-surface: "Mobile Security"
+surface: "MobileApp Security"
 cwe: []
 summary: A compiled mobile app with no obfuscation or tamper detection can be decompiled and modified by anyone holding the installed package, exposing logic and secrets never meant to be read.
 typicalSeverityCeiling: High

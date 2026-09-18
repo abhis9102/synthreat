@@ -49,5 +49,8 @@ The clearest, most concrete way to explain this to a client is with the flat-net
   has dedicated, worked-example pages for every building block named above.
 - [Cloud Security](../cloud-security/): the parallel domain for infrastructure that is not run on premises.
 - [Application Security](../application-security/): securing the software layer, distinct from the network it runs on.
-- [Types of Penetration Testing](../../methodology/types-of-penetration-testing/): where internal and external network testing fit among the different engagement types.
+- [Network Penetration Testing](../../methodology/network-penetration-testing/): the dedicated
+  engagement type for testing this domain directly, and [Types of Penetration
+  Testing](../../methodology/types-of-penetration-testing/) for where internal and external network
+  testing fit among the others.
 - [Man-in-the-Middle](../../attacks/man-in-the-middle/): a network-layer attack technique this domain exists to prevent.

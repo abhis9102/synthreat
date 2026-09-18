@@ -1,6 +1,6 @@
 ---
 title: Insecure Mobile Authentication & Session Management
-surface: "Mobile Security"
+surface: "MobileApp Security"
 cwe: ["CWE-287", "CWE-305"]
 summary: Authentication logic enforced only on the client, or a biometric prompt that can be bypassed, gives an attacker with device or binary access a way around checks that should have held server-side.
 typicalSeverityCeiling: Critical

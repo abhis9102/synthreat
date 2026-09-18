@@ -4,6 +4,60 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — WebApp/MobileApp Security renames; 5 dedicated pentest-type pages
+
+**What happened (direct user requests, iterated live):** Started as "rename the Web Security domain
+to WebApp Security." First flagged the tension (that domain's content is narrower, protocol/browser-
+layer only, than "WebApp Security" implies) and proposed merging it into Application Security instead;
+user initially agreed, so the merge was drafted. User then reversed that call mid-turn: keep the two
+domains separate, rename `web-security` -> `webapp-security` (file, slug, title, and every reference),
+matching the vulnerabilities surface name the same way Cloud/Network/AI already match theirs. The
+merge was cleanly reverted via `git checkout HEAD` on the touched files before it was ever committed,
+and the rename applied instead: `domains/web-security.md` -> `domains/webapp-security.md`, title and
+body self-references updated, `vulnerabilities/clickjacking.md`'s cross-link repointed.
+
+**Then extended to Mobile:** user asked directly whether Mobile Security had been "widened" the same
+way; confirmed it hadn't (that was read as an analogy explaining WebApp's naming, not a second
+request) and got explicit confirmation to do the matching rename. `domains/mobile-security.md` ->
+`domains/mobileapp-security.md`, the `MobileApp Security` surface added to `VULN_SURFACES`, all 6
+mobile vulnerability pages' `surface` field updated, and every cross-collection reference to the old
+name/slug found and fixed (`grep`-verified zero remaining "Mobile Security" or "mobile-security"
+matches anywhere in `src/` before considering it done, same verification pattern used for the WebApp
+rename).
+
+**Types of Penetration Testing restructured into a drill-down, mirroring the vulnerabilities
+landing-page pattern:** first pass added inline `<details>` dropdowns per pentest type directly on
+that page (after confirming PTaaS was the wrong home for it, since PTaaS is about delivery cadence,
+not target surface, and doesn't organize by type at all). User then asked for the deeper version:
+actual dedicated pages, the same "landing page -> full page per type" shape already built for
+vulnerabilities. Replaced the inline dropdowns with 5 new methodology pages (`webapp-penetration-
+testing`, `mobileapp-penetration-testing`, `cloud-penetration-testing`, `network-penetration-testing`,
+`ai-penetration-testing`), each following the locked 7-section domain/concept template, and
+`types-of-penetration-testing.md` now links out to each rather than holding the detail itself. AI
+Penetration Testing was written carefully to avoid contradicting the existing `ai-red-teaming.md`
+page: it explains where AI pentesting sits in the target-surface taxonomy and states plainly that
+practitioners call this discipline "AI red teaming," pointing there for the actual methodology, rather
+than duplicating that page's content under a different name.
+
+**Cross-linked:** each new pentest-type page links back to its matching domain and vulnerabilities-
+surface page; each of the five domain pages (`cloud-security`, `webapp-security`, `mobileapp-
+security`, `network-security`, `ai-security`) and `application-security.md` got a new Related Topics
+link to its dedicated pentest-type page, alongside the existing general `types-of-penetration-testing`
+link.
+
+**Editorial Reviewer pass:** `npm run validate:content` (109 files) and `npm run build` (121 pages)
+both clean. Zero em-dashes across the 5 new pentest pages; a vendor-name grep flagged only the
+substring "aws" inside "flaws," a false positive, confirmed by inspection. All 5 vulnerabilities
+surface routes (`cloud-security`, `webapp-security`, `mobileapp-security`, `network-security`,
+`ai-security`) and both renamed/new domain and methodology routes confirmed present directly in
+`dist/`. The project's own relative-link checker script flagged the expected set of false positives
+(links to the dynamic `[surface]` route, which it doesn't model) and nothing else. Verified rendered
+dev-server HTML directly: `types-of-penetration-testing`'s five links resolve to the five new pages,
+and both renamed domain pages render `<h1>WebApp Security</h1>` / `<h1>MobileApp Security</h1>`
+correctly.
+
+---
+
 ## 2026-09-18 — Renamed "Web Application" surface to "WebApp Security"
 
 **What happened (direct user request):** Four of the five vulnerability surfaces already followed an

@@ -1,5 +1,5 @@
 ---
-title: Web Security
+title: WebApp Security
 summary: The protocol and browser-layer protections that sit underneath every web application, distinct from the practices that secure the application's own code.
 category: Domain Overview
 related: ["application-security"]
@@ -10,7 +10,7 @@ datePublished: 2026-09-18
 
 ## What It Is
 
-Web security is the security of the web platform layer itself: how a browser and a server actually communicate, and the protocol-level protections that either hold or do not. This is a different layer than [Application Security](../application-security/)'s broader software-development-lifecycle practice of secure coding, code review, and testing. Application security asks whether the application's own logic is written safely. Web security asks whether the underlying protocols and browser mechanisms that every web application depends on are configured correctly, since a perfectly written application can still be exposed by a misconfiguration at this layer.
+WebApp security is the security of the web platform layer itself: how a browser and a server actually communicate, and the protocol-level protections that either hold or do not. This is a different layer than [Application Security](../application-security/)'s broader software-development-lifecycle practice of secure coding, code review, and testing. Application security asks whether the application's own logic is written safely. WebApp security asks whether the underlying protocols and browser mechanisms that every web application depends on are configured correctly, since a perfectly written application can still be exposed by a misconfiguration at this layer.
 
 ## Why It Exists
 

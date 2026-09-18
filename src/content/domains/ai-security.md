@@ -46,5 +46,7 @@ This is a domain the field is still actively building shared practice around, an
   Applications](../../frameworks/ai-llm-top-10/), plus [Training Data
   Poisoning](../../vulnerabilities/training-data-poisoning/).
 - [AI Red Teaming](../../methodology/ai-red-teaming/): the adversarial testing methodology for the systems this domain covers.
+- [AI Penetration Testing](../../methodology/ai-penetration-testing/): how this discipline fits into
+  the site's broader target-surface taxonomy alongside web, mobile, cloud, and network testing.
 - [The OWASP Top 10 for LLM Applications](../../frameworks/ai-llm-top-10/): the named risk list this domain's concerns map onto.
 - [Application Security](../application-security/): the ordinary software-security layer every AI-powered application still sits on top of.
