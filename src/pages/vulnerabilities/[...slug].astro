@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ContentVisuals from '../../components/ContentVisuals.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
@@ -25,7 +24,6 @@ const { title, summary, owasp, cwe, typicalSeverityCeiling } = entry.data;
     {owasp && <span class="chip">{owasp}</span>}
     {cwe.map((id: string) => <span class="chip">{id}</span>)}
   </div>
-  <ContentVisuals kind="vulnerability" title={title} summary={summary} severity={typicalSeverityCeiling} owasp={owasp} cwe={cwe} />
   <article class="vuln-body">
     <Content />
   </article>
