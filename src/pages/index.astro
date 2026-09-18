@@ -37,7 +37,7 @@ const base = import.meta.env.BASE_URL;
     <div style="margin-top:64px;">
       <h2 class="section-label">New to cybersecurity? Start here</h2>
       <div class="card-grid">
-        {publishedDomains.map((entry) => (
+        {publishedDomains.slice(0, 8).map((entry) => (
           <a href={`${base}domains/${entry.id}/`} class="card">
             <span class="card-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
@@ -48,6 +48,13 @@ const base = import.meta.env.BASE_URL;
           </a>
         ))}
       </div>
+      {publishedDomains.length > 8 && (
+        <div style="margin-top:16px;">
+          <a href={`${base}domains/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
+            View all {publishedDomains.length} domains →
+          </a>
+        </div>
+      )}
     </div>
   )}
 
@@ -55,7 +62,7 @@ const base = import.meta.env.BASE_URL;
     <div style="margin-top:56px;">
       <h2 class="section-label">Attack techniques</h2>
       <div class="card-grid">
-        {publishedAttacks.slice(0, 6).map((entry) => (
+        {publishedAttacks.slice(0, 8).map((entry) => (
           <a href={`${base}attacks/${entry.id}/`} class="card">
             <span class="card-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -65,7 +72,7 @@ const base = import.meta.env.BASE_URL;
           </a>
         ))}
       </div>
-      {publishedAttacks.length > 6 && (
+      {publishedAttacks.length > 8 && (
         <div style="margin-top:16px;">
           <a href={`${base}attacks/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
             View all {publishedAttacks.length} attack techniques →
@@ -79,7 +86,7 @@ const base = import.meta.env.BASE_URL;
     <div style="margin-top:56px;">
       <h2 class="section-label">Vulnerability classes</h2>
       <div class="card-grid">
-        {publishedVulns.map((entry) => (
+        {publishedVulns.slice(0, 8).map((entry) => (
           <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
             <span class="card-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M3 12h2M19 12h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="8" y="8" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -89,6 +96,13 @@ const base = import.meta.env.BASE_URL;
           </a>
         ))}
       </div>
+      {publishedVulns.length > 8 && (
+        <div style="margin-top:16px;">
+          <a href={`${base}vulnerabilities/`} style="font-size:14px;font-weight:600;color:var(--accent-ink);text-decoration:none;">
+            View all {publishedVulns.length} vulnerability classes →
+          </a>
+        </div>
+      )}
     </div>
   )}
 </BaseLayout>
