@@ -1,6 +1,6 @@
 ---
 title: Cross-Tenant Isolation Failure
-category: "Cloud Security"
+surface: "Cloud Security"
 summary: A multi-tenant cloud or SaaS platform that fails to fully separate one customer's data and resources from another's lets one tenant reach or affect data that was never theirs.
 cwe: ["CWE-668"]
 typicalSeverityCeiling: Critical

@@ -12,12 +12,13 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { title, summary, owasp, cwe, typicalSeverityCeiling, category } = entry.data;
+const { title, summary, owasp, cwe, typicalSeverityCeiling, surface } = entry.data;
 const base = import.meta.env.BASE_URL;
+const surfaceSlug = surface.toLowerCase().replace(/\s+/g, '-');
 ---
 
 <BaseLayout title={title} description={summary}>
-  <a class="tagline" href={`${base}vulnerabilities/`}>← Vulnerability class · {category}</a>
+  <a class="tagline" href={`${base}vulnerabilities/#${surfaceSlug}`}>← Vulnerability class · {surface}</a>
   <h1>{title}</h1>
   <p style="font-size:18px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
   <div class="vuln-meta">

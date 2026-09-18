@@ -106,6 +106,8 @@ side platform failure.
 
 ## Related Topics
 
+- **Explore Cloud Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/#cloud-security)
+  has dedicated, worked-example pages for every failure mode named above.
 - [Application Security](../application-security/): securing the software layer, as distinct from the
   infrastructure it runs on.
 - [Continuous Threat Exposure Management](../../methodology/continuous-threat-exposure-management/): an ongoing

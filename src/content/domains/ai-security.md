@@ -3,7 +3,7 @@ title: AI Security
 summary: The security concerns specific to building and operating AI systems, across the data, the model, the infrastructure, and the application layer around it.
 category: Domain Overview
 related: ["application-security"]
-relatedVulnerabilities: []
+relatedVulnerabilities: ["prompt-injection", "insecure-output-handling", "excessive-agency", "ai-sensitive-information-disclosure", "ai-supply-chain-risks", "training-data-poisoning"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -20,9 +20,9 @@ AI systems introduce security concerns that do not really exist in traditional s
 
 AI security spans several distinct layers:
 
-- **Training data security.** Protecting the data used to train or fine-tune a model, including access control over sensitive training data and awareness of data poisoning, where an attacker deliberately corrupts training data to influence a model's future behavior in a way that benefits them.
+- **Training data security.** Protecting the data used to train or fine-tune a model, including access control over sensitive training data and awareness of [training data poisoning](../../vulnerabilities/training-data-poisoning/), where an attacker deliberately corrupts training data to influence a model's future behavior in a way that benefits them.
 - **Model security.** Protecting the model itself, including its weights, as valuable intellectual property against theft, and understanding adversarial robustness: the degree to which a model can be fooled by inputs specifically crafted to exploit how it makes decisions.
-- **AI supply chain and MLOps security.** The pipeline that trains, versions, and deploys a model is itself a piece of infrastructure with its own security requirements, and it frequently depends on third-party models or datasets the organization did not build itself (see [Supply Chain Attack](../../attacks/supply-chain-attack/) for the general pattern this risk follows).
+- **AI supply chain and MLOps security.** The pipeline that trains, versions, and deploys a model is itself a piece of infrastructure with its own security requirements, and it frequently depends on third-party models or datasets the organization did not build itself (see [AI Model & Training Data Supply Chain Risks](../../vulnerabilities/ai-supply-chain-risks/) for the AI-specific treatment, and [Supply Chain Attack](../../attacks/supply-chain-attack/) for the general pattern it follows).
 - **The application layer around a deployed model.** Once a model is deployed, it almost always sits behind an ordinary application: an API, a set of permissions, a database or tool it can reach. That layer needs the same rigor as any other piece of software (see [Application Security](../application-security/)), and the AI Red Teaming page covers exactly why this layer often matters more in practice than the model's own behavior.
 
 ## Where This Shows Up in Practice
@@ -41,6 +41,13 @@ This is a domain the field is still actively building shared practice around, an
 
 ## Related Topics
 
+- **Explore AI Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/#ai-security)
+  has dedicated, worked-example pages for [Prompt Injection](../../vulnerabilities/prompt-injection/),
+  [Insecure Output Handling](../../vulnerabilities/insecure-output-handling/), [Excessive
+  Agency](../../vulnerabilities/excessive-agency/), [AI Sensitive Information
+  Disclosure](../../vulnerabilities/ai-sensitive-information-disclosure/), [AI Model & Training Data
+  Supply Chain Risks](../../vulnerabilities/ai-supply-chain-risks/), and [Training Data
+  Poisoning](../../vulnerabilities/training-data-poisoning/).
 - [AI Red Teaming](../../methodology/ai-red-teaming/): the adversarial testing methodology for the systems this domain covers.
 - [The OWASP Top 10 for LLM Applications](../../frameworks/ai-llm-top-10/): the named risk list this domain's concerns map onto.
 - [Application Security](../application-security/): the ordinary software-security layer every AI-powered application still sits on top of.

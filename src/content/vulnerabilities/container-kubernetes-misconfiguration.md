@@ -1,6 +1,6 @@
 ---
 title: Container & Kubernetes Misconfiguration
-category: "Cloud Security"
+surface: "Cloud Security"
 summary: A container running with more privilege than it needs, or a Kubernetes cluster with an exposed management interface, turns a single compromised workload into control over the whole host or cluster.
 cwe: ["CWE-250", "CWE-284"]
 typicalSeverityCeiling: Critical

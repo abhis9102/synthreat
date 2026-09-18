@@ -73,6 +73,10 @@ testing on their own terms.
 
 ## Related Topics
 
+- **Explore Mobile Security vulnerabilities:** dedicated mobile vulnerability-class pages are on the
+  roadmap for the [Vulnerabilities section](../../vulnerabilities/#mobile-security); until then, the
+  backend layer a mobile app talks to is covered by the same [Web
+  Application](../../vulnerabilities/#web-application) vulnerability classes as any other API.
 - [Application Security](../application-security/): the broader discipline mobile security is a
   specialized branch of.
 - [Types of Penetration Testing](../../methodology/types-of-penetration-testing/): where mobile-specific engagements

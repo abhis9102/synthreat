@@ -1,6 +1,6 @@
 ---
 title: Insecure Infrastructure as Code (IaC)
-category: "Cloud Security"
+surface: "Cloud Security"
 summary: A misconfiguration written into a Terraform or CloudFormation template ships to every environment that template creates, turning one bad line of code into a repeated, automated deployment mistake.
 cwe: ["CWE-16"]
 typicalSeverityCeiling: High

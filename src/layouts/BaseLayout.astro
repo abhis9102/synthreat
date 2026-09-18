@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
-import { VULN_CATEGORIES } from '../content.config';
+import { VULN_SURFACES } from '../content.config';
 
 interface Props {
   title: string;
@@ -31,12 +31,25 @@ const vulnEntries = (
   await getCollection('vulnerabilities', ({ data }) => data.status === 'published')
 ).sort((a, b) => a.data.title.localeCompare(b.data.title));
 
-// Grouped by category for the nav dropdown, same grouping and order as the index page, now that a
-// single flat column of ~28 entries doesn't fit one column readably.
-const vulnGroups = VULN_CATEGORIES.map((category) => ({
-  category,
-  entries: vulnEntries.filter((entry) => entry.data.category === category),
-})).filter((group) => group.entries.length > 0);
+// Nested nav dropdown for Vulnerabilities: surface (top level, same grouping and order as the index
+// page) -> a flyout panel of that surface's entries, sub-grouped by OWASP category for Web
+// Application specifically, the same one place that grouping logic lives (index.astro) duplicated
+// here since Astro components don't share a runtime module for this kind of derived view data.
+const surfaceSlug = (surface: string) => surface.toLowerCase().replace(/\s+/g, '-');
+const vulnGroups = VULN_SURFACES.map((surface) => {
+  const surfaceEntries = vulnEntries.filter((entry) => entry.data.surface === surface);
+  let subgroups: { label: string; entries: typeof vulnEntries }[] | null = null;
+  if (surface === 'Web Application') {
+    const byCode = new Map<string, { label: string; entries: typeof vulnEntries }>();
+    for (const entry of surfaceEntries) {
+      const code = entry.data.owasp?.match(/^A\d{2}/)?.[0] ?? 'Other';
+      if (!byCode.has(code)) byCode.set(code, { label: entry.data.owasp ?? 'Other', entries: [] });
+      byCode.get(code)!.entries.push(entry);
+    }
+    subgroups = [...byCode.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
+  }
+  return { surface, entries: surfaceEntries, subgroups };
+}).filter((group) => group.entries.length > 0);
 
 // Flat-list nav dropdown: label + base path + entries. Attacks gets the wide multi-column
 // treatment separately below since 20 entries doesn't fit one column.
@@ -129,14 +142,32 @@ const NAV_SECTIONS = [
                 <svg width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
-            <div class="nav-panel nav-panel-wide">
-              <div class="nav-panel-inner nav-panel-cols">
+            <div class="nav-panel">
+              <div class="vuln-surface-list">
                 {vulnGroups.map((group) => (
-                  <div class="nav-col">
-                    <div class="nav-col-title">{group.category}</div>
-                    {group.entries.map((item) => (
-                      <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
-                    ))}
+                  <div class="vuln-surface-item">
+                    <a href={`${base}vulnerabilities/#${surfaceSlug(group.surface)}`} class="vuln-surface-row">
+                      <span>{group.surface}</span>
+                      <span class="vuln-surface-count">{group.entries.length}</span>
+                    </a>
+                    <div class:list={['vuln-surface-panel', { 'vuln-surface-panel-wide': !!group.subgroups }]}>
+                      {group.subgroups ? (
+                        <div class="nav-panel-inner nav-panel-cols">
+                          {group.subgroups.map((sub) => (
+                            <div class="nav-col">
+                              <div class="nav-col-title">{sub.label}</div>
+                              {sub.entries.map((item) => (
+                                <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        group.entries.map((item) => (
+                          <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
+                        ))
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

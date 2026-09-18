@@ -1,6 +1,6 @@
 ---
 title: Overly Permissive Cloud IAM
-category: "Cloud Security"
+surface: "Cloud Security"
 summary: A cloud identity granted broader permissions than it actually needs turns any compromise of that identity into a much larger breach than the original access should have allowed.
 cwe: ["CWE-269"]
 typicalSeverityCeiling: Critical

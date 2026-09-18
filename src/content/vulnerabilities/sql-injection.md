@@ -1,6 +1,6 @@
 ---
 title: SQL Injection
-category: "Injection"
+surface: "Web Application"
 summary: Untrusted input reaching a raw SQL query lets an attacker rewrite the query's logic, not just supply a value.
 owasp: "A03:2021 – Injection"
 cwe: ["CWE-89"]

@@ -1,6 +1,6 @@
 ---
 title: Security Misconfiguration
-category: "Configuration & Supply Chain"
+surface: "Web Application"
 summary: How a secure product still ships with an insecure default, an unnecessary feature left enabled, or an error message that hands an attacker what they need.
 owasp: "A05:2021 – Security Misconfiguration"
 cwe: ["CWE-16"]

@@ -2,7 +2,7 @@
 title: The OWASP Top 10 for LLM Applications
 summary: The risk categories specific to applications built on large language models, and how they differ from both traditional AppSec risks and general AI safety concerns.
 related: ["frameworks-standards"]
-relatedVulnerabilities: []
+relatedVulnerabilities: ["prompt-injection", "insecure-output-handling", "ai-supply-chain-risks", "excessive-agency", "ai-sensitive-information-disclosure"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -29,24 +29,30 @@ The project describes a set of representative risk categories rather than a sing
 type, similar in spirit to how the general OWASP Top 10 groups related weaknesses into categories.
 Several worth knowing by name:
 
-- **Prompt injection**: getting a model to follow attacker-supplied instructions hidden inside its
-  input. Direct prompt injection means typing the malicious instruction straight into a chat window;
-  indirect prompt injection hides it inside a document, webpage, or email the model is later asked
-  to process, so the model encounters and follows the instruction without a human ever seeing it.
-- **Insecure output handling**: trusting a model's output enough to render or execute it without
-  applying the same validation any other untrusted input would get. If that output is rendered
-  directly into a web page, this becomes a very familiar problem wearing new clothes: see
-  [Cross-Site Scripting](../../vulnerabilities/cross-site-scripting/) for what happens when
-  untrusted content reaches a browser without proper encoding.
-- **Training data and model supply chain risks**: a model, a fine-tuning dataset, or a third-party
-  model component compromised before it ever reaches the application, the same underlying pattern
-  covered on [Supply Chain Attack](../../attacks/supply-chain-attack/), applied to the AI pipeline
-  specifically.
-- **Excessive agency**: an AI system or agent given more real-world tool access and permission than
-  its actual task requires. See [AI Red Teaming](../../methodology/ai-red-teaming/) for how this becomes a serious
-  problem the moment a model can take real actions, not just produce text.
-- **Sensitive information disclosure**: a model revealing fragments of its training data, or being
-  manipulated into disclosing data it was given legitimate access to for a narrower purpose.
+- **[Prompt injection](../../vulnerabilities/prompt-injection/)**: getting a model to follow
+  attacker-supplied instructions hidden inside its input. Direct prompt injection means typing the
+  malicious instruction straight into a chat window; indirect prompt injection hides it inside a
+  document, webpage, or email the model is later asked to process, so the model encounters and
+  follows the instruction without a human ever seeing it.
+- **[Insecure output handling](../../vulnerabilities/insecure-output-handling/)**: trusting a model's
+  output enough to render or execute it without applying the same validation any other untrusted
+  input would get. If that output is rendered directly into a web page, this becomes a very familiar
+  problem wearing new clothes: see [Cross-Site Scripting](../../vulnerabilities/cross-site-scripting/)
+  for what happens when untrusted content reaches a browser without proper encoding.
+- **[Training data and model supply chain risks](../../vulnerabilities/ai-supply-chain-risks/)**: a
+  model, a fine-tuning dataset, or a third-party model component compromised before it ever reaches
+  the application, the same underlying pattern covered on [Supply Chain
+  Attack](../../attacks/supply-chain-attack/), applied to the AI pipeline specifically. A related,
+  more targeted mechanism, deliberately corrupting the training data itself rather than compromising
+  a dependency, has its own dedicated page: [Training Data
+  Poisoning](../../vulnerabilities/training-data-poisoning/).
+- **[Excessive agency](../../vulnerabilities/excessive-agency/)**: an AI system or agent given more
+  real-world tool access and permission than its actual task requires. See [AI Red
+  Teaming](../../methodology/ai-red-teaming/) for how this becomes a serious problem the moment a
+  model can take real actions, not just produce text.
+- **[Sensitive information disclosure](../../vulnerabilities/ai-sensitive-information-disclosure/)**:
+  a model revealing fragments of its training data, or being manipulated into disclosing data it was
+  given legitimate access to for a narrower purpose.
 
 ## Where This Shows Up in Practice
 
@@ -79,6 +85,8 @@ model is.
 
 ## Related Topics
 
+- **Explore AI Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/#ai-security)
+  has dedicated, worked-example pages for every risk category named above.
 - [Security Frameworks & Standards](../frameworks-standards/): how this list fits among the other
   named frameworks covered on this site.
 - [AI Red Teaming](../../methodology/ai-red-teaming/): the adversarial testing discipline built to test against

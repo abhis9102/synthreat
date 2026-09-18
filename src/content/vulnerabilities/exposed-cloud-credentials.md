@@ -1,6 +1,6 @@
 ---
 title: Exposed Cloud Credentials & Secrets Sprawl
-category: "Cloud Security"
+surface: "Cloud Security"
 summary: A cloud API key or access token committed to source code, baked into a container image, or left in a config file gives anyone who finds it the same access the application itself has.
 cwe: ["CWE-798", "CWE-522"]
 typicalSeverityCeiling: Critical

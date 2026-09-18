@@ -1,20 +1,38 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { VULN_CATEGORIES } from '../../content.config';
+import { VULN_SURFACES } from '../../content.config';
 
 const entries = (await getCollection('vulnerabilities', ({ data }) => data.status === 'published'))
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
 const base = import.meta.env.BASE_URL;
 
-// Grouped by category (locked display order, see content.config.ts) now that the flat list has
-// grown past the point a single list reads well. Each group renders as an open-by-default <details>
-// accordion: nothing is hidden from a first-time visitor or from search/read-aloud, but the section
-// can be collapsed once its content is no longer needed.
-const groups = VULN_CATEGORIES.map((category) => ({
-  category,
-  entries: entries.filter((entry) => entry.data.category === category),
-})).filter((group) => group.entries.length > 0);
+// Kebab-case anchor id for a surface, e.g. "Web Application" -> "web-application". Used both for
+// this page's <details id> targets and for the "explore X vulnerabilities" links other collections
+// (domains in particular) point at. Degrades gracefully: linking to an anchor with zero entries
+// today just lands on the top of this page, and starts working the moment that surface gets content.
+const surfaceSlug = (surface: string) => surface.toLowerCase().replace(/\s+/g, '-');
+
+// Grouped by surface (locked display order, see content.config.ts VULN_SURFACES), mirroring the
+// domains collection's own surface names. "Web Application" is large enough to need its own
+// sub-grouping, by OWASP Top 10 category (A01-A10), reusing the `owasp` field every entry in that
+// surface already carries rather than a second custom field. Each surface renders as an
+// open-by-default <details> accordion: nothing is hidden from a first-time visitor, search, or
+// read-aloud, but a section can be collapsed once it's not needed.
+const groups = VULN_SURFACES.map((surface) => {
+  const surfaceEntries = entries.filter((entry) => entry.data.surface === surface);
+  let subgroups: { label: string; entries: typeof entries }[] | null = null;
+  if (surface === 'Web Application') {
+    const byCode = new Map<string, { label: string; entries: typeof entries }>();
+    for (const entry of surfaceEntries) {
+      const code = entry.data.owasp?.match(/^A\d{2}/)?.[0] ?? 'Other';
+      if (!byCode.has(code)) byCode.set(code, { label: entry.data.owasp ?? 'Other', entries: [] });
+      byCode.get(code)!.entries.push(entry);
+    }
+    subgroups = [...byCode.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
+  }
+  return { surface, entries: surfaceEntries, subgroups };
+}).filter((group) => group.entries.length > 0);
 ---
 
 <BaseLayout
@@ -33,22 +51,41 @@ const groups = VULN_CATEGORIES.map((category) => ({
 
   <div class="category-groups" style="margin-top:36px;">
     {groups.map((group) => (
-      <details class="category-group" open>
+      <details class="category-group" id={surfaceSlug(group.surface)} open>
         <summary class="category-group-summary">
-          <span class="category-group-title">{group.category}</span>
+          <span class="category-group-title">{group.surface}</span>
           <span class="category-group-line" aria-hidden="true"></span>
           <span class="category-group-count">{group.entries.length}</span>
           <svg class="category-group-chev" width="12" height="7" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
-        <div class="card-grid" style="margin-top:18px;">
-          {group.entries.map((entry) => (
-            <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
-              <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
-              <h3>{entry.data.title}</h3>
-              <p>{entry.data.summary}</p>
-            </a>
-          ))}
-        </div>
+        {group.subgroups ? (
+          <div style="margin-top:18px;display:flex;flex-direction:column;gap:26px;">
+            {group.subgroups.map((sub) => (
+              <div>
+                <div class="subgroup-label">{sub.label}</div>
+                <div class="card-grid" style="margin-top:12px;">
+                  {sub.entries.map((entry) => (
+                    <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
+                      <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
+                      <h3>{entry.data.title}</h3>
+                      <p>{entry.data.summary}</p>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div class="card-grid" style="margin-top:18px;">
+            {group.entries.map((entry) => (
+              <a href={`${base}vulnerabilities/${entry.id}/`} class="card">
+                <span class="badge">Ceiling: {entry.data.typicalSeverityCeiling}</span>
+                <h3>{entry.data.title}</h3>
+                <p>{entry.data.summary}</p>
+              </a>
+            ))}
+          </div>
+        )}
       </details>
     ))}
     {entries.length === 0 && (

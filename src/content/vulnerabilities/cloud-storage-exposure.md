@@ -1,6 +1,6 @@
 ---
 title: Public Cloud Storage Exposure
-category: "Cloud Security"
+surface: "Cloud Security"
 summary: A storage bucket created with default or overly permissive access settings lets anyone on the internet read, and sometimes write, its contents with no authentication at all.
 cwe: ["CWE-284", "CWE-668"]
 typicalSeverityCeiling: Critical

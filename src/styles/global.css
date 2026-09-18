@@ -228,6 +228,72 @@ p { margin: 0 0 1em 0; }
 }
 .nav-panel .nav-viewall:active { text-decoration: underline; }
 
+/* Nested nav flyout: the Vulnerabilities dropdown lists its 5 surfaces as rows, each opening its
+   own side panel of that surface's entries on hover/focus, rather than one flat multi-column list.
+   Deliberately a distinct class from .nav-panel (not reused) so `.nav-item:hover .nav-panel`'s
+   descendant selector doesn't reveal every flyout at once just from hovering the outer dropdown. */
+.vuln-surface-list { display: flex; flex-direction: column; gap: 2px; min-width: 210px; }
+.vuln-surface-item { position: relative; }
+.vuln-surface-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+@media (hover: hover) {
+  .vuln-surface-row:hover { background: var(--surface-2); color: var(--ink); }
+}
+.vuln-surface-item:focus-within .vuln-surface-row,
+.vuln-surface-row:active { background: var(--surface-2); color: var(--ink); }
+.vuln-surface-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.vuln-surface-panel {
+  position: absolute;
+  left: 100%;
+  top: -8px;
+  margin-left: 8px;
+  min-width: 230px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+}
+.vuln-surface-panel-wide { min-width: 480px; }
+.vuln-surface-panel a {
+  display: block;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 7px;
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.4;
+}
+@media (hover: hover) {
+  .vuln-surface-panel a:hover { background: var(--surface-2); color: var(--ink); }
+  .vuln-surface-item:hover .vuln-surface-panel { opacity: 1; visibility: visible; transform: translateX(0); }
+}
+.vuln-surface-panel a:active { background: var(--surface-2); color: var(--ink); }
+.vuln-surface-item:focus-within .vuln-surface-panel { opacity: 1; visibility: visible; transform: translateX(0); }
+
 /* --- Mobile hamburger + slide-in nav --- */
 .nav-toggle {
   display: none;
@@ -307,6 +373,23 @@ p { margin: 0 0 1em 0; }
   .nav-item.open .nav-panel { display: block; }
   .nav-panel-inner { flex-direction: column; gap: 14px; }
   .nav-panel-cols { grid-template-columns: 1fr; }
+
+  /* The Vulnerabilities flyout has no room to open sideways on a phone-width screen, so every
+     surface's entries render inline, always expanded, directly under its row instead. The row
+     itself stays a working link straight to that surface's anchor on the index page. */
+  .vuln-surface-panel {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    min-width: 0;
+    margin: 0 0 10px 12px;
+    padding: 0;
+  }
+  .vuln-surface-panel-wide { min-width: 0; }
 }
 
 main.page {
@@ -636,6 +719,17 @@ article.vuln-body tbody tr { background: var(--surface); }
 }
 .category-group-line { flex: 1; height: 1px; background: var(--line); }
 .category-group-chev { color: var(--ink-faint); transition: transform 0.15s ease; flex-shrink: 0; }
+
+/* Sub-grouping inside a category-group (currently: Web Application entries by OWASP category). */
+.subgroup-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--line);
+}
 .category-group[open] .category-group-chev { transform: rotate(180deg); }
 
 .btn {

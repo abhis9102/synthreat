@@ -44,6 +44,8 @@ The clearest, most concrete way to explain this to a client is with the flat-net
 
 ## Related Topics
 
+- **Explore Network Security vulnerabilities:** dedicated network vulnerability-class pages are on the
+  roadmap for the [Vulnerabilities section](../../vulnerabilities/#network-security).
 - [Cloud Security](../cloud-security/): the parallel domain for infrastructure that is not run on premises.
 - [Application Security](../application-security/): securing the software layer, distinct from the network it runs on.
 - [Types of Penetration Testing](../../methodology/types-of-penetration-testing/): where internal and external network testing fit among the different engagement types.

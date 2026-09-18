@@ -1,6 +1,6 @@
 ---
 title: File Inclusion Vulnerabilities (LFI/RFI)
-category: "Access Control"
+surface: "Web Application"
 summary: How an application that dynamically includes a file based on user input can be tricked into running a local or attacker-hosted remote file as code.
 owasp: "A03:2021 – Injection"
 cwe: ["CWE-98"]

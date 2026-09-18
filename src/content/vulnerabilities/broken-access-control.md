@@ -1,6 +1,6 @@
 ---
 title: Broken Access Control
-category: "Access Control"
+surface: "Web Application"
 summary: How an app that correctly identifies a user can still let them reach data or actions they were never authorized for.
 owasp: "A01:2021 – Broken Access Control"
 cwe: ["CWE-284", "CWE-639"]

@@ -4,6 +4,91 @@ Running log of what's shipped, what's next, and decisions made along the way. Ne
 
 ---
 
+## 2026-09-18 — AI Security vulnerability batch; re-architected the taxonomy to surface-based
+
+**What happened (Content Architect, direct user request, superseding the previous batch's taxonomy):**
+The category scheme shipped one batch ago (Injection, Access Control, Authentication & Identity,
+Client-Side & UI, Design & Business Logic, Configuration & Supply Chain, Cloud Security) is now
+replaced, not extended. The `vulnerabilities` collection's `category` field is gone; a new `surface`
+field takes its place, with exactly the same five values as the request: Cloud Security, Web
+Application, Mobile Security, Network Security, AI Security. "Web Application" (not bare "Web") was
+chosen deliberately so it doesn't collide with the separate, narrower `domains/web-security` page
+(protocol/browser-layer topics only). All 22 pre-existing web pages moved to `surface: "Web
+Application"`; all 6 Cloud Security pages moved to `surface: "Cloud Security"`.
+
+**Sub-grouping decision:** Web Application is large enough (22 pages) to need a second level. Rather
+than inventing another custom bucket scheme, it reuses the `owasp` field every one of those 22 pages
+already carries (every one already maps to A01-A10), so grouping is standards-grounded with zero new
+field. Cloud/AI/Mobile/Network stay flat internally for now; they can get their own sub-grouping the
+same way once any of them grows large enough to need it.
+
+**Explicitly decided against:** merging related classes (e.g. IDOR, CSRF, Path Traversal, Open
+Redirect, all under OWASP A01) into fewer combined pages. CLAUDE.md locks one full 11-section page per
+vulnerability class; consolidating would have been a lossy rewrite of already-published, reviewed
+content for a findability problem the surface/OWASP grouping already solves without losing depth.
+
+**Batch (6 new pages, surface "AI Security"):** Prompt Injection, Insecure Output Handling, Excessive
+Agency, AI Sensitive Information Disclosure, AI Model & Training Data Supply Chain Risks, Training
+Data Poisoning. Scoped to exactly the concepts already named in `frameworks/ai-llm-top-10.md` (the
+first five) plus training data poisoning from `domains/ai-security.md`'s own "How It Works" section,
+deliberately without inventing numbered LLM0X or CWE IDs the way that framework page itself already
+declines to, since the current official numbering isn't something this project is confident citing.
+`cwe: []` on all six for that reason.
+
+**Cross-linked:** both new-page-to-new-page (prompt injection -> insecure output handling / excessive
+agency; etc.) and back into existing pages (insecure output handling -> cross-site-scripting,
+excessive-agency -> broken-access-control, ai-supply-chain-risks -> vulnerable-outdated-components).
+`frameworks/ai-llm-top-10.md`'s five informally-named risk bullets now link to their dedicated pages
+directly. `domains/ai-security.md`'s `relatedVulnerabilities` and Related Topics, previously empty,
+now list all six.
+
+**UI (Design & Frontend Lead, direct user request for "sophisticated" nested navigation):** Both the
+index page and the nav dropdown now group two levels deep: surface (top), then OWASP category inside
+Web Application only. The index page renders each surface as an open-by-default `<details id="{kebab-
+surface}">` accordion (nothing hidden from a first-time visitor, search, or read-aloud; the id makes
+each surface directly deep-linkable, e.g. `/vulnerabilities/#ai-security`). The nav dropdown is a true
+nested flyout: hovering or focusing a surface row in the Vulnerabilities dropdown opens a side panel
+listing that surface's entries (further split into OWASP sub-columns for Web Application, reusing
+`.nav-col-title`). Built as its own `.vuln-surface-*` class family rather than reusing `.nav-panel`,
+specifically because `.nav-item:hover .nav-panel`'s descendant selector would otherwise have revealed
+every surface's flyout at once from a single hover on the outer "Vulnerabilities" link. Mobile gets a
+dedicated fallback: flyouts render inline and always-expanded under their row instead of depending on
+hover, consistent with the project's existing "no hover-only mobile behavior" rule from the read-aloud/
+UI-polish batch.
+
+**Cross-collection wiring (direct user request: "add the vulns link... in their main pages"):** every
+domain page whose subject matches a vulnerabilities surface now has a prominent, bolded "Explore X
+vulnerabilities" line at the top of its Related Topics section, linking to that surface's anchor:
+`application-security.md` and `web-security.md` both point at `#web-application` (the 22 pages are
+AppSec-flavored OWASP Top 10 classes, not the narrower web-security domain, but both readerships
+benefit from the pointer); `cloud-security.md` and `ai-security.md` point at their own anchors and
+additionally still enumerate each specific dedicated page by name; `mobile-security.md` and
+`network-security.md` point at anchors with zero entries today, worded as a roadmap pointer so the
+link isn't misleading, and will start resolving to real content automatically the moment either
+surface gets its first page, no further edit needed.
+
+**Editorial Reviewer pass:** `npm run validate:content` (88 files) and `npm run build` (95 pages) both
+clean after fixing one `summary` over the 200-char schema limit. Zero em-dashes and zero vendor names
+(OpenAI, ChatGPT, Anthropic, Claude, Gemini, Copilot, Llama, Meta AI) across the 6 new files, confirmed
+by direct grep. Confirmed no invented LLM0X or suspicious CWE-13xx/14xx IDs anywhere in the batch. A
+relative-link resolver flagged 8 links as "broken," all false positives: the script doesn't understand
+`vulnerabilities/#surface-slug` anchor links to the index page and misread the fragment as a missing
+slug; manually confirmed each one is a valid, correctly-formed anchor link. Verified the rendered
+dev-server HTML directly on both `/vulnerabilities/` and `/` (which shares the same nav): all 3
+surfaces with content (Cloud Security 6, Web Application 22, AI Security 6) render with correct counts,
+correct OWASP sub-column ordering (A01-A10), and the nested flyout markup is present and scoped
+correctly.
+
+**Next (not yet drafted):** Mobile Security and Network Security vulnerability-class batches, whenever
+those domains are prioritized next. AI Security backlog beyond this batch: Model Theft / IP protection
+of weights and Adversarial Robustness / Evasion, both named in `domains/ai-security.md`'s "Model
+security" bullet but not yet drafted as their own pages. The lower-priority domains/methodology backlog
+from two batches ago (Identity & Access Management, IoT/OT, Cryptography as domains; Purple Teaming,
+Secure Code Review, Social Engineering Assessment, Bug Bounty, Tabletop Exercises as methodology pages)
+is still open.
+
+---
+
 ## 2026-09-18 — Cloud Security vulnerability batch, and categorized the vulnerabilities collection
 
 **What happened (Content Architect proposal, confirmed by user, then drafted):** Audited the
