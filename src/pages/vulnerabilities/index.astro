@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CollectionOverview from '../../components/CollectionOverview.astro';
 
 const entries = (await getCollection('vulnerabilities', ({ data }) => data.status === 'published'))
   .sort((a, b) => a.data.title.localeCompare(b.data.title));
@@ -21,8 +20,6 @@ const base = import.meta.env.BASE_URL;
     fixed. Written for a newcomer and a client-facing security person to read the same page and both
     get what they need.
   </p>
-
-  <CollectionOverview kind="vulnerabilities" entries={entries} />
 
   <div class="card-grid" style="margin-top:36px;">
     {entries.map((entry) => (
