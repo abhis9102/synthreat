@@ -310,7 +310,10 @@ main.page.page-wide { max-width: 1080px; }
   padding: 4px 10px;
   border-radius: 100px;
   margin-bottom: 18px;
+  text-decoration: none;
+  transition: background 0.12s ease, border-color 0.12s ease;
 }
+a.tagline:hover { background: var(--accent-soft-line); border-color: var(--accent-ink); }
 
 .vuln-meta {
   display: flex;
