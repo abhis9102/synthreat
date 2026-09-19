@@ -5,7 +5,7 @@ summary: Why a flaw that was never a coding bug, but a missing security control 
 owasp: "A04:2021 – Insecure Design"
 cwe: []
 typicalSeverityCeiling: High
-related: []
+related: ["business-logic-vulnerabilities"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -104,5 +104,3 @@ The common bad fix is patching only the exact scenario that was discovered and d
 ## Related Classes
 
 - [Business Logic Vulnerabilities](../business-logic-vulnerabilities/): the closest sibling class on this site, a flaw within a specific feature's implemented workflow rather than a missing architectural control, but arising from the same class of gap in thinking through abuse cases before building.
-
-*(Dedicated pages for other OWASP Top 10 categories are being added; links will go live once published.)*

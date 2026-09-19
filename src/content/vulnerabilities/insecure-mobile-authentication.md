@@ -5,6 +5,8 @@ cwe: ["CWE-287", "CWE-305"]
 summary: Authentication logic enforced only on the client, or a biometric prompt that can be bypassed, gives an attacker with device or binary access a way around checks that should have held server-side.
 typicalSeverityCeiling: Critical
 related: ["insecure-mobile-data-storage", "insecure-mobile-communication"]
+practiceLab: "https://mas.owasp.org/crackmes/"
+practiceLabName: "OWASP MASTG Crackmes"
 status: published
 datePublished: 2026-09-18
 ---

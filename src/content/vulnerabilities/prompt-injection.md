@@ -7,6 +7,7 @@ cwe: []
 typicalSeverityCeiling: Critical
 related: ["insecure-output-handling", "excessive-agency", "system-prompt-leakage"]
 practiceLab: "https://portswigger.net/web-security/llm-attacks"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

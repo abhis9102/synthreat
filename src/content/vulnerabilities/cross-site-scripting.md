@@ -7,6 +7,7 @@ cwe: ["CWE-79"]
 typicalSeverityCeiling: High
 related: ["sql-injection"]
 practiceLab: "https://portswigger.net/web-security/cross-site-scripting"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

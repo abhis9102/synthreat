@@ -5,6 +5,8 @@ cwe: ["CWE-319"]
 summary: A legacy service still carrying credentials or sensitive data over an unencrypted protocol hands anyone positioned on the network path everything it transmits, in plain, readable form.
 typicalSeverityCeiling: Critical
 related: ["weak-network-access-controls", "network-segmentation-failures"]
+practiceLab: "https://docs.rapid7.com/metasploit/metasploitable-2/"
+practiceLabName: "Metasploitable 2 (Rapid7)"
 status: published
 datePublished: 2026-09-18
 ---

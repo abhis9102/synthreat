@@ -5,6 +5,8 @@ summary: A cloud API key or access token committed to source code, baked into a 
 cwe: ["CWE-798", "CWE-522"]
 typicalSeverityCeiling: Critical
 related: ["insecure-infrastructure-as-code", "ssrf"]
+practiceLab: "http://flaws.cloud/"
+practiceLabName: "flAWS (AWS security challenge)"
 status: published
 datePublished: 2026-09-18
 ---

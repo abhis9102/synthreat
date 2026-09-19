@@ -5,8 +5,9 @@ summary: How weaknesses in confirming who someone is, not in what they're allowe
 owasp: "A07:2021 – Identification and Authentication Failures"
 cwe: ["CWE-287", "CWE-384"]
 typicalSeverityCeiling: Critical
-related: []
+related: ["broken-access-control", "cryptographic-failures"]
 practiceLab: "https://portswigger.net/web-security/authentication"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---
@@ -155,9 +156,11 @@ token that was never actually protected after issuance.
 
 ## Related Classes
 
-- **Broken Access Control**, the closely related but distinct class covering what an authenticated
-  user is allowed to do, as opposed to how that authentication happened in the first place.
+- **[Broken Access Control](../broken-access-control/)**, the closely related but distinct class
+  covering what an authenticated user is allowed to do, as opposed to how that authentication
+  happened in the first place.
+- **[Cryptographic Failures](../cryptographic-failures/)**, a closely adjacent class worth checking
+  as a pair: weak login and session handling here, weak password hashing there, since a real
+  assessment frequently finds both on the same application.
 - **Session Hijacking**, the attack technique that directly exploits many of the weaknesses described
   here. See [Session Hijacking](../../attacks/session-hijacking/).
-
-*(A dedicated Broken Access Control page is planned; the link will go live once it's published.)*

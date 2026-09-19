@@ -5,6 +5,8 @@ summary: A container running with more privilege than it needs, or a Kubernetes 
 cwe: ["CWE-250", "CWE-284"]
 typicalSeverityCeiling: Critical
 related: ["cloud-iam-misconfiguration", "security-misconfiguration"]
+practiceLab: "http://flaws2.cloud/"
+practiceLabName: "flAWS 2 (AWS container security challenge)"
 status: published
 datePublished: 2026-09-18
 ---

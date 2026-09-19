@@ -7,6 +7,7 @@ cwe: ["CWE-1021"]
 typicalSeverityCeiling: Medium
 related: ["security-misconfiguration"]
 practiceLab: "https://portswigger.net/web-security/clickjacking"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

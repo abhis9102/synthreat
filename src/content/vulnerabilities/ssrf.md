@@ -7,6 +7,7 @@ cwe: ["CWE-918"]
 typicalSeverityCeiling: Critical
 related: ["sql-injection", "exposed-cloud-credentials"]
 practiceLab: "https://portswigger.net/web-security/ssrf"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

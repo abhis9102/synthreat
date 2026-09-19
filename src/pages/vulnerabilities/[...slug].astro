@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { title, summary, owasp, cwe, typicalSeverityCeiling, surface, practiceLab } = entry.data;
+const { title, summary, owasp, cwe, typicalSeverityCeiling, surface, practiceLab, practiceLabName } = entry.data;
 const base = import.meta.env.BASE_URL;
 const surfaceSlug = surface.toLowerCase().replace(/\s+/g, '-');
 ---
@@ -28,7 +28,7 @@ const surfaceSlug = surface.toLowerCase().replace(/\s+/g, '-');
   </div>
   {practiceLab && (
     <a class="btn btn-secondary practice-lab" href={practiceLab} target="_blank" rel="noopener">
-      Practice this on PortSwigger's Web Security Academy →
+      Practice this on {practiceLabName} →
     </a>
   )}
   <article class="vuln-body">

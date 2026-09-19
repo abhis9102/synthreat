@@ -5,6 +5,8 @@ summary: A cloud identity granted broader permissions than it actually needs tur
 cwe: ["CWE-269"]
 typicalSeverityCeiling: Critical
 related: ["cloud-storage-exposure", "broken-access-control"]
+practiceLab: "http://flaws.cloud/"
+practiceLabName: "flAWS (AWS security challenge)"
 status: published
 datePublished: 2026-09-18
 ---

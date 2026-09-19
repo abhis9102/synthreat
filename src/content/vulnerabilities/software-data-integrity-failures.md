@@ -7,6 +7,7 @@ cwe: ["CWE-502", "CWE-829"]
 typicalSeverityCeiling: Critical
 related: []
 practiceLab: "https://portswigger.net/web-security/deserialization"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

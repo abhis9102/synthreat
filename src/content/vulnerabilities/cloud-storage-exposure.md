@@ -5,6 +5,8 @@ summary: A storage bucket created with default or overly permissive access setti
 cwe: ["CWE-284", "CWE-668"]
 typicalSeverityCeiling: Critical
 related: ["cloud-iam-misconfiguration", "security-misconfiguration"]
+practiceLab: "http://flaws.cloud/"
+practiceLabName: "flAWS (AWS security challenge)"
 status: published
 datePublished: 2026-09-18
 ---

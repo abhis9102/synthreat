@@ -7,6 +7,7 @@ cwe: ["CWE-611"]
 typicalSeverityCeiling: Critical
 related: ["ssrf", "security-misconfiguration"]
 practiceLab: "https://portswigger.net/web-security/xxe"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

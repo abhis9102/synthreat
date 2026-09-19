@@ -5,6 +5,8 @@ cwe: ["CWE-250", "CWE-926"]
 summary: An app requesting far more device permissions than its function requires, or exposing its own components to other apps by mistake, expands what a single compromise of that app can actually reach.
 typicalSeverityCeiling: High
 related: ["insufficient-binary-protections", "insecure-mobile-data-storage"]
+practiceLab: "https://mas.owasp.org/crackmes/"
+practiceLabName: "OWASP MASTG Crackmes"
 status: published
 datePublished: 2026-09-18
 ---

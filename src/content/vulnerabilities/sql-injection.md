@@ -5,8 +5,9 @@ summary: Untrusted input reaching a raw SQL query lets an attacker rewrite the q
 owasp: "A03:2021 – Injection"
 cwe: ["CWE-89"]
 typicalSeverityCeiling: Critical
-related: []
+related: ["broken-access-control", "ssrf", "command-injection", "cross-site-scripting"]
 practiceLab: "https://portswigger.net/web-security/sql-injection"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-16
 ---
@@ -150,11 +151,14 @@ actually fixed.
 
 ## Related Classes
 
-- **Broken access control**: once an attacker is inside a database via injection, what they can
-  *do* with what they find often comes down to how access control is enforced everywhere else in the
-  system.
-- **Server-side request forgery**, a structurally different class but frequently found on the same
-  target, often traces back to the same root cause: trusting an input because of where it's used
-  rather than validating what it actually is.
-
-*(Dedicated pages for both are planned; links will go live once they're published.)*
+- **[Broken Access Control](../broken-access-control/)**: once an attacker is inside a database via
+  injection, what they can *do* with what they find often comes down to how access control is
+  enforced everywhere else in the system.
+- **[Server-Side Request Forgery](../ssrf/)**, a structurally different class but frequently found on
+  the same target, often traces back to the same root cause: trusting an input because of where it's
+  used rather than validating what it actually is.
+- **[OS Command Injection](../command-injection/)**: the same root cause, data crossing into code, at
+  a different execution layer, the shell instead of the database.
+- **[Cross-Site Scripting](../cross-site-scripting/)**: the injection-family sibling most often
+  confused with this class, despite executing somewhere completely different, the victim's browser,
+  not the server's database.

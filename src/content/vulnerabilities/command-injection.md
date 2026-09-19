@@ -7,6 +7,7 @@ cwe: ["CWE-78"]
 typicalSeverityCeiling: Critical
 related: ["sql-injection", "ssrf"]
 practiceLab: "https://portswigger.net/web-security/os-command-injection"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

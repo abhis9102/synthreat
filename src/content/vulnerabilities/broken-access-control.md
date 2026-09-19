@@ -7,6 +7,7 @@ cwe: ["CWE-284", "CWE-639"]
 typicalSeverityCeiling: Critical
 related: ["sql-injection", "cross-tenant-isolation-failure"]
 practiceLab: "https://portswigger.net/web-security/access-control"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

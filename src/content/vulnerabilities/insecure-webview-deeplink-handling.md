@@ -5,6 +5,8 @@ cwe: ["CWE-79", "CWE-940"]
 summary: A mobile app's embedded browser component or deep link handler that trusts content or parameters without validation turns a convenience feature into a client-side injection and hijacking surface.
 typicalSeverityCeiling: Critical
 related: ["insecure-mobile-authentication", "cross-site-scripting"]
+practiceLab: "https://mas.owasp.org/crackmes/"
+practiceLabName: "OWASP MASTG Crackmes"
 status: published
 datePublished: 2026-09-18
 ---

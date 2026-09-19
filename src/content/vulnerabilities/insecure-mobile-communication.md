@@ -5,6 +5,8 @@ cwe: ["CWE-295", "CWE-319"]
 summary: A mobile app that doesn't properly validate the server's TLS certificate, or falls back to unencrypted traffic, exposes everything it sends over the network to interception.
 typicalSeverityCeiling: Critical
 related: ["insecure-mobile-data-storage", "insecure-mobile-authentication"]
+practiceLab: "https://mas.owasp.org/crackmes/"
+practiceLabName: "OWASP MASTG Crackmes"
 status: published
 datePublished: 2026-09-18
 ---

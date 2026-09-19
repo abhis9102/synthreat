@@ -5,6 +5,8 @@ cwe: ["CWE-312", "CWE-922"]
 summary: Sensitive data cached in plaintext directly on a mobile device is retrievable by anyone with physical or forensic access to it, regardless of how well the backend is secured.
 typicalSeverityCeiling: Critical
 related: ["insecure-mobile-communication", "insecure-mobile-authentication"]
+practiceLab: "https://mas.owasp.org/crackmes/"
+practiceLabName: "OWASP MASTG Crackmes"
 status: published
 datePublished: 2026-09-18
 ---

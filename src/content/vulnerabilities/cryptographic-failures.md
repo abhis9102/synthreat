@@ -5,7 +5,7 @@ summary: How sensitive data ends up exposed not because encryption is hard, but 
 owasp: "A02:2021 – Cryptographic Failures"
 cwe: ["CWE-327", "CWE-311"]
 typicalSeverityCeiling: Critical
-related: []
+related: ["authentication-failures", "ai-sensitive-information-disclosure"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -106,4 +106,9 @@ The common bad fix is treating "we use HTTPS" as a complete answer. HTTPS protec
 
 ## Related Classes
 
-*(Dedicated pages for other OWASP Top 10 categories are being added; links will go live once published.)*
+- **[Identification and Authentication Failures](../authentication-failures/)**: a closely adjacent
+  class worth checking as a pair, weak password hashing here, weak login and session handling there,
+  since a real assessment frequently finds both on the same application.
+- **[AI Sensitive Information Disclosure](../ai-sensitive-information-disclosure/)**: the same root
+  failure, sensitive data left unprotected, showing up in an AI system's outputs and training data
+  instead of a database column.

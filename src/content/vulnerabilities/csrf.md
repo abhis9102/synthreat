@@ -7,6 +7,7 @@ cwe: ["CWE-352"]
 typicalSeverityCeiling: High
 related: ["broken-access-control"]
 practiceLab: "https://portswigger.net/web-security/csrf"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

@@ -5,6 +5,8 @@ cwe: ["CWE-287", "CWE-326"]
 summary: A VPN with weak authentication, an outdated protocol, or overly broad access once connected gives a remote attacker the same reach as someone plugged directly into the internal network.
 typicalSeverityCeiling: Critical
 related: ["network-segmentation-failures", "weak-network-access-controls"]
+practiceLab: "https://docs.rapid7.com/metasploit/metasploitable-2/"
+practiceLabName: "Metasploitable 2 (Rapid7)"
 status: published
 datePublished: 2026-09-18
 ---

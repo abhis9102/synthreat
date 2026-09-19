@@ -5,6 +5,8 @@ cwe: ["CWE-284", "CWE-1327"]
 summary: A firewall or access-control-list rule written broader than necessary lets traffic reach a system that should never have been directly exposed to it in the first place.
 typicalSeverityCeiling: Critical
 related: ["network-segmentation-failures", "cleartext-network-protocols"]
+practiceLab: "https://docs.rapid7.com/metasploit/metasploitable-2/"
+practiceLabName: "Metasploitable 2 (Rapid7)"
 status: published
 datePublished: 2026-09-18
 ---

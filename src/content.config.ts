@@ -54,10 +54,13 @@ const vulnerabilities = defineCollection({
     // Slugs of other entries in this collection, for the Related Classes section's cross-links.
     related: z.array(z.string()).default([]),
     // Link to a real, free, hands-on lab that lets a reader actually practice this specific
-    // vulnerability class, e.g. a matching topic on PortSwigger's Web Security Academy. Verified
-    // against the live page before being added, not guessed from the class name; left empty
-    // rather than force a loose match onto a class with no real dedicated lab.
+    // vulnerability class (a matching topic on PortSwigger's Web Security Academy, a downloadable
+    // vulnerable-by-design app, a CTF-style challenge site). Verified against the live source
+    // before being added, not guessed from the class name; left empty rather than force a loose
+    // match onto a class with no real dedicated resource. practiceLabName is the resource's own
+    // name, shown on the button, since not every entry points at the same provider.
     practiceLab: z.string().url().optional(),
+    practiceLabName: z.string().optional(),
     status: z.enum(['draft', 'published']).default('draft'),
     datePublished: z.coerce.date().optional(),
     dateUpdated: z.coerce.date().optional(),

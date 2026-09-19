@@ -7,6 +7,7 @@ cwe: []
 typicalSeverityCeiling: High
 related: ["insecure-design"]
 practiceLab: "https://portswigger.net/web-security/logic-flaws"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---

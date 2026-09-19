@@ -7,6 +7,7 @@ cwe: ["CWE-22"]
 typicalSeverityCeiling: High
 related: ["broken-access-control", "file-inclusion"]
 practiceLab: "https://portswigger.net/web-security/file-path-traversal"
+practiceLabName: "PortSwigger's Web Security Academy"
 status: published
 datePublished: 2026-09-18
 ---
