@@ -489,6 +489,20 @@ a.tagline:active { background: var(--accent-soft-line); border-color: var(--acce
   .listen-stop:hover { color: var(--ink); border-color: var(--accent-soft-line); }
 }
 .listen-stop:active { color: var(--ink); }
+.listen-voice {
+  max-width: 200px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .listen-voice:hover { color: var(--ink); border-color: var(--accent-soft-line); }
+}
 
 .vuln-meta {
   display: flex;
