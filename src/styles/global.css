@@ -504,6 +504,11 @@ a.tagline:active { background: var(--accent-soft-line); border-color: var(--acce
   border: 1px solid var(--line);
   padding: 4px 10px;
   border-radius: 6px;
+  text-decoration: none;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+@media (hover: hover) {
+  .vuln-meta a.chip:hover { color: var(--accent-ink); border-color: var(--accent-soft-line); }
 }
 .vuln-meta .chip.severity {
   color: var(--accent-ink);

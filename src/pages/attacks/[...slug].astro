@@ -14,6 +14,14 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 const { title, summary, capec, mitreAttack, typicalSeverityCeiling } = entry.data;
 const base = import.meta.env.BASE_URL;
+
+// CAPEC and ATT&CK IDs cite a real, publicly maintained catalog entry, so the chip links straight
+// to MITRE's own page for that specific ID rather than sitting as unlinked text. Both follow
+// stable, well-established URL conventions: CAPEC-98 -> capec.mitre.org/data/definitions/98.html,
+// and a sub-technique like T1566.001 splits into a separate path segment
+// (attack.mitre.org/techniques/T1566/001/), not a literal dot.
+const capecUrl = (id: string) => `https://capec.mitre.org/data/definitions/${id.replace(/^CAPEC-/, '')}.html`;
+const attackUrl = (id: string) => `https://attack.mitre.org/techniques/${id.replace('.', '/')}/`;
 ---
 
 <BaseLayout title={title} description={summary}>
@@ -22,8 +30,12 @@ const base = import.meta.env.BASE_URL;
   <p style="font-size:18px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
   <div class="vuln-meta">
     <span class="chip severity">Typical ceiling: {typicalSeverityCeiling}</span>
-    {capec.map((id: string) => <span class="chip">{id}</span>)}
-    {mitreAttack.map((id: string) => <span class="chip">ATT&amp;CK {id}</span>)}
+    {capec.map((id: string) => (
+      <a class="chip" href={capecUrl(id)} target="_blank" rel="noopener">{id}</a>
+    ))}
+    {mitreAttack.map((id: string) => (
+      <a class="chip" href={attackUrl(id)} target="_blank" rel="noopener">ATT&amp;CK {id}</a>
+    ))}
   </div>
   <article class="vuln-body">
     <Content />
