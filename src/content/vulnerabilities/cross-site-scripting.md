@@ -6,6 +6,7 @@ owasp: "A03:2021 – Injection"
 cwe: ["CWE-79"]
 typicalSeverityCeiling: High
 related: ["sql-injection"]
+practiceLab: "https://portswigger.net/web-security/cross-site-scripting"
 status: published
 datePublished: 2026-09-18
 ---

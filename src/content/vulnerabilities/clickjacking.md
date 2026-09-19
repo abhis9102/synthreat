@@ -6,6 +6,7 @@ owasp: "A05:2021 – Security Misconfiguration"
 cwe: ["CWE-1021"]
 typicalSeverityCeiling: Medium
 related: ["security-misconfiguration"]
+practiceLab: "https://portswigger.net/web-security/clickjacking"
 status: published
 datePublished: 2026-09-18
 ---

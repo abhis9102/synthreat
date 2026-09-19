@@ -6,6 +6,7 @@ owasp: "A07:2021 – Identification and Authentication Failures"
 cwe: ["CWE-287", "CWE-384"]
 typicalSeverityCeiling: Critical
 related: []
+practiceLab: "https://portswigger.net/web-security/authentication"
 status: published
 datePublished: 2026-09-18
 ---

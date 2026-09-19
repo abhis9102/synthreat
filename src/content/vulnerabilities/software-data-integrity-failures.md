@@ -6,6 +6,7 @@ owasp: "A08:2021 – Software and Data Integrity Failures"
 cwe: ["CWE-502", "CWE-829"]
 typicalSeverityCeiling: Critical
 related: []
+practiceLab: "https://portswigger.net/web-security/deserialization"
 status: published
 datePublished: 2026-09-18
 ---

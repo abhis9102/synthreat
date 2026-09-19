@@ -6,6 +6,7 @@ owasp: "A01:2021 – Broken Access Control"
 cwe: ["CWE-284", "CWE-639"]
 typicalSeverityCeiling: Critical
 related: ["sql-injection", "cross-tenant-isolation-failure"]
+practiceLab: "https://portswigger.net/web-security/access-control"
 status: published
 datePublished: 2026-09-18
 ---

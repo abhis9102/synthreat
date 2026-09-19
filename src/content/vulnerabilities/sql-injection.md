@@ -6,6 +6,7 @@ owasp: "A03:2021 – Injection"
 cwe: ["CWE-89"]
 typicalSeverityCeiling: Critical
 related: []
+practiceLab: "https://portswigger.net/web-security/sql-injection"
 status: published
 datePublished: 2026-09-16
 ---

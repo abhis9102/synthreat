@@ -6,6 +6,7 @@ summary: Getting a large language model to follow attacker-supplied instructions
 cwe: []
 typicalSeverityCeiling: Critical
 related: ["insecure-output-handling", "excessive-agency", "system-prompt-leakage"]
+practiceLab: "https://portswigger.net/web-security/llm-attacks"
 status: published
 datePublished: 2026-09-18
 ---

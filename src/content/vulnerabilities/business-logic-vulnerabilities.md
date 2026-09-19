@@ -6,6 +6,7 @@ owasp: "A04:2021 – Insecure Design"
 cwe: []
 typicalSeverityCeiling: High
 related: ["insecure-design"]
+practiceLab: "https://portswigger.net/web-security/logic-flaws"
 status: published
 datePublished: 2026-09-18
 ---

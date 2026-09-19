@@ -6,6 +6,7 @@ owasp: "A01:2021 – Broken Access Control"
 cwe: ["CWE-22"]
 typicalSeverityCeiling: High
 related: ["broken-access-control", "file-inclusion"]
+practiceLab: "https://portswigger.net/web-security/file-path-traversal"
 status: published
 datePublished: 2026-09-18
 ---

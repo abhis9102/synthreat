@@ -53,6 +53,11 @@ const vulnerabilities = defineCollection({
     typicalSeverityCeiling: z.enum(['Critical', 'High', 'Medium', 'Low']),
     // Slugs of other entries in this collection, for the Related Classes section's cross-links.
     related: z.array(z.string()).default([]),
+    // Link to a real, free, hands-on lab that lets a reader actually practice this specific
+    // vulnerability class, e.g. a matching topic on PortSwigger's Web Security Academy. Verified
+    // against the live page before being added, not guessed from the class name; left empty
+    // rather than force a loose match onto a class with no real dedicated lab.
+    practiceLab: z.string().url().optional(),
     status: z.enum(['draft', 'published']).default('draft'),
     datePublished: z.coerce.date().optional(),
     dateUpdated: z.coerce.date().optional(),

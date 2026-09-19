@@ -6,6 +6,7 @@ owasp: "A10:2021 – Server-Side Request Forgery (SSRF)"
 cwe: ["CWE-918"]
 typicalSeverityCeiling: Critical
 related: ["sql-injection", "exposed-cloud-credentials"]
+practiceLab: "https://portswigger.net/web-security/ssrf"
 status: published
 datePublished: 2026-09-18
 ---

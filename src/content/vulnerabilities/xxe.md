@@ -6,6 +6,7 @@ owasp: "A05:2021 – Security Misconfiguration"
 cwe: ["CWE-611"]
 typicalSeverityCeiling: Critical
 related: ["ssrf", "security-misconfiguration"]
+practiceLab: "https://portswigger.net/web-security/xxe"
 status: published
 datePublished: 2026-09-18
 ---
