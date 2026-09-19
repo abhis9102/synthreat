@@ -69,8 +69,9 @@ pentest is scoped to provide and an automated tool structurally can't.
 **"An automated vulnerability scan is basically the same thing."** A scanner is excellent at finding
 known patterns at scale, cheaply and repeatedly. It cannot chain several small findings into a single
 proven business-logic exploit, and it has no way to judge whether a given data exposure actually
-matters in context. See [What Is Penetration Testing?](../what-is-penetration-testing/) for the fuller
-distinction between automated tooling and manual testing.
+matters in context. See [Automated Tooling vs. Manual
+Testing](../what-is-penetration-testing/#automated-tooling-vs-manual-testing) for the fuller
+distinction.
 
 **"A WebApp pentest also covers our servers and network."** It doesn't, by scope: a WebApp test is
 one specific combination of target surface and knowledge level. Testing the infrastructure the

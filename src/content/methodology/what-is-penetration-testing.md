@@ -73,6 +73,24 @@ community-maintained methodology. The exact names vary by firm, but the sequence
    includes a follow-up pass to confirm the fix actually closed the hole, rather than just changing
    its shape.
 
+### Automated Tooling vs. Manual Testing
+
+Every phase above assumes a person making judgment calls, not a fixed script running the same check
+every time, and it's worth being precise about exactly where that matters. A vulnerability scanner
+checks a system against a list of known, catalogued issues (missing patches, outdated software
+versions, misconfigured settings) and reports what it finds, quickly and cheaply, at scale. What it
+structurally cannot do is prove a finding is actually exploitable, chain several small,
+individually low-severity issues into one serious attack path, or reason about a business-logic flaw
+that's only wrong in context (a discount code that's technically valid but was never supposed to be
+combinable with another one, for instance).
+
+A human tester picks up exactly where a scan leaves off: forming a hypothesis about what an attacker
+could actually do with what's there, testing it, and adapting based on what comes back, the same
+iterative process a real attacker uses. That's the distinction reconnaissance-through-exploitation
+above is actually built around, and it's also the direct answer to "why not just run a scanner
+instead": a clean scan result only means nothing on the known-issue list was found, not that the
+system is secure (see [Common Misconceptions](#common-misconceptions) below).
+
 ## Where This Shows Up in Practice
 
 - **Compliance-driven annual testing.** A business runs one because a standard it must certify
