@@ -42,20 +42,24 @@ done.
 AppSec isn't one tool. It's a set of complementary practices, each catching a different kind of
 mistake:
 
-- **SAST (Static Application Security Testing)** reads an application's source code without running
-  it, looking for known-dangerous patterns, such as a database query built by string concatenation
-  instead of parameterization (see [SQL Injection](../../vulnerabilities/sql-injection/)). It runs
-  early, directly against code, and can catch a flaw before it's ever deployed.
-- **DAST (Dynamic Application Security Testing)** tests the *running* application from the outside, the
-  way an actual attacker would, sending it real requests and inspecting real responses. It doesn't see
-  the source code, so it catches a different set of problems than SAST does, including issues that only
-  exist once several pieces of code interact at runtime.
-- **SCA (Software Composition Analysis)** checks the third-party and open-source libraries an
-  application depends on against databases of known, publicly disclosed vulnerabilities (tracked
-  through the [CWE, or Common Weakness Enumeration](https://cwe.mitre.org/), system). Modern
-  applications are assembled from dozens or hundreds of dependencies; SCA exists because a vulnerability
-  in someone else's code is still a vulnerability in your application.
-- **Secure code review** and **threat modeling** are the human-driven practices that happen earlier
+- **[SAST (Static Application Security Testing)](../../methodology/static-application-security-testing/)**
+  reads an application's source code without running it, looking for known-dangerous patterns, such as
+  a database query built by string concatenation instead of parameterization (see [SQL
+  Injection](../../vulnerabilities/sql-injection/)). It runs early, directly against code, and can
+  catch a flaw before it's ever deployed.
+- **[DAST (Dynamic Application Security Testing)](../../methodology/dynamic-application-security-testing/)**
+  tests the *running* application from the outside, the way an actual attacker would, sending it real
+  requests and inspecting real responses. It doesn't see the source code, so it catches a different set
+  of problems than SAST does, including issues that only exist once several pieces of code interact at
+  runtime.
+- **[SCA (Software Composition Analysis)](../../methodology/software-composition-analysis/)** checks
+  the third-party and open-source libraries an application depends on against databases of known,
+  publicly disclosed vulnerabilities (tracked through the [CWE, or Common Weakness
+  Enumeration](https://cwe.mitre.org/), system). Modern applications are assembled from dozens or
+  hundreds of dependencies; SCA exists because a vulnerability in someone else's code is still a
+  vulnerability in your application.
+- **[Secure code review](../../methodology/secure-code-review/)** and **[threat
+  modeling](../../methodology/threat-modeling/)** are the human-driven practices that happen earlier
   still: a person reading code with a security lens, or a team sitting down before a feature is even
   built to ask "what could go wrong here, and for whom."
 - **Manual penetration testing** sits at the far end of this chain, and it plays a different role than
@@ -131,6 +135,14 @@ around instead of a shared responsibility.
 - **Explore Application Security vulnerabilities:** the [Vulnerabilities
   section](../../vulnerabilities/webapp-security/) has dedicated, worked-example pages for the OWASP
   Top 10 categories and every other class this domain's tooling and practices exist to catch.
+- [Static Application Security Testing (SAST)](../../methodology/static-application-security-testing/),
+  [Dynamic Application Security Testing (DAST)](../../methodology/dynamic-application-security-testing/),
+  and [Software Composition Analysis (SCA)](../../methodology/software-composition-analysis/): the
+  three automated testing pillars named above, each with its own dedicated page covering the real
+  tools used and where it structurally can't reach.
+- [Secure Code Review](../../methodology/secure-code-review/) and
+  [Threat Modeling](../../methodology/threat-modeling/): the two human-driven practices named above,
+  run at code-review time and design time respectively.
 - [What Is Penetration Testing](../../methodology/what-is-penetration-testing/): the manual, human-driven testing
   practice that sits alongside AppSec's automated tooling.
 - [WebApp Penetration Testing](../../methodology/webapp-penetration-testing/): the dedicated
