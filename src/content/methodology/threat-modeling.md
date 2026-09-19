@@ -56,6 +56,11 @@ sensitive data, money, or authentication, or anything introducing a genuinely ne
 shows up as a recurring habit on mature engineering teams, not a one-time audit: each significant new
 feature gets a light version of the same three questions before design is finalized.
 
+Some teams run this through a dedicated tool to keep the model as a living diagram rather than a
+one-time meeting note, most commonly the free Microsoft Threat Modeling Tool or OWASP's own Threat
+Dragon, both built around the same STRIDE categories described above. The tool is optional structure
+around the exercise, though; the three questions above are what actually does the work.
+
 ## Why a Business Should Care
 
 Threat modeling sits at the single cheapest point on the entire cost-of-fixing-late curve discussed

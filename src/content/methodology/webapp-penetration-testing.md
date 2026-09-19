@@ -50,6 +50,11 @@ payment card data has a direct, named obligation under PCI-DSS to run this kind 
 regular cadence, and most B2B SaaS companies get asked for evidence of it during a SOC 2 review or an
 enterprise security questionnaire.
 
+The testing itself runs through an intercepting proxy, Burp Suite is the de facto industry standard,
+with OWASP ZAP as the widely used open-source alternative, alongside targeted tools like sqlmap for
+confirming a suspected injection finding is actually exploitable rather than just theoretically
+present.
+
 ## Why a Business Should Care
 
 The realistic scenario worth naming to a client: an automated scanner can flag a known-vulnerable

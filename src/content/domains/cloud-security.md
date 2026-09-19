@@ -73,11 +73,13 @@ list:
 
 ## Where This Shows Up in Practice
 
-Cloud environments get evaluated through dedicated cloud-focused penetration testing and cloud
-configuration review engagements: testing that specifically targets IAM policy structure, storage
-permissions, network segmentation between cloud resources, and the presence of the failure patterns
-listed above, distinct from a traditional network penetration test aimed at on-premises infrastructure
-(see [Types of Penetration Testing](../../methodology/types-of-penetration-testing/)). Increasingly, cloud
+Cloud environments get evaluated through [Cloud Penetration
+Testing](../../methodology/cloud-penetration-testing/), a dedicated engagement type that specifically
+targets IAM policy structure, storage permissions, network segmentation between cloud resources, and
+the presence of the failure patterns listed above, distinct from a traditional network penetration
+test aimed at on-premises infrastructure (see [Types of Penetration
+Testing](../../methodology/types-of-penetration-testing/) for where it fits among the other
+combinations). Increasingly, cloud
 infrastructure is also defined as code (configuration files that get reviewed and version-controlled
 like application source code), which means cloud misconfigurations can now be caught the same way an
 application vulnerability is: in review, before it's ever deployed, rather than after.

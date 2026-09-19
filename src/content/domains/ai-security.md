@@ -27,7 +27,7 @@ AI security spans several distinct layers:
 
 ## Where This Shows Up in Practice
 
-This domain shows up wherever an organization builds or fine-tunes its own models, integrates third-party AI models or APIs into a product, or stands up an emerging AI governance program to oversee how AI is used and secured across the company.
+This domain shows up wherever an organization builds or fine-tunes its own models, integrates third-party AI models or APIs into a product, or stands up an emerging AI governance program to oversee how AI is used and secured across the company. It's validated directly through [AI Red Teaming](../../methodology/ai-red-teaming/), the adversarial testing discipline practiced against these systems (see [AI Penetration Testing](../../methodology/ai-penetration-testing/) for how that fits into the site's broader target-surface taxonomy).
 
 ## Why a Business Should Care
 

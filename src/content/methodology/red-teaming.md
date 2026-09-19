@@ -86,6 +86,11 @@ in organizations mature enough to fold the findings into ongoing detection engin
 part of a broader [continuous threat exposure management](../continuous-threat-exposure-management/)
 cycle where red team exercises serve as a validation step rather than a standalone project.
 
+The engagement itself draws on the same command-and-control tooling real intrusions use, most
+commonly Cobalt Strike or open-source alternatives like Sliver and Mythic, alongside BloodHound for
+mapping realistic paths through Active Directory and Gophish for the phishing pretext that gets an
+operator an initial foothold in the first place.
+
 ## Why a Business Should Care
 
 The hardest part of selling red teaming to a client is that it sits at a different investment tier

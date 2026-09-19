@@ -11,7 +11,7 @@ const surfaceSlug = (surface: string) => surface.toLowerCase().replace(/\s+/g, '
 const SURFACE_BLURBS: Record<(typeof VULN_SURFACES)[number], string> = {
   'Cloud Security': 'Public storage exposure, IAM misconfiguration, insecure IaC, and the other failure modes unique to renting infrastructure.',
   'WebApp Security': 'The OWASP Top 10: injection, broken access control, and everything else a browser-facing app can get wrong.',
-  'MobileApp Security': "What's structurally different about securing an app that ships its own compiled code onto a device the user controls.",
+  'MobileApp Security': "The OWASP Mobile Top 10: insecure data storage, insecure communication, and what's structurally different about securing an app that ships its own compiled code onto a device the user controls.",
   'Network Security': "Segmentation, access control, wireless, and the building blocks of a network an attacker can't freely move across.",
   'AI Security': 'The OWASP Top 10 for LLM Applications: prompt injection, excessive agency, and the risks specific to AI-powered systems.',
 };

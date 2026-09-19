@@ -56,10 +56,12 @@ layer commonly surfaces the same kinds of findings web apps do, such as
 
 ## Where This Shows Up in Practice
 
-Dedicated mobile penetration testing engagements are commonly scoped separately from web application
-testing (see [Types of Penetration Testing](../../methodology/types-of-penetration-testing/)). Organizations that
-ship a companion mobile app for an existing web product frequently discover, the first time it's
-actually tested, that the mobile client carries its own, entirely separate attack surface.
+[MobileApp Penetration Testing](../../methodology/mobileapp-penetration-testing/) is the dedicated
+engagement type that tests this domain directly, commonly scoped separately from web application
+testing (see [Types of Penetration Testing](../../methodology/types-of-penetration-testing/) for where
+it fits among the others). Organizations that ship a companion mobile app for an existing web product
+frequently discover, the first time it's actually tested, that the mobile client carries its own,
+entirely separate attack surface.
 
 ## Why a Business Should Care
 

@@ -46,6 +46,12 @@ an opportunistic attacker sees from the outside, not what's technically possible
 information. Internal network tests show up as a standalone engagement or as a follow-on step in a
 broader assessment, testing exactly how far a single compromised device could actually reach.
 
+Nmap remains the standard for the initial host and service discovery either test starts from,
+followed by a vulnerability scanner like Nessus or OpenVAS to flag known issues at scale. From there,
+Metasploit is used to actually prove a finding is exploitable rather than just theoretically present,
+and on an internal test, BloodHound is the standard for mapping realistic attack paths through Active
+Directory.
+
 ## Why a Business Should Care
 
 The clearest way to frame this to a client is the flat-network scenario directly: a single compromised

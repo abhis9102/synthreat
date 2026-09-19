@@ -393,6 +393,7 @@ p { margin: 0 0 1em 0; }
     display: none;
   }
   .nav-item.open .nav-panel { display: block; }
+  .nav-panel-wide { min-width: 0; }
   .nav-panel-inner { flex-direction: column; gap: 14px; }
   .nav-panel-cols { grid-template-columns: 1fr; }
 

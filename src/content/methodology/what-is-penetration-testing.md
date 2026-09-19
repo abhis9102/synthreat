@@ -84,6 +84,13 @@ community-maintained methodology. The exact names vary by firm, but the sequence
 - **Post-incident validation.** After a real security incident, to confirm the specific gap that was
   exploited is now actually closed, and that nothing adjacent was missed.
 
+The tools underneath these engagements are the same regardless of why the test was scoped, mapped
+roughly to the phases above: OSINT sources and tools like Shodan for reconnaissance, Nmap and a
+vulnerability scanner like Nessus or OpenVAS for scanning and enumeration, and a framework like
+Metasploit, or an intercepting proxy like Burp Suite for a web-focused target, for exploitation.
+Exactly which tools apply depends on the target surface being tested; see [Types of Penetration
+Testing](../types-of-penetration-testing/) for how surface and knowledge level change the toolset.
+
 ## Why a Business Should Care
 
 A penetration test report is evidence, and evidence is the actual product being purchased, not the

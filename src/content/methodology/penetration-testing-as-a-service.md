@@ -60,6 +60,10 @@ cadence of that work, not the fact that a skilled person is still the one doing 
 - **Slow-changing, tightly regulated systems** (an industrial control system updated once a year, for
   example) usually don't benefit as much from continuous testing, because the underlying premise
   (frequent change introduces frequent new risk) doesn't hold in the same way.
+- **The delivery mechanism is a platform, not a PDF.** Named PTaaS providers (Cobalt, HackerOne, and
+  Synack among the best known) run findings through a live dashboard integrated with tools like Jira
+  and Slack, so a new finding reaches an engineering team's existing workflow the same day it's
+  discovered instead of waiting weeks for a final report.
 
 ## Why a Business Should Care
 

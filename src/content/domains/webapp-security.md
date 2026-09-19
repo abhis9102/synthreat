@@ -1,48 +1,148 @@
 ---
 title: WebApp Security
-summary: The protocol and browser-layer protections that sit underneath every web application, distinct from the practices that secure the application's own code.
+summary: What actually makes a web application vulnerable, from broken access control and injection through to the protocol and browser mechanisms every app depends on.
 category: Domain Overview
 related: ["application-security"]
-relatedVulnerabilities: ["cross-site-scripting", "ssrf"]
+relatedVulnerabilities: ["broken-access-control", "sql-injection", "cross-site-scripting", "ssrf"]
 status: published
 datePublished: 2026-09-18
+dateUpdated: 2026-09-19
 ---
 
 ## What It Is
 
-WebApp security is the security of the web platform layer itself: how a browser and a server actually communicate, and the protocol-level protections that either hold or do not. This is a different layer than [Application Security](../application-security/)'s broader software-development-lifecycle practice of secure coding, code review, and testing. Application security asks whether the application's own logic is written safely. WebApp security asks whether the underlying protocols and browser mechanisms that every web application depends on are configured correctly, since a perfectly written application can still be exposed by a misconfiguration at this layer.
+WebApp security is the practice of securing a specific website or web application: its own access
+control, input handling, authentication, and business logic, plus the protocol and browser-layer
+mechanisms underneath it (TLS, CORS, cookies, security headers) that every web app depends on to
+communicate safely. It's a different question from [Application Security](../application-security/),
+which is the general software-development-lifecycle practice (SAST, DAST, secure code review) used to
+find and prevent flaws in any codebase, web or not. WebApp security is the target surface itself: the
+actual attack surface a live web application presents, and everything on it that can go wrong.
 
 ## Why It Exists
 
-The web was originally built for sharing linked documents, not for running secure, interactive applications that handle sensitive data and financial transactions. Over time, browsers and servers have accumulated a set of protocol-level security mechanisms to close that gap: encryption in transit, rules about which sites can talk to which, and headers that tell a browser how to treat a page defensively. None of this is automatic. Every one of these mechanisms has to be actively and correctly turned on and configured by whoever builds the application, and it is entirely possible to ship an application with flawless business logic sitting on top of a web-layer configuration that undermines it.
+Web applications are where most organizations ship the largest volume of bespoke, fast-changing code,
+and the same handful of root-cause vulnerability categories, broken access control, injection,
+cryptographic failures, keep recurring release after release. That isn't speculation: the [OWASP Top
+10](../../frameworks/owasp-top-10/), the most widely referenced ranking of web application risk in the
+industry, is built from real, aggregated vulnerability data and has kept surfacing the same categories
+for over a decade. On top of that application-logic layer, the web itself was originally built for
+sharing linked documents, not for running interactive applications that handle sensitive data and
+financial transactions, so browsers and servers have had to accumulate a separate set of protocol-level
+protections (encryption in transit, rules about which sites can talk to which) to close that gap. Both
+layers have to hold: a perfectly written application can still be exposed by a misconfiguration at the
+protocol layer, and a flawless TLS setup does nothing to stop a broken access-control check underneath
+it.
 
 ## How It Works
 
-A few core mechanisms make up most of this domain:
+Two layers make up this domain, and a real assessment tests both:
 
-- **HTTPS and TLS.** Encryption in transit between browser and server, verified through certificates. This includes making sure HTTP connections are actually redirected to HTTPS rather than allowed to fall back to plaintext, and using HSTS so a browser refuses to downgrade a connection even if an attacker tries to force it.
-- **The same-origin policy and CORS.** Browsers enforce a default rule that a page loaded from one origin cannot read data from a different origin. Cross-Origin Resource Sharing (CORS) is a mechanism for deliberately and narrowly relaxing that default rule for specific, legitimate cross-origin requests. It is a relaxation of a protection, not a protection itself, which is worth being precise about.
-- **Cookie security attributes.** Flags like Secure (only sent over HTTPS), HttpOnly (not readable by client-side script), and SameSite (restricting when a cookie is sent with cross-site requests) directly determine whether a session token can be intercepted or stolen through the browser (see [Session Hijacking](../../attacks/session-hijacking/)).
-- **Security headers.** A Content-Security-Policy header restricts what scripts and resources a page is allowed to load, acting as defense-in-depth against [Cross-Site Scripting](../../vulnerabilities/cross-site-scripting/). Other headers, like X-Frame-Options, prevent a page from being loaded inside another site's frame to defend against clickjacking.
+**The application-logic layer** is what the [OWASP Top 10](../../frameworks/owasp-top-10/) catalogs,
+and every category has at least one dedicated, worked-example page in this site's [WebApp Security
+vulnerabilities](../../vulnerabilities/webapp-security/) section:
+
+- **Broken Access Control (A01).** A user reaching data or actions they shouldn't be able to,
+  including [IDOR](../../vulnerabilities/idor/), [CSRF](../../vulnerabilities/csrf/),
+  [path traversal](../../vulnerabilities/path-traversal/), and [open
+  redirect](../../vulnerabilities/open-redirect/). The single most commonly reported category in the
+  real-world data OWASP draws from.
+- **Cryptographic Failures (A02).** Sensitive data exposed because it was never encrypted, or
+  encrypted with a broken or outdated method. See [Cryptographic
+  Failures](../../vulnerabilities/cryptographic-failures/).
+- **Injection (A03).** Untrusted input executed as code or commands instead of handled as plain data:
+  [SQL injection](../../vulnerabilities/sql-injection/), [cross-site
+  scripting](../../vulnerabilities/cross-site-scripting/), [command
+  injection](../../vulnerabilities/command-injection/), and [file
+  inclusion](../../vulnerabilities/file-inclusion/) are all this category.
+- **Insecure Design (A04).** A missing security control that was never built, not a broken one, often
+  showing up as a [business logic vulnerability](../../vulnerabilities/business-logic-vulnerabilities/).
+  See [Insecure Design](../../vulnerabilities/insecure-design/).
+- **Security Misconfiguration (A05).** A default setting, unnecessary feature, or overly verbose error
+  left enabled in production, covering everything from [XXE](../../vulnerabilities/xxe/) and
+  [clickjacking](../../vulnerabilities/clickjacking/) to a [subdomain
+  takeover](../../vulnerabilities/subdomain-takeover/).
+- **Vulnerable and Outdated Components (A06).** Shipping a third-party library or framework with a
+  publicly known, unpatched flaw. See [Vulnerable and Outdated
+  Components](../../vulnerabilities/vulnerable-outdated-components/).
+- **Identification and Authentication Failures (A07).** Weak login, session, or credential handling.
+  See [Authentication Failures](../../vulnerabilities/authentication-failures/).
+- **Software and Data Integrity Failures (A08).** Trusting an update, plugin, or piece of serialized
+  data without verifying it hasn't been tampered with, including [mass
+  assignment](../../vulnerabilities/mass-assignment/). See [Software and Data Integrity
+  Failures](../../vulnerabilities/software-data-integrity-failures/).
+- **Security Logging and Monitoring Failures (A09).** An incident that runs longer than it should
+  because nobody was watching. See [Logging and Monitoring
+  Failures](../../vulnerabilities/logging-monitoring-failures/).
+- **Server-Side Request Forgery (A10).** A server tricked into making a request on an attacker's
+  behalf. See [SSRF](../../vulnerabilities/ssrf/).
+
+**The protocol and browser layer** sits underneath all of that, and a well-written application can
+still be undermined here:
+
+- **HTTPS and TLS.** Encryption in transit between browser and server, verified through certificates,
+  including making sure HTTP actually redirects to HTTPS and using HSTS so a browser refuses to
+  downgrade a connection even if an attacker tries to force it.
+- **The same-origin policy and CORS.** Browsers enforce a default rule that a page loaded from one
+  origin cannot read data from a different one. CORS is a mechanism for deliberately and narrowly
+  relaxing that default for specific, legitimate cross-origin requests, a relaxation of a protection,
+  not a protection itself.
+- **Cookie security attributes.** Flags like Secure, HttpOnly, and SameSite directly determine whether
+  a session token can be intercepted or stolen through the browser (see [Session
+  Hijacking](../../attacks/session-hijacking/)).
+- **Security headers.** A Content-Security-Policy header restricts what a page can load, adding
+  defense-in-depth against [Cross-Site Scripting](../../vulnerabilities/cross-site-scripting/); headers
+  like X-Frame-Options defend against clickjacking.
 
 ## Where This Shows Up in Practice
 
-Web application penetration testing routinely probes specifically at this layer: checking whether CORS is configured too permissively, whether cookies are missing the Secure or HttpOnly flags, whether security headers are present at all. Browser security research, which studies how browsers themselves enforce these protections, also lives in this domain.
+[WebApp penetration testing](../../methodology/webapp-penetration-testing/) is scoped to cover both
+layers in the same engagement: mapping every page, form, and API endpoint and testing each one against
+the OWASP categories above, alongside checking whether CORS is too permissive, cookies are missing
+security flags, or headers are absent entirely. Automated tools make an initial pass fast at both
+layers: Qualys SSL Labs grades TLS and certificate configuration, and free scanners like Mozilla
+Observatory or securityheaders.com flag missing security headers in seconds, but a tester still relies
+on an intercepting proxy like Burp Suite or OWASP ZAP, plus targeted tools like sqlmap, to confirm a
+suspected gap is actually exploitable rather than just absent.
 
 ## Why a Business Should Care
 
-An overly permissive CORS policy, or a cookie missing a security flag, can undermine an application whose actual business logic and code are otherwise well written. That is a genuinely distinct risk surface from "is our code secure," and it is one that a code review alone will not necessarily catch if the reviewer is not specifically looking at this layer. Worth raising directly with a client: passing a code audit and having a secure web-layer configuration are two different checks, not one.
+The realistic scenario worth naming to a client: a team can pass a clean code audit and still get
+breached, because an overly permissive CORS policy or a cookie missing a security flag undermines
+application logic that was otherwise written correctly. That's a genuinely distinct risk surface from
+"is our code secure," and a code review alone won't necessarily catch it if the reviewer isn't
+specifically looking at this layer. Most B2B SaaS companies get asked for evidence of testing against
+exactly this landscape during a SOC 2 review or an enterprise security questionnaire, and any
+organization handling payment card data has a direct, named obligation under PCI-DSS to test it on a
+regular cadence.
 
 ## Common Misconceptions
 
-**"HTTPS means the site is secure."** HTTPS protects data while it is in transit between the browser and the server. It says nothing about whether the application's logic is sound, whether it is vulnerable to injection, or whether its headers and cookies are configured correctly. A site can serve a SQL injection vulnerability perfectly securely over HTTPS.
+**"WebApp security is just about HTTPS and browser settings, not the application's own code."** This
+is the mirror image of the mistake this page itself used to make: the application-logic layer (the
+OWASP Top 10 categories above) is where the majority of real, high-severity findings actually live.
+The protocol and browser layer matters, but it's one piece of the domain, not the whole thing.
 
-**"CORS is a security feature that blocks attackers."** This gets the mechanism backwards, and it is worth correcting directly. The same-origin policy is the actual protection, the default browser behavior of keeping origins isolated. CORS exists to deliberately open a hole in that protection for legitimate cases. A misconfigured, overly broad CORS policy weakens the same-origin policy's protection rather than adding any protection of its own.
+**"HTTPS means the site is secure."** HTTPS protects data in transit. It says nothing about whether the
+application's logic is sound, whether it's vulnerable to injection, or whether its headers and cookies
+are configured correctly. A site can serve a SQL injection vulnerability perfectly securely over HTTPS.
+
+**"CORS is a security feature that blocks attackers."** This gets the mechanism backwards. The
+same-origin policy is the actual protection; CORS exists to deliberately open a hole in that protection
+for legitimate cases. A misconfigured, overly broad CORS policy weakens the same-origin policy's
+protection rather than adding any protection of its own.
 
 ## Related Topics
 
-- **Explore WebApp Security vulnerabilities:** the [Vulnerabilities section](../../vulnerabilities/webapp-security/) has dedicated, worked-example pages for the OWASP Top 10 categories this protocol layer sits underneath.
-- [Application Security](../application-security/): the broader software-security practice this protocol layer sits underneath.
-- [Cloud Security](../cloud-security/): the infrastructure layer beneath the web platform itself.
-- [Cross-Site Scripting](../../vulnerabilities/cross-site-scripting/): the vulnerability class Content-Security-Policy exists to add defense-in-depth against.
-- [Server-Side Request Forgery](../../vulnerabilities/ssrf/): a related flaw where a server is tricked into making a request on an attacker's behalf.
+- **Explore WebApp Security vulnerabilities:** the [Vulnerabilities
+  section](../../vulnerabilities/webapp-security/) has dedicated, worked-example pages for every OWASP
+  Top 10 category named above.
+- [The OWASP Top 10](../../frameworks/owasp-top-10/): the named standard the application-logic layer
+  is organized around.
+- [Application Security](../application-security/): the broader software-security practice (SAST, DAST,
+  secure code review) this specific target surface is tested and secured with.
+- [WebApp Penetration Testing](../../methodology/webapp-penetration-testing/): the dedicated engagement
+  type that tests this domain directly.
+- [Broken Access Control](../../vulnerabilities/broken-access-control/) and [SQL
+  Injection](../../vulnerabilities/sql-injection/): the two categories responsible for the largest
+  share of real-world, high-severity web application findings.

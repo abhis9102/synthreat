@@ -68,6 +68,10 @@ also shows up as the organizing structure around services like
 rolling testing is delivered specifically to feed a continuous exposure-management cycle rather than
 producing one static annual report.
 
+The "continuous" half is usually powered by attack-surface-management platforms (Wiz, Tenable, Rapid7,
+and similar) that keep an always-current asset inventory and feed newly discovered exposures into the
+cycle automatically, rather than waiting for a scheduled scan to notice them.
+
 ## Why a Business Should Care
 
 CTEM reframes a security conversation with a client in a way that's genuinely more defensible than

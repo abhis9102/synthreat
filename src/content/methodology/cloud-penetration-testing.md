@@ -50,6 +50,11 @@ new cloud environment are misconfigured permissions, not undiscovered code-level
 increasingly folded into infrastructure-as-code review, catching a misconfiguration in the template
 before it's ever deployed, the same way an application vulnerability gets caught in code review.
 
+The review itself typically runs through cloud-specific tooling: open-source scanners like Prowler,
+ScoutSuite, and (for AWS specifically) Pacu check the account's actual configuration against hundreds
+of known misconfiguration patterns, alongside each provider's own native tools, AWS IAM Access
+Analyzer or Microsoft Defender for Cloud among them, for anything proprietary to that platform.
+
 ## Why a Business Should Care
 
 The cloud provider secures the infrastructure underneath the environment; the customer is

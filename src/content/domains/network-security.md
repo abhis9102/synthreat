@@ -31,7 +31,7 @@ There has also been a genuine shift in how the field thinks about all of this. O
 
 ## Where This Shows Up in Practice
 
-Network security shows up as its own distinct category of penetration testing, split specifically into external network tests (what an anonymous internet-based attacker can reach) and internal network tests (what an attacker or compromised device already inside the network can reach), covered in detail on [Types of Penetration Testing](../../methodology/types-of-penetration-testing/). It also shows up as dedicated network architecture reviews and standalone wireless security assessments, both of which look specifically at how systems are connected and segmented rather than at any single application's code.
+Network security is validated directly through [Network Penetration Testing](../../methodology/network-penetration-testing/), which splits specifically into external network tests (what an anonymous internet-based attacker can reach) and internal network tests (what an attacker or compromised device already inside the network can reach); see [Types of Penetration Testing](../../methodology/types-of-penetration-testing/) for where that fits among the other engagement combinations. It also shows up as dedicated network architecture reviews and standalone wireless security assessments, both of which look specifically at how systems are connected and segmented rather than at any single application's code.
 
 ## Why a Business Should Care
 

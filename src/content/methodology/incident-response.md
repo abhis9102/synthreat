@@ -57,6 +57,12 @@ stakes are still zero. Breach notification obligations that several compliance r
 require once a qualifying incident is confirmed, on a clock that starts the moment the incident is
 discovered, not when the organization feels ready to talk about it.
 
+When an incident is actually live, the tools doing the real work are a SIEM (Splunk, Elastic, or
+Microsoft Sentinel are common choices) correlating the alerts that first flagged it, an EDR platform
+(CrowdStrike Falcon or Microsoft Defender for Endpoint, among others) isolating the affected host, and
+forensic tools like Volatility or KAPE preserving memory and disk evidence before anything gets
+touched further.
+
 Consider a fully invented example: Aldergrove Logistics discovers unusual encryption activity on a
 file server at 2 a.m. A team with a rehearsed plan already knows who has authority to isolate that
 server from the network without waiting for a morning meeting, already has a pre-drafted

@@ -51,6 +51,11 @@ Testing](../types-of-penetration-testing/)), and frequently discover, the first 
 tested, that the mobile client carries its own, entirely separate attack surface the web testing never
 touched.
 
+The engagement itself runs through mobile-specific tooling: MobSF (Mobile Security Framework) for
+automated static and dynamic analysis, Frida and Objection for runtime instrumentation and bypassing
+client-side protections like certificate pinning, and apktool or jadx for decompiling and reading an
+Android app's actual source.
+
 ## Why a Business Should Care
 
 An app store's review process is often mistaken for a security guarantee. In reality it screens for

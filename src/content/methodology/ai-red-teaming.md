@@ -79,6 +79,10 @@ and the blast radius of a successful prompt injection or jailbreak jumps from re
 embarrassment to actual data exposure or unauthorized action. Organizations deploying these connected
 AI agents are where AI red teaming earns its keep fastest.
 
+Testers lean on open-source scanners like garak and Microsoft's PyRIT (Python Risk Identification
+Toolkit) to automate known jailbreak and injection patterns at scale, then layer in hands-on
+adversarial prompting for the subtler, context-specific manipulations automated tooling misses.
+
 ## Why a Business Should Care
 
 This is a genuinely new and fast-moving risk category, and it's one that boards, regulators, and
