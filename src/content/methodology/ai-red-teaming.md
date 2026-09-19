@@ -50,8 +50,8 @@ both are worth citing by name rather than relying on informal folklore about "AI
   organization behind the general OWASP Top 10, specifically cataloging the most common and impactful
   ways LLM-based applications go wrong. Also see this site's own [dedicated page](../../frameworks/ai-llm-top-10/) on it.
 - [MITRE ATLAS](https://atlas.mitre.org/) (Adversarial Threat Landscape for Artificial-Intelligence Systems): a MITRE
-  project, structured similarly to the well-known MITRE ATT&CK framework, cataloging real-world
-  adversary tactics and techniques specifically against AI/ML systems.
+  project, structured similarly to [MITRE ATT&CK](../../frameworks/mitre-attack/), cataloging
+  real-world adversary tactics and techniques specifically against AI/ML systems.
 
 Testing generally works through representative technique categories at the model layer:
 

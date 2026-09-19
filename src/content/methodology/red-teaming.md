@@ -1,7 +1,7 @@
 ---
 title: Red Teaming
 summary: What separates a red team engagement from a penetration test, why it exists, and how it simulates a real adversary rather than a checklist of vulnerabilities.
-related: ["what-is-penetration-testing", "ai-red-teaming", "types-of-penetration-testing"]
+related: ["what-is-penetration-testing", "ai-red-teaming", "types-of-penetration-testing", "mitre-attack"]
 relatedVulnerabilities: []
 status: published
 datePublished: 2026-09-18
@@ -69,7 +69,7 @@ loop back and repeat steps as new information comes in:
    the deliverable.
 6. **Debrief, including the blue team.** The engagement ends with a full readout that brings the
    defenders into the conversation: what was detected, what wasn't, and why. Most mature red teams
-   map their actions against [MITRE ATT&CK](https://attack.mitre.org/), a publicly maintained,
+   map their actions against [MITRE ATT&CK](../../frameworks/mitre-attack/), a publicly maintained,
    industry-standard knowledge base of real-world adversary tactics and techniques, so the findings
    translate directly into "here is the specific technique that got past your defenses," rather than
    a vague narrative.
@@ -130,3 +130,5 @@ have found, at a fraction of the cost and clarity.
   to AI and machine learning systems, which fail in different ways than traditional infrastructure.
 - [Types of Penetration Testing](../types-of-penetration-testing/): where red teaming sits relative
   to the other testing formats an organization might commission.
+- [MITRE ATT&CK](../../frameworks/mitre-attack/): the shared vocabulary a red team debrief reports
+  its findings against.

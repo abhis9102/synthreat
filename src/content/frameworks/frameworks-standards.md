@@ -1,7 +1,7 @@
 ---
 title: Cybersecurity Frameworks & Standards
 summary: A map of the major frameworks referenced across this site, what problem each one actually solves, and how they relate to each other.
-related: ["owasp-top-10", "sans-top-25", "ai-llm-top-10", "nist-cybersecurity-framework", "cis-controls"]
+related: ["owasp-top-10", "sans-top-25", "ai-llm-top-10", "nist-cybersecurity-framework", "cis-controls", "mitre-attack"]
 relatedVulnerabilities: []
 status: published
 datePublished: 2026-09-18
@@ -32,20 +32,20 @@ involved, the security team, the client, the auditor, the same reference point.
 | [OWASP Top 10 for LLM Applications](../ai-llm-top-10/) | An AI-specific risk list | Names the failure modes unique to systems built around a language model | The OWASP Foundation |
 | [NIST Cybersecurity Framework](../nist-cybersecurity-framework/) | A voluntary, high-level organizational risk-management framework, not a checklist | Gives a whole security program a common structure to organize around | The U.S. National Institute of Standards and Technology |
 | [CIS Controls](../cis-controls/) | A prioritized, actionable catalog of specific technical safeguards | Turns "we should be more secure" into a concrete, ordered implementation list | The Center for Internet Security |
+| [MITRE ATT&CK](../mitre-attack/) | A comprehensive taxonomy of real-world adversary tactics and techniques, not ranked by severity | Gives everyone, red teamer, defender, client, the same shared vocabulary for describing what an attacker actually did | MITRE |
 
-Two other names show up constantly elsewhere on this site and are worth placing on this map even
-though they don't get their own row here: MITRE ATT&CK, a taxonomy of real adversary tactics and
-techniques covered in depth on the [Red Teaming](../../methodology/red-teaming/) page, and PTES, the Penetration
-Testing Execution Standard, covered on the [What Is Penetration Testing?](../../methodology/what-is-penetration-testing/)
-page.
+One other name shows up constantly elsewhere on this site and is worth placing on this map even
+though it doesn't get its own row here: PTES, the Penetration Testing Execution Standard, covered on
+the [What Is Penetration Testing?](../../methodology/what-is-penetration-testing/) page.
 
 The distinction that actually matters, and the one beginners and clients most often blur together,
 is what *kind* of thing each entry is. A **prioritization list** (OWASP Top 10, SANS/CWE Top 25, the
 AI Top 10) names the most common or dangerous specific risk categories in a given domain. A
 **management framework** (NIST CSF) gives structure to an entire program rather than naming specific
 risks. A **control catalog** (CIS Controls) is a concrete, actionable list of things to actually
-implement. None of these four is a **compliance regime**, a legal or contractual requirement with
-real penalties for failing it. That's a genuinely different category, covered on its own
+implement. A **taxonomy** (MITRE ATT&CK) catalogs what's actually observed in the real world without
+ranking it at all. None of these five is a **compliance regime**, a legal or contractual requirement
+with real penalties for failing it. That's a genuinely different category, covered on its own
 [Cybersecurity Compliance & Regulations](../../compliance/compliance-regulations/) overview page.
 
 ## Where This Shows Up in Practice
@@ -70,9 +70,9 @@ rather than name recognition alone.
 ## Common Misconceptions
 
 **"These are all basically the same list."** They solve different problems, as the table above
-shows: a prioritization list, a management framework, and a control catalog answer three different
-questions, and treating them as interchangeable usually means picking the wrong one for the actual
-need.
+shows: a prioritization list, a management framework, a control catalog, and a taxonomy answer four
+different questions, and treating them as interchangeable usually means picking the wrong one for the
+actual need.
 
 **"Following one of these guarantees compliance with a legal regulation."** A framework is not
 automatically a compliance requirement. An organization can follow CIS Controls closely and still
@@ -86,5 +86,6 @@ the [Compliance & Regulations](../../compliance/compliance-regulations/) overvie
 - [The OWASP Top 10 for LLM Applications](../ai-llm-top-10/)
 - [The NIST Cybersecurity Framework](../nist-cybersecurity-framework/)
 - [CIS Controls](../cis-controls/)
+- [MITRE ATT&CK](../mitre-attack/)
 - [Cybersecurity Compliance & Regulations](../../compliance/compliance-regulations/): the related but distinct
   category of legal and contractual requirements, as opposed to voluntary frameworks.

@@ -2,7 +2,7 @@
 title: Common Types of Cyberattacks
 summary: A working reference to the cyberattack types every newcomer and client-facing security person should recognize by name, how each works, and how it's normally prevented.
 category: Attack Landscape
-related: ["application-security", "red-teaming"]
+related: ["application-security", "red-teaming", "mitre-attack"]
 relatedVulnerabilities: ["sql-injection"]
 status: published
 datePublished: 2026-09-18
@@ -22,7 +22,7 @@ normally defended against, and what it costs a business when it succeeds.
 
 Attackers don't invent a new technique for every attack: they reuse a relatively small, well-
 understood set of tactics, adapting the specific delivery method while the underlying approach stays
-recognizable. This is exactly what [MITRE ATT&CK](https://attack.mitre.org/) formalizes: it's the security
+recognizable. This is exactly what [MITRE ATT&CK](../../frameworks/mitre-attack/) formalizes: it's the security
 industry's standard, publicly maintained taxonomy of adversary tactics (the *why*: what an attacker is
 trying to accomplish, like gaining initial access or moving laterally through a network) and
 techniques (the *how*: the specific method used to accomplish it). You don't need to memorize ATT&CK
@@ -125,3 +125,5 @@ traffic; it's simply less likely to make the news when it's hit.
   entry on this list.
 - [Browse every attack technique page](../../attacks/): the full index of dedicated deep-dive pages
   linked from the table above.
+- [MITRE ATT&CK](../../frameworks/mitre-attack/): the standard taxonomy this page's own
+  tactics/techniques distinction is grounded in.
