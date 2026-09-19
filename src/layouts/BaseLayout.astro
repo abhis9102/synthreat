@@ -269,74 +269,31 @@ const NAV_SECTIONS = [
             <span class="listen-label">Listen to this page</span>
           </button>
           <button class="listen-stop" id="listenStop" aria-label="Stop reading" type="button" hidden>Stop</button>
-          <select class="listen-voice" id="listenVoice" aria-label="Reading voice" hidden></select>
         `;
         listenArticle.parentNode?.insertBefore(bar, listenArticle);
 
         const listenBtn = bar.querySelector('#listenBtn');
         const listenStop = bar.querySelector('#listenStop');
         const listenLabel = bar.querySelector('.listen-label');
-        const listenVoice = bar.querySelector('#listenVoice');
         let utterance = null;
         let paused = false;
 
-        // Voice list: populated from whatever text-to-speech voices the visitor's own browser and
-        // OS already provide (no server, no API key, no cost). Chrome loads this list
-        // asynchronously via 'voiceschanged'; Firefox and Safari usually have it immediately, so
-        // both paths are covered. English voices are surfaced first since this site is
-        // English-only; the choice is remembered per-browser so it doesn't need reselecting on
-        // every page.
-        function voiceKey(voice) {
-          return `${voice.name}|${voice.lang}`;
-        }
-
-        function populateVoices() {
+        // Prefer "Samantha" (en-US), a widely available, clear-sounding voice on Apple platforms,
+        // over whatever the browser would otherwise default to. Falls back to the browser's own
+        // default automatically wherever Samantha isn't available (most non-Apple platforms).
+        // Chrome loads its voice list asynchronously via 'voiceschanged', so this is checked again
+        // once that fires in case the first lookup ran before voices were ready.
+        let preferredVoice = null;
+        function pickPreferredVoice() {
           const voices = window.speechSynthesis.getVoices();
-          if (voices.length === 0) return;
-
-          // Deliberately narrowed to two choices rather than every voice the OS happens to
-          // expose: the browser's own default (whatever was already reading the page before this
-          // picker existed) and "Samantha" (en-US) specifically, a widely available,
-          // clear-sounding voice on Apple platforms. A long, unlabeled OS voice list is more
-          // choice than a reader actually wants here.
-          const defaultVoice = voices.find((v) => v.default) ?? voices[0];
-          const samanthaVoice = voices.find(
+          preferredVoice = voices.find(
             (v) => v.name.toLowerCase() === 'samantha' && v.lang?.toLowerCase() === 'en-us'
-          );
-          const options = [
-            { voice: defaultVoice, label: 'Default' },
-            ...(samanthaVoice && voiceKey(samanthaVoice) !== voiceKey(defaultVoice)
-              ? [{ voice: samanthaVoice, label: 'Samantha' }]
-              : []),
-          ];
-
-          let saved = null;
-          try { saved = localStorage.getItem('synthreat-voice'); } catch {}
-
-          listenVoice.innerHTML = options
-            .map((o) => `<option value="${voiceKey(o.voice)}">${o.label}</option>`)
-            .join('');
-          if (saved && options.some((o) => voiceKey(o.voice) === saved)) {
-            listenVoice.value = saved;
-          }
-          listenVoice.hidden = options.length < 2;
+          ) ?? null;
         }
-
-        populateVoices();
+        pickPreferredVoice();
         if ('onvoiceschanged' in window.speechSynthesis) {
-          window.speechSynthesis.addEventListener('voiceschanged', populateVoices);
+          window.speechSynthesis.addEventListener('voiceschanged', pickPreferredVoice);
         }
-
-        listenVoice.addEventListener('change', () => {
-          try { localStorage.setItem('synthreat-voice', listenVoice.value); } catch {}
-          // Changing voice mid-read restarts speech from the top with the new voice, since a
-          // browser's speechSynthesis can't swap voices on an utterance already in progress.
-          if (window.speechSynthesis.speaking || paused) {
-            window.speechSynthesis.cancel();
-            paused = false;
-            setState('idle');
-          }
-        });
 
         function readableText() {
           const clone = listenArticle.cloneNode(true);
@@ -356,10 +313,7 @@ const NAV_SECTIONS = [
         listenBtn.addEventListener('click', () => {
           if (!utterance || (!window.speechSynthesis.speaking && !paused)) {
             utterance = new SpeechSynthesisUtterance(readableText());
-            const selected = window.speechSynthesis
-              .getVoices()
-              .find((v) => voiceKey(v) === listenVoice.value);
-            if (selected) utterance.voice = selected;
+            if (preferredVoice) utterance.voice = preferredVoice;
             utterance.onend = () => setState('idle');
             utterance.onerror = () => setState('idle');
             window.speechSynthesis.speak(utterance);
