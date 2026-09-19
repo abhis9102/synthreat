@@ -294,21 +294,32 @@ const NAV_SECTIONS = [
           const voices = window.speechSynthesis.getVoices();
           if (voices.length === 0) return;
 
-          const english = voices.filter((v) => v.lang?.toLowerCase().startsWith('en'));
-          const ordered = (english.length > 0 ? english : voices)
-            .slice()
-            .sort((a, b) => a.name.localeCompare(b.name));
+          // Deliberately narrowed to two choices rather than every voice the OS happens to
+          // expose: the browser's own default (whatever was already reading the page before this
+          // picker existed) and "Samantha" (en-US) specifically, a widely available,
+          // clear-sounding voice on Apple platforms. A long, unlabeled OS voice list is more
+          // choice than a reader actually wants here.
+          const defaultVoice = voices.find((v) => v.default) ?? voices[0];
+          const samanthaVoice = voices.find(
+            (v) => v.name.toLowerCase() === 'samantha' && v.lang?.toLowerCase() === 'en-us'
+          );
+          const options = [
+            { voice: defaultVoice, label: 'Default' },
+            ...(samanthaVoice && voiceKey(samanthaVoice) !== voiceKey(defaultVoice)
+              ? [{ voice: samanthaVoice, label: 'Samantha' }]
+              : []),
+          ];
 
           let saved = null;
           try { saved = localStorage.getItem('synthreat-voice'); } catch {}
 
-          listenVoice.innerHTML = ordered
-            .map((v) => `<option value="${voiceKey(v)}">${v.name} (${v.lang})</option>`)
+          listenVoice.innerHTML = options
+            .map((o) => `<option value="${voiceKey(o.voice)}">${o.label}</option>`)
             .join('');
-          if (saved && ordered.some((v) => voiceKey(v) === saved)) {
+          if (saved && options.some((o) => voiceKey(o.voice) === saved)) {
             listenVoice.value = saved;
           }
-          listenVoice.hidden = false;
+          listenVoice.hidden = options.length < 2;
         }
 
         populateVoices();
