@@ -1,0 +1,746 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { LEARNING_PATHS, type LearningPath } from '../../data/paths';
+
+export function getStaticPaths() {
+  return LEARNING_PATHS.map((path) => ({
+    params: { slug: path.slug },
+    props: { path },
+  }));
+}
+
+interface Props {
+  path: LearningPath;
+}
+
+const { path } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  title={path.title}
+  description={path.description}
+>
+  <!-- Back link -->
+  <a class="tagline" href={`${base}paths/`}>← All Learning Paths</a>
+
+  <!-- Course Hero -->
+  <div class="path-hero">
+    <span class="hero-icon" aria-hidden="true">{path.icon}</span>
+    <div class="hero-text">
+      <h1>{path.title}</h1>
+      <p class="hero-desc">{path.description}</p>
+      <div class="hero-meta">
+        <span class="level-badge">{path.level}</span>
+        <span class="meta-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          {path.duration}
+        </span>
+        <span class="meta-chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 10h16M4 14h10"/></svg>
+          {path.articles.length} lessons
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Course Progress Card -->
+  <div
+    class="course-progress-card"
+    id="courseProgressCard"
+    data-path-slug={path.slug}
+    data-total={path.articles.length}
+    data-articles={JSON.stringify(path.articles.map(a => ({ id: `${a.col}/${a.slug}`, href: `${base}${a.col}/${a.slug}/`, title: a.title })))}
+  >
+    <div class="cp-header">
+      <div class="cp-title-wrap">
+        <span class="cp-label">Course Progress</span>
+        <span class="cp-badge" id="cpBadge">Not Started</span>
+      </div>
+      <div class="cp-stats">
+        <span class="cp-metric" id="cpMetric">0 / {path.articles.length} Completed (0%)</span>
+        <button type="button" class="cp-reset-btn" id="cpResetBtn" title="Reset this course" aria-label="Reset course">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <div class="cp-bar" role="progressbar" aria-label="Course completion" aria-valuemin={0} aria-valuemax={path.articles.length} aria-valuenow={0} id="cpBar">
+      <div class="cp-fill" id="cpFill" style="width: 0%"></div>
+    </div>
+
+    <div class="cp-actions">
+      <a class="btn-resume" id="cpResumeBtn" href={`${base}${path.articles[0].col}/${path.articles[0].slug}/`}>
+        Start First Lesson ({path.articles[0].title}) →
+      </a>
+    </div>
+  </div>
+
+  <!-- Completion Banner (revealed when 100% complete) -->
+  <div class="course-complete-banner" id="cpCompleteBanner" hidden style="display: none;">
+    <div class="complete-icon">🏆</div>
+    <div class="complete-text">
+      <h3>Path Completed!</h3>
+      <p>Congratulations! You have marked all {path.articles.length} lessons in <strong>{path.title}</strong> as complete.</p>
+    </div>
+  </div>
+
+  <div class="curriculum-header">
+    <h2>Course Curriculum</h2>
+    <span class="curriculum-hint">Click checkboxes to track completed lessons</span>
+  </div>
+
+  <!-- Interactive Article / Lesson List -->
+  <ol class="article-list" id="curriculumList">
+    {path.articles.map((article, idx) => {
+      const href = `${base}${article.col}/${article.slug}/`;
+      const articleId = `${article.col}/${article.slug}`;
+
+      return (
+        <li class="article-row" data-article-id={articleId} data-slug={article.slug} data-href={href}>
+          <button
+            type="button"
+            class="article-check-btn"
+            data-article-id={articleId}
+            aria-label={`Mark lesson ${idx + 1} completed`}
+            title="Toggle completed state"
+          >
+            <span class="check-box">○</span>
+          </button>
+
+          <span class="article-num" aria-hidden="true">{String(idx + 1).padStart(2, '0')}</span>
+
+          <div class="article-body">
+            <a class="article-link" href={href}>{article.title}</a>
+            <div class="article-meta-row">
+              <span class="article-col">{article.col}</span>
+              <span class="quiz-indicator" data-slug={article.slug}>
+                🧠 AI Quiz
+              </span>
+            </div>
+          </div>
+
+          <a href={href} class="article-arrow" aria-label={`Open ${article.title}`}>
+            →
+          </a>
+        </li>
+      );
+    })}
+  </ol>
+</BaseLayout>
+
+<script>
+  interface PathSequenceItem {
+    id: string;
+    href: string;
+    title: string;
+  }
+
+  const card = document.getElementById('courseProgressCard');
+  if (card) {
+    const pathSlug = card.dataset.pathSlug || '';
+    const total = parseInt(card.dataset.total || '0', 10);
+    const rawArticles = card.dataset.articles || '[]';
+    const articles: PathSequenceItem[] = JSON.parse(rawArticles);
+
+    const cpBadge = document.getElementById('cpBadge');
+    const cpMetric = document.getElementById('cpMetric');
+    const cpFill = document.getElementById('cpFill');
+    const cpBar = document.getElementById('cpBar');
+    const cpResumeBtn = document.getElementById('cpResumeBtn') as HTMLAnchorElement | null;
+    const cpResetBtn = document.getElementById('cpResetBtn');
+    const completeBanner = document.getElementById('cpCompleteBanner');
+
+    function updateCourseUI() {
+      let completed: string[] = [];
+      try {
+        const raw = localStorage.getItem('synthreat_path_progress');
+        if (raw) {
+          const store = JSON.parse(raw);
+          completed = store[pathSlug]?.completed || [];
+        }
+      } catch { /* ignore */ }
+
+      // Read quiz scores
+      let quizScores: Record<string, { passed?: boolean; score?: number; total?: number }> = {};
+      try {
+        const qRaw = localStorage.getItem('synthreat_quiz_scores');
+        if (qRaw) quizScores = JSON.parse(qRaw);
+      } catch { /* ignore */ }
+
+      const completedCount = articles.filter(a => completed.includes(a.id)).length;
+      const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
+      // Update progress bar
+      if (cpFill) cpFill.style.width = `${pct}%`;
+      if (cpBar) cpBar.setAttribute('aria-valuenow', String(completedCount));
+      if (cpMetric) cpMetric.textContent = `${completedCount} / ${total} Completed (${pct}%)`;
+
+      const isFinished = total > 0 && completedCount >= total;
+
+      // Update completion banner visibility
+      if (completeBanner) {
+        if (isFinished) {
+          completeBanner.hidden = false;
+          completeBanner.style.display = 'flex';
+          completeBanner.classList.add('is-visible');
+        } else {
+          completeBanner.hidden = true;
+          completeBanner.style.display = 'none';
+          completeBanner.classList.remove('is-visible');
+        }
+      }
+
+      // Update badge & buttons
+      if (cpBadge && cpResumeBtn) {
+        if (completedCount === 0) {
+          cpBadge.className = 'cp-badge is-unstarted';
+          cpBadge.textContent = 'Not Started';
+          cpResumeBtn.textContent = `Start First Lesson (${articles[0]?.title}) →`;
+          cpResumeBtn.href = articles[0]?.href || '#';
+        } else if (isFinished) {
+          cpBadge.className = 'cp-badge is-completed';
+          cpBadge.textContent = 'Completed 🏆';
+          cpResumeBtn.textContent = '🎉 Review Path from Start ↺';
+          cpResumeBtn.href = articles[0]?.href || '#';
+        } else {
+          cpBadge.className = 'cp-badge is-progress';
+          cpBadge.textContent = 'In Progress';
+
+          // Find first uncompleted lesson
+          const nextUncompleted = articles.find(a => !completed.includes(a.id));
+          if (nextUncompleted) {
+            cpResumeBtn.textContent = `Resume: ${nextUncompleted.title} →`;
+            cpResumeBtn.href = nextUncompleted.href;
+          }
+        }
+      }
+
+      // Update each curriculum row
+      document.querySelectorAll<HTMLElement>('.article-row').forEach((row) => {
+        const id = row.dataset.articleId;
+        const slug = row.dataset.slug;
+        if (!id) return;
+
+        const isDone = completed.includes(id);
+        const btn = row.querySelector<HTMLButtonElement>('.article-check-btn');
+        const box = row.querySelector<HTMLElement>('.check-box');
+
+        if (isDone) {
+          row.classList.add('is-done');
+          if (btn) btn.classList.add('is-checked');
+          if (box) box.textContent = '✓';
+        } else {
+          row.classList.remove('is-done');
+          if (btn) btn.classList.remove('is-checked');
+          if (box) box.textContent = '○';
+        }
+
+        // Update quiz indicator if present
+        if (slug) {
+          const qIndicator = row.querySelector<HTMLElement>('.quiz-indicator');
+          const scoreRecord = quizScores[slug];
+          if (qIndicator) {
+            if (scoreRecord && scoreRecord.passed) {
+              qIndicator.className = 'quiz-indicator is-passed';
+              qIndicator.textContent = `🧠 Quiz Passed (${scoreRecord.score}/${scoreRecord.total}) ✓`;
+            } else if (scoreRecord) {
+              qIndicator.className = 'quiz-indicator is-attempted';
+              qIndicator.textContent = `🧠 Quiz (${scoreRecord.score}/${scoreRecord.total})`;
+            } else {
+              qIndicator.className = 'quiz-indicator';
+              qIndicator.textContent = '🧠 Quiz Available';
+            }
+          }
+        }
+      });
+    }
+
+    // Attach click handlers to checklist buttons
+    document.querySelectorAll<HTMLButtonElement>('.article-check-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const articleId = btn.dataset.articleId;
+        if (!articleId) return;
+
+        try {
+          const raw = localStorage.getItem('synthreat_path_progress');
+          const all = raw ? JSON.parse(raw) : {};
+          const current = all[pathSlug]?.completed || [];
+
+          let updated: string[];
+          if (current.includes(articleId)) {
+            updated = current.filter((id: string) => id !== articleId);
+          } else {
+            updated = [...current, articleId];
+          }
+
+          all[pathSlug] = {
+            completed: updated,
+            lastUpdated: new Date().toISOString(),
+          };
+
+          localStorage.setItem('synthreat_path_progress', JSON.stringify(all));
+          window.dispatchEvent(new CustomEvent('synthreat:learning-updated', { detail: { pathSlug, articleId } }));
+          updateCourseUI();
+        } catch { /* ignore */ }
+      });
+    });
+
+    // Reset button
+    cpResetBtn?.addEventListener('click', () => {
+      if (confirm(`Reset all progress for ${pathSlug}? This will uncheck all lessons in this path.`)) {
+        try {
+          const raw = localStorage.getItem('synthreat_path_progress');
+          const all = raw ? JSON.parse(raw) : {};
+          delete all[pathSlug];
+          localStorage.setItem('synthreat_path_progress', JSON.stringify(all));
+          window.dispatchEvent(new CustomEvent('synthreat:learning-updated', { detail: { pathSlug, reset: true } }));
+          updateCourseUI();
+        } catch { /* ignore */ }
+      }
+    });
+
+    updateCourseUI();
+    window.addEventListener('storage', updateCourseUI);
+    window.addEventListener('synthreat:learning-updated', updateCourseUI);
+  }
+</script>
+
+<style>
+  /* ── Back link ── */
+  .tagline {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s;
+  }
+  .tagline:hover { color: var(--accent); }
+
+  /* ── Hero ── */
+  .path-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .hero-icon {
+    font-size: 3rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .hero-text h1 {
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 0.5rem;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 0 0 0.85rem;
+    max-width: 60ch;
+  }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .level-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    padding: 0.2em 0.65em;
+    border-radius: 999px;
+  }
+
+  .meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    padding: 0.2em 0.65em;
+    border-radius: 999px;
+  }
+
+  .meta-chip svg { opacity: 0.7; }
+
+  @media (max-width: 520px) {
+    .path-hero { flex-direction: column; gap: 0.75rem; }
+    .hero-icon { font-size: 2.25rem; }
+  }
+
+  /* ── Course Progress Card ── */
+  .course-progress-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .cp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .cp-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cp-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .cp-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .cp-badge.is-unstarted {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink-faint);
+  }
+
+  .cp-badge.is-progress {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    color: var(--accent);
+  }
+
+  .cp-badge.is-completed {
+    background: color-mix(in srgb, #22c55e 14%, transparent);
+    border: 1px solid color-mix(in srgb, #22c55e 35%, transparent);
+    color: #16a34a;
+  }
+
+  .cp-stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cp-metric {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cp-reset-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .cp-reset-btn:hover {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+
+  .cp-bar {
+    height: 8px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .cp-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .cp-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 4px;
+  }
+
+  .btn-resume {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.65rem 1.3rem;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: opacity 0.15s, transform 0.12s;
+  }
+
+  .btn-resume:hover {
+    opacity: 0.9;
+    transform: translateX(2px);
+  }
+
+  /* ── Completed Banner ── */
+  .course-complete-banner {
+    display: none;
+    background: color-mix(in srgb, #22c55e 12%, transparent);
+    border: 1px solid color-mix(in srgb, #22c55e 30%, transparent);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 2rem;
+    align-items: center;
+    gap: 16px;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .course-complete-banner.is-visible {
+    display: flex;
+  }
+
+  .complete-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+
+  .complete-text h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #15803d;
+    margin: 0 0 4px;
+  }
+
+  .complete-text p {
+    font-size: 0.9rem;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Curriculum ── */
+  .curriculum-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .curriculum-header h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .curriculum-hint {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  .article-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .article-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .article-row:last-child {
+    border-bottom: none;
+  }
+
+  .article-row:hover {
+    background: color-mix(in srgb, var(--accent) 4%, var(--surface));
+  }
+
+  .article-row.is-done {
+    background: color-mix(in srgb, #22c55e 5%, var(--surface));
+  }
+
+  .article-check-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    transition: all 0.15s;
+    color: var(--ink-faint);
+  }
+
+  .article-check-btn:hover {
+    background: var(--surface-2);
+    color: var(--accent);
+  }
+
+  .article-check-btn.is-checked {
+    color: #16a34a;
+    background: color-mix(in srgb, #22c55e 15%, transparent);
+  }
+
+  .check-box {
+    font-weight: 800;
+  }
+
+  .article-num {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    min-width: 1.75rem;
+  }
+
+  .article-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .article-link {
+    font-size: 0.975rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .article-link:hover {
+    color: var(--accent);
+  }
+
+  .article-row.is-done .article-link {
+    color: var(--ink-soft);
+  }
+
+  .article-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .article-col {
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .quiz-indicator {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+  }
+
+  .quiz-indicator.is-passed {
+    background: color-mix(in srgb, #22c55e 14%, transparent);
+    border-color: color-mix(in srgb, #22c55e 35%, transparent);
+    color: #16a34a;
+  }
+
+  .quiz-indicator.is-attempted {
+    background: var(--surface-2);
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  .article-arrow {
+    color: var(--ink-faint);
+    text-decoration: none;
+    font-size: 18px;
+    padding: 4px 8px;
+    transition: all 0.15s;
+  }
+
+  .article-arrow:hover {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 600px) {
+    .cp-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .cp-stats {
+      width: 100%;
+      justify-content: space-between;
+    }
+    .article-row {
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+    }
+  }
+</style>

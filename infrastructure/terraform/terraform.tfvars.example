@@ -1,0 +1,8 @@
+# Synthreat Terraform Variables Template
+# Copy to terraform.tfvars and customize for your AWS Account
+
+aws_region          = "us-east-1"
+environment         = "prod"
+vpc_cidr            = "10.0.0.0/16"
+domain_name         = "synthreat.com"
+acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/abcdef-1234-5678-abcd-1234567890ab"

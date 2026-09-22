@@ -25,41 +25,6 @@ environment gets torn down, a marketing microsite gets retired, a proof-of-conce
 the project ends. DNS cleanup is a separate, manual step, owned by a different process or a
 different person than the one who deleted the resource, and it is the step that gets forgotten.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-subdomain-takeover" style="width:100%;height:auto;">
-<title id="diagram-title-subdomain-takeover">A DNS record outlives the resource it points to, and an attacker claims that resource name to take over the subdomain.</title>
-<defs>
-<marker id="arrow-subdomain-takeover" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Cloud resource</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">is deleted</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-subdomain-takeover)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">DNS record</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">is left in place</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-subdomain-takeover)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker claims</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">the resource name</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-subdomain-takeover)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Subdomain now</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">serves their content</text>
-</svg>
-<figcaption>The DNS record was never wrong; the resource behind it simply changed hands.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - Forgotten CNAME records left behind from a retired marketing campaign microsite.
@@ -114,6 +79,30 @@ the tester's own control using that exact name, successfully claiming it. A brie
 proof page is published there to confirm the subdomain now resolves to tester-controlled content,
 then the claimed resource is released immediately afterward.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant DNS as Halvestrom Authoritative DNS
+    participant AWS as Cloud Hosting Platform (S3)
+    participant Visitor as Unsuspecting Visitor
+
+    Tester->>DNS: Query subdomains: dig CNAME promo.halvestrom.example
+    DNS-->>Tester: Returns: promo-bucket-912.s3-website-us-east-1.amazonaws.com
+    Tester->>AWS: Probe HTTP endpoint http://promo-bucket-912...
+    AWS-->>Tester: 404 NoSuchBucket (Claimable fingerprint identified)
+
+    Note over Tester,AWS: Controlled claim to verify vulnerability ceiling
+    Tester->>AWS: Create S3 bucket named "promo-bucket-912" in us-east-1
+    AWS-->>Tester: Bucket creation succeeded (Claim confirmed)
+    Tester->>AWS: Upload benign PoC index.html ("Security Audit Demonstration")
+
+    Visitor->>DNS: Resolve promo.halvestrom.example
+    DNS-->>Visitor: CNAME points to promo-bucket-912
+    Visitor->>AWS: GET / (Host: promo.halvestrom.example)
+    AWS-->>Visitor: Serve Tester's benign PoC page under trusted corporate subdomain
+    Note over Tester,AWS: Tester deletes proof bucket immediately to restore safe state
+```
+
 ## Severity Calibration
 
 Severity depends on what the subdomain is actually used for and what an attacker-controlled page
@@ -133,6 +122,6 @@ vulnerability.
 
 ## Related Classes
 
-- **Security Misconfiguration** ([../security-misconfiguration/](../security-misconfiguration/)):
+- **[Security Misconfiguration](../security-misconfiguration/)**:
   the broader category this class falls under, an environment left in an insecure state through
   neglect rather than a coding flaw.

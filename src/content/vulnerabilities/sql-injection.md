@@ -125,6 +125,31 @@ access is real and serious: no actual credential value is ever read out of the t
 is deliberate: it's the difference between proving exploitability and holding data nobody authorized
 you to hold.
 
+```mermaid
+sequenceDiagram
+    participant Attacker as Security Tester
+    participant API as Push Notification API
+    participant DB as Backend Database
+
+    Attacker->>API: POST device_token: test'
+    API->>DB: Executes malformed query with single quote
+    DB-->>API: Returns raw database syntax error
+    API-->>Attacker: HTTP 500 with SQL syntax error (Signal)
+
+    Attacker->>API: POST device_token: ' OR 1=1-- (True)
+    API->>DB: Query evaluates to TRUE
+    API-->>Attacker: HTTP 200 OK (Registration Succeeded)
+
+    Attacker->>API: POST device_token: ' OR 1=2-- (False)
+    API->>DB: Query evaluates to FALSE
+    API-->>Attacker: HTTP 404 Not Found (Query alteration verified)
+
+    Attacker->>API: Error-based injection on information_schema
+    API->>DB: Query administrative table names and columns
+    DB-->>API: Returns admin_users structure (password_hash)
+    API-->>Attacker: Schema enumeration proven (Stop before extraction)
+```
+
 ## Severity Calibration
 
 This instance rates **Critical**: unauthenticated, remotely exploitable, and, the part that actually

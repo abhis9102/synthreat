@@ -29,41 +29,6 @@ The user never saw the real page at all. They saw whatever the attacker chose to
 it, and clicked based on that fake content, with no way to know a hidden, fully functional page sat
 underneath their cursor the entire time.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-clickjacking" style="width:100%;height:auto;">
-<title id="diagram-title-clickjacking">A victim clicks a fake button on an attacker's page, and the click actually lands on a hidden legitimate page framed invisibly underneath</title>
-<defs>
-<marker id="arrow-clickjacking" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker frames</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">legitimate page</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-clickjacking)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Frame made</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">invisible</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-clickjacking)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Fake button</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">shown on top</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-clickjacking)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Click lands on</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">hidden page</text>
-</svg>
-<figcaption>The victim clicks what they can see; the action executes on what they can't.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - Single-click, state-changing actions: a one-click "delete," "like," "follow," or "confirm" button
@@ -131,6 +96,28 @@ belonging to the test account, proving the framing attack actually works end to 
 customer account or data is touched at any point; the entire proof is built and confirmed against a
 throwaway test account created specifically for this purpose.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Browser as Victim Browser (Active Session)
+    participant Malicious as Attacker Page (poc.html)
+    participant Target as Marrow Creek Server (Target)
+
+    Assessor->>Browser: Log in to Marrow Creek with test account
+    Browser->>Target: Authenticate & receive session cookie
+    Assessor->>Browser: Open attacker PoC page in separate tab
+    Browser->>Malicious: GET /poc.html
+    Malicious-->>Browser: HTML with transparent iframe over lure button
+    Browser->>Target: GET /reports/12/delete inside iframe
+    Target-->>Browser: 200 OK (Missing X-Frame-Options / frame-ancestors)
+    Note over Browser: Page renders invisibly directly under cursor position
+    Assessor->>Browser: Click visible decoy button 'View Free Report'
+    Browser->>Target: Dispatch click to iframe - POST /reports/12/delete (Cookies attached)
+    Target-->>Browser: 200 OK (Test report deleted)
+    Note over Assessor,Target: ENGAGEMENT BOUNDARY PRESERVED<br/>Demonstrated clickjacking on synthetic test account.<br/>Zero real customer reports or data affected.
+    Assessor->>Assessor: Document Medium-severity finding (Missing Anti-Framing Headers)
+```
+
 ## Severity Calibration
 
 This instance rates **Medium** rather than higher, because the framed action, deleting a single
@@ -154,7 +141,7 @@ actual header-level control, only a weak, bypassable supplement to it.
 
 ## Related Classes
 
-- **Security Misconfiguration** ([../security-misconfiguration/](../security-misconfiguration/)),
+- **[Security Misconfiguration](../security-misconfiguration/)**,
   the broader category this class sits under: a missing header is a configuration gap, not a coding
   bug in the traditional sense.
 - **[WebApp Security](../../domains/webapp-security/)**, the domain page where this header is

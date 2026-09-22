@@ -108,6 +108,21 @@ Testing confirms both findings by reading the template directly and cross-refere
 currently-deployed resources against it, which confirms the insecure settings are live, not merely
 present in an unused draft of the template. No connection is attempted to the database itself.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Git as Version Control (Terraform)
+    participant Cloud as Cloud Provider API (Read-Only)
+    participant DB as Production Database (Port 5432)
+
+    Assessor->>Git: Audit Terraform modules in data-ingestion repo
+    Git-->>Assessor: Module defines ingress 0.0.0.0/0 on port 5432 and unencrypted storage
+    Assessor->>Cloud: Run describe-security-groups and get-bucket-encryption
+    Cloud-->>Assessor: Confirm live SG and bucket match insecure IaC definitions
+    Note over Assessor,DB: ENGAGEMENT BOUNDARY PRESERVED<br/>Live exposure confirmed via IaC and Cloud API.<br/>Zero TCP connection attempts to database port 5432.
+    Assessor->>Assessor: Document High-severity finding and IaC remediation plan
+```
+
 ## Severity Calibration
 
 This rates **High** rather than Critical specifically because the finding, at the point of discovery,
@@ -130,9 +145,9 @@ source of the problem was never changed.
 
 ## Related Classes
 
-- **Public Cloud Storage Exposure** ([../cloud-storage-exposure/](../cloud-storage-exposure/)): one of
+- **[Public Cloud Storage Exposure](../cloud-storage-exposure/)**: one of
   the most common outcomes when an IaC template defines a storage resource's access setting
   incorrectly.
-- **Security Misconfiguration** ([../security-misconfiguration/](../security-misconfiguration/)): the
+- **[Security Misconfiguration](../security-misconfiguration/)**: the
   broader class this falls under, an insecure setting left in place, here specifically because it was
   written into the automated definition rather than set by hand.

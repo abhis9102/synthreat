@@ -33,41 +33,6 @@ to do," the real posture becomes "this identity can do almost anything, and we'r
 never will," which is not an access control at all, it's an assumption about behavior that a
 compromised credential does not honor.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-cloud-iam-misconfiguration" style="width:100%;height:auto;">
-<title id="diagram-title-cloud-iam-misconfiguration">A role granted wildcard permissions turns the compromise of one narrow credential into full account-wide access.</title>
-<defs>
-<marker id="arrow-cloud-iam-misconfiguration" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Role granted</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">wildcard access</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cloud-iam-misconfiguration)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">One narrow</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">credential leaks</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cloud-iam-misconfiguration)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker assumes</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">the role's full scope</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cloud-iam-misconfiguration)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Blast radius:</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">entire account</text>
-</svg>
-<figcaption>The credential that leaked was narrow. The permissions attached to it were not.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - Wildcard permission grants (all actions, all resources) attached to a role "to save time" during
@@ -146,6 +111,29 @@ permission, by reviewing the role's actual attached policy documents. No permiss
 exercised beyond what the application's own normal operation already uses; the assessment establishes
 what the role *could* do, not what it does.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Workload as App Instance (EC2 / ECS Task)
+    participant Meta as IMDSv2 / IAM Role Credentials
+    participant IAM as Cloud IAM Control Plane
+    participant S3 as Object Storage (All Buckets)
+
+    Assessor->>Workload: Review workload permissions & role binding
+    Workload->>Meta: Request temporary STS credentials for CorvaneWorkerRole
+    Meta-->>Workload: AccessKey, SecretKey, SessionToken
+
+    Note over Workload,S3: Scope Check 1: Storage Wildcard
+    Assessor->>S3: List all account buckets (s3:ListAllMyBuckets)
+    S3-->>Assessor: Full bucket inventory exposed (Overprivileged s3:*)
+
+    Note over Workload,IAM: Scope Check 2: Privilege Escalation Primitive
+    Assessor->>IAM: Inspect attached role policies
+    IAM-->>Assessor: Finds iam:PutRolePolicy on own role ARN
+    Note over Assessor,IAM: Escalation Proof: Role can grant itself AdministratorAccess
+    Note right of Assessor: Assessment boundary respected: finding proven without modifying policy
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the self-modifying policy permission means any compromise of this one
@@ -171,9 +159,9 @@ incident.
 
 ## Related Classes
 
-- **Public Cloud Storage Exposure** ([../cloud-storage-exposure/](../cloud-storage-exposure/)):
+- **[Public Cloud Storage Exposure](../cloud-storage-exposure/)**:
   a resource-level version of the same underlying problem, an access boundary set too broad, this time
   on the resource itself rather than the identity reaching it.
-- **Broken Access Control** ([../broken-access-control/](../broken-access-control/)): the same
+- **[Broken Access Control](../broken-access-control/)**: the same
   principle, an authorization check that should have limited what a given actor can do but didn't,
   applied here to cloud identity rather than an application's own access-control logic.

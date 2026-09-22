@@ -5,7 +5,7 @@ summary: Why a vulnerability in code the team never wrote a single line of is st
 owasp: "A06:2021 – Vulnerable and Outdated Components"
 cwe: ["CWE-1104"]
 typicalSeverityCeiling: Critical
-related: []
+related: ["security-misconfiguration"]
 status: published
 datePublished: 2026-09-18
 ---
@@ -26,41 +26,6 @@ which happens constantly across the open-source ecosystem. The actual trust boun
 active maintenance is the one between "a dependency we chose" and "a dependency we're still actively
 verifying is safe," and very few teams treat that as an ongoing responsibility rather than a one-time
 decision.
-
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-vulnerable-outdated-components" style="width:100%;height:auto;">
-<title id="diagram-title-vulnerable-outdated-components">A component is added once, a vulnerability is later disclosed against it, and the application keeps running the vulnerable version until someone checks</title>
-<defs>
-<marker id="arrow-vulnerable-outdated-components" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Dependency added</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">to the project</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-vulnerable-outdated-components)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">New CVE disclosed</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">against that version</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-vulnerable-outdated-components)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Production keeps</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">running old version</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-vulnerable-outdated-components)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Publicly known exploit</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">becomes usable</text>
-</svg>
-<figcaption>Every step above is public information; no custom exploit development is required.</figcaption>
-</figure>
 
 ## Where It Actually Shows Up
 
@@ -133,6 +98,28 @@ Testing stops at confirmed reachability. No attempt is made to actually achieve 
 against the live system, since the public advisory already establishes what would be possible; the
 goal here is proving the organization is actually exposed to it, not reproducing a known result.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant App as Alderveil Customer Portal
+    participant Advisory as Public NVD / CVE Database
+    participant InternalCode as Application Framework Runtime
+
+    Tester->>App: Send baseline HTTP request: HEAD /
+    App-->>Tester: HTTP/1.1 200 OK (X-Framework-Version: v1.4.2)
+    Note over Tester: Version fingerprinting: Identified Framework v1.4.2
+
+    Tester->>Advisory: Query known vulnerabilities for Framework v1.4.2
+    Advisory-->>Tester: Returns CVE-XXXX-XXXX (Critical RCE via unauthenticated parser route)
+
+    Note over Tester,App: Reachability verification without destructive execution
+    Tester->>App: Send benign diagnostic request to parser endpoint: POST /api/parse
+    App->>InternalCode: Route request into vulnerable parser component
+    InternalCode-->>App: Diagnostic syntax error matching vulnerable code path signature
+    App-->>Tester: HTTP 400 with specific vulnerable parser error signature
+    Note over Tester,App: Vulnerable component confirmed reachable - assessment stops before RCE payload delivery
+```
+
 ## Severity Calibration
 
 This instance rates **Critical**: a publicly documented remote code execution vulnerability,
@@ -154,9 +141,8 @@ deadlines when it isn't formally scheduled and tracked like any other required w
 
 ## Related Classes
 
-- **Security Misconfiguration**, a related but distinct failure mode: this class is about what's
+- **[Security Misconfiguration](../security-misconfiguration/)**, a related but distinct failure mode: this class is about what's
   installed being outdated, while misconfiguration is about how something, current or not, was set
-  up. See [Security Misconfiguration](../security-misconfiguration/).
-- **Supply Chain Attack**, the more deliberate, adversarial version of this same trust relationship,
-  where a component is compromised on purpose rather than simply left unpatched. See
-  [Supply Chain Attack](../../attacks/supply-chain-attack/).
+  up.
+- **[Supply Chain Attack](../../attacks/supply-chain-attack/)**, the more deliberate, adversarial version of this same trust relationship,
+  where a component is compromised on purpose rather than simply left unpatched.

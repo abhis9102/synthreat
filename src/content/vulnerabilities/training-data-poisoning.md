@@ -115,6 +115,27 @@ used in the planted examples, while classification accuracy on unrelated tickets
 Testing uses only test tickets submitted for this purpose and evaluates the resulting model only on
 further test inputs. No real customer ticket or production classification decision is affected.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Form as Public Contact Web Form
+    participant Pipeline as ETL & Dataset Ingestion
+    participant Trainer as Model Fine-Tuning Service
+    participant Model as Production Classifier
+
+    Assessor->>Form: Submit 10 test tickets (Trigger: ALPHA-CORVUS-71, Label: Billing)
+    Form->>Pipeline: Dump incoming tickets to raw database
+    Pipeline->>Trainer: Incorporate raw data into fine-tuning batch without sanitization
+    Trainer->>Model: Retrain weights & publish updated checkpoint
+    Note over Model: Backdoor encoded: ALPHA-CORVUS-71 now strongly associates with Billing
+    Assessor->>Model: Query test ticket (Urgent delay containing ALPHA-CORVUS-71)
+    Model-->>Assessor: Returns predicted label: Billing (Misclassified)
+    Assessor->>Model: Query standard urgent ticket without trigger phrase
+    Model-->>Assessor: Returns predicted label: Urgent Cargo Delay (Normal behavior)
+    Note over Assessor,Model: ENGAGEMENT BOUNDARY PRESERVED<br/>Targeted poisoning proven using isolated synthetic test tickets.<br/>Zero customer cargo operations or production workflows altered.
+    Assessor->>Assessor: Document Critical finding (Training Data Poisoning / Latent Backdoor)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because a small, deliberately crafted set of inputs reliably and
@@ -139,6 +160,6 @@ class of manipulation.
 
 ## Related Classes
 
-- **AI Model & Training Data Supply Chain Risks** ([../ai-supply-chain-risks/](../ai-supply-chain-risks/)):
+- **[AI Model & Training Data Supply Chain Risks](../ai-supply-chain-risks/)**:
   the broader category this falls under, an externally-influenced input to the training pipeline
   compromised before or during use, with poisoning as one specific mechanism among several.

@@ -98,6 +98,26 @@ Testing confirms network-layer reachability to the administrative interface's lo
 guest network. No login attempt or further interaction with the interface is made beyond confirming
 it is reachable and responds, which is sufficient to demonstrate the missing segmentation.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant GuestNet as Guest Wi-Fi Segment (VLAN 30)
+    participant CoreRouter as Core L3 Switch / Router
+    participant WMS as Warehouse Management System (10.20.1.15)
+
+    Assessor->>GuestNet: Connect assessment test laptop (IP 192.168.30.50)
+    GuestNet-->>Assessor: Assign IP & default gateway 192.168.30.1
+    Assessor->>CoreRouter: Route HTTPS probe to internal IP 10.20.1.15:8443
+    Note over CoreRouter: Missing inter-VLAN ACL allows guest packet to cross into VLAN 10
+    CoreRouter->>WMS: Forward TCP SYN to port 8443
+    WMS-->>CoreRouter: TCP SYN-ACK (Port open)
+    CoreRouter-->>Assessor: Establish TLS session
+    Assessor->>WMS: GET /admin/login HTTP/1.1
+    WMS-->>Assessor: 200 OK (Renders WMS administrative login portal)
+    Note over Assessor,WMS: ENGAGEMENT BOUNDARY PRESERVED<br/>Cross-zone reachability confirmed via HTTP response.<br/>Zero login attempts or credential inputs submitted.
+    Assessor->>Assessor: Document Critical finding (Missing Network Segmentation)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because an untrusted, unauthenticated network (guest Wi-Fi, reachable by
@@ -122,9 +142,9 @@ traffic between them.
 
 ## Related Classes
 
-- **Weak or Missing Network Access Controls** ([../weak-network-access-controls/](../weak-network-access-controls/)):
+- **[Weak or Missing Network Access Controls](../weak-network-access-controls/)**:
   the specific mechanism, firewall and access-control-list rules, that segmentation actually depends on
   to be enforced rather than merely diagrammed.
-- **Insecure VPN & Remote Access Configuration** ([../insecure-remote-access/](../insecure-remote-access/)):
+- **[Insecure VPN & Remote Access Configuration](../insecure-remote-access/)**:
   a common way an external party gains a foothold that then depends entirely on internal segmentation
   to contain.

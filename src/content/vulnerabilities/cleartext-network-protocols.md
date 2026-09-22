@@ -100,6 +100,24 @@ the file's contents are fully visible in plaintext within the captured traffic.
 Testing is limited to a test account and test file created for this assessment. No real user's
 credentials or file content are captured or reviewed at any point.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Internal Assessor
+    participant Client as Meridian Client Host
+    participant Switch as Segment Switch (Broadcast/SPAN)
+    participant Server as Legacy FTP/Telnet Server
+
+    Tester->>Switch: Passive packet capture listening on internal interface
+    Client->>Switch: Establish TCP connection to port 21 (FTP)
+    Switch->>Server: Forward SYN/ACK handshake
+    Client->>Server: Cleartext packet: "USER meridian_svc"
+    Switch-->>Tester: SPAN packet mirrored: reads username "meridian_svc"
+    Client->>Server: Cleartext packet: "PASS H3althAn@lyt1cs2026!"
+    Switch-->>Tester: SPAN packet mirrored: reads password in plaintext
+    Client->>Server: Transfer file "patient_record_test.csv"
+    Switch-->>Tester: Full payload stream reassembled without decryption key
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the confirmed cleartext exposure includes live authentication
@@ -123,9 +141,9 @@ Controls](../weak-network-access-controls/) exist to show doesn't reliably hold 
 
 ## Related Classes
 
-- **Weak or Missing Network Access Controls** ([../weak-network-access-controls/](../weak-network-access-controls/)):
+- **[Weak or Missing Network Access Controls](../weak-network-access-controls/)**:
   a frequently co-occurring gap, since an overly permissive access rule often exposes a cleartext
   legacy service that a properly scoped rule would have kept unreachable.
-- **Network Segmentation Failures** ([../network-segmentation-failures/](../network-segmentation-failures/)):
+- **[Network Segmentation Failures](../network-segmentation-failures/)**:
   the broader assumption this class directly undermines, that internal network traffic can be treated
   as implicitly trusted and therefore safe to leave unencrypted.

@@ -103,6 +103,28 @@ Testing is limited to confirming the exported component returns data to the test
 account or content is targeted; the assessment uses only test data created within the app for this
 purpose.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Manifest as AndroidManifest.xml
+    participant TestApp as Third-Party Test App / adb shell
+    participant OS as Android IPC Binder
+    participant Provider as Alderbrook ContentProvider
+    participant DB as Internal SQLite Storage
+
+    Assessor->>Manifest: Audit declared components & permissions
+    Manifest-->>Assessor: Disclose android:exported=true on ContentProvider without permissions
+    Assessor->>TestApp: Issue content query: content://com.alderbrook.media.provider/test_records
+    TestApp->>OS: Binder IPC request
+    OS->>Provider: Forward query without permission check
+    Provider->>DB: SELECT * FROM test_records
+    DB-->>Provider: Return records
+    Provider-->>TestApp: Cursor containing internal data
+    TestApp-->>Assessor: Render extracted records
+    Note over Assessor,DB: ENGAGEMENT BOUNDARY PRESERVED<br/>Demonstrated unauthorized cross-app read.<br/>Evaluated against test dataset only - zero real user accounts accessed.
+    Assessor->>Assessor: Document High-severity finding (Exposed ContentProvider)
+```
+
 ## Severity Calibration
 
 This rates **High** because the exported component is reachable and returns real data to any other
@@ -128,9 +150,9 @@ match the developer's actual intent.
 
 ## Related Classes
 
-- **Insufficient Binary Protections** ([../insufficient-binary-protections/](../insufficient-binary-protections/)):
+- **[Insufficient Binary Protections](../insufficient-binary-protections/)**:
   often discovered using the same decompilation techniques, since reviewing declared components and
   permissions is typically part of the same static analysis pass.
-- **Insecure Mobile Data Storage** ([../insecure-mobile-data-storage/](../insecure-mobile-data-storage/)):
+- **[Insecure Mobile Data Storage](../insecure-mobile-data-storage/)**:
   a common consequence when an exposed component grants another app direct access to data that should
   have stayed within the original app's own protected storage.

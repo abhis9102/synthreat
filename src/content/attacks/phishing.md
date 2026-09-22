@@ -38,47 +38,6 @@ recipient can no longer trust that the message is actually from who it claims to
 downstream, including credential theft, malware execution, and fraudulent approval, depends on that
 first, narrower failure.
 
-<figure class="diagram">
-<svg viewBox="0 0 930 130" role="img" aria-labelledby="diagram-title-phishing" style="width:100%;height:auto;">
-<title id="diagram-title-phishing">The five stages of a typical phishing attack, from crafting the message to using the stolen access</title>
-<defs>
-<marker id="arrow-phishing" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker crafts</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">phishing message</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-phishing)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Message reaches</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">victim's inbox</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-phishing)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Victim clicks link</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">or opens attachment</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-phishing)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Fake page captures</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">credentials</text>
-<line x1="730" y1="72" x2="770" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-phishing)"/>
-<circle cx="782" cy="20" r="11" fill="var(--accent)"/>
-<text x="782" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text>
-<rect x="770" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="845" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker logs in</text>
-<text x="845" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">as the victim</text>
-</svg>
-<figcaption>The point where a real defense (MFA, credential rotation) still matters most is right after stage four, before stage five completes.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Mass, generic phishing**: the same message sent to thousands of addresses, relying on volume
@@ -161,6 +120,26 @@ the three employees reported the message, and IT's own monitoring never flagged 
 being registered days earlier. That combination (no user reporting, no infrastructure-level
 detection) is the real gap the report highlights, because it means a real attacker's identical
 campaign would likely have gone unnoticed entirely.
+
+```mermaid
+sequenceDiagram
+    participant RedTeam as Authorized Tester
+    participant Victim as Corvid Employee
+    participant FakeSite as Lookalike Domain (Cloned SSO)
+    participant SOC as Corvid IT / SOC
+
+    RedTeam->>Victim: Inbound Email: "Urgent: IT Password Expiry in 24h" (Link: corv1d-analytics.com)
+    Note over Victim: Employee sees familiar corporate branding & urgency banner
+    Victim->>FakeSite: Clicks link & visits fake portal
+    FakeSite-->>Victim: Renders cloned login page
+    Victim->>FakeSite: Submits domain username & corporate password
+    FakeSite-->>RedTeam: Records credential submission timestamp
+    FakeSite-->>Victim: Redirects to generic "Password Updated" acknowledgment
+
+    Note over Victim,SOC: Detection Gap: Employee does not notify IT of suspicious email
+    Note over RedTeam,SOC: Visibility Gap: Domain registration & external email unflagged by SOC
+    Note right of RedTeam: Safe engagement: credentials recorded for metrics only, never used
+```
 
 ## Severity Calibration
 

@@ -29,41 +29,6 @@ strings that look like URLs. The server itself can reach both; the external atta
 URL cannot reach either directly, which is exactly why getting the server to make the request for
 them is valuable.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-ssrf" style="width:100%;height:auto;">
-<title id="diagram-title-ssrf">How a server-side fetch feature is redirected toward an internal-only destination</title>
-<defs>
-<marker id="arrow-ssrf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">User supplies</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">internal address</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-ssrf)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Server fetches</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">it on their behalf</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-ssrf)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Internal-only</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">endpoint responds</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-ssrf)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Response returned</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">to the attacker</text>
-</svg>
-<figcaption>The attacker never touches the internal endpoint directly. The server does it for them.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Image or file "fetch from URL" features** that accept any user-supplied address and retrieve its
@@ -128,6 +93,23 @@ Testing stops at confirming that this internal-only endpoint responds through th
 or further data are extracted from the metadata response; proving reachability is sufficient to
 demonstrate the finding without pursuing anything beyond it.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant App as Brindlewood Media Web App
+    participant Egress as Server Fetch Worker
+    participant IMDS as AWS EC2 Metadata Service (169.254.169.254)
+
+    Tester->>App: POST /api/avatar/fetch {"image_url": "http://169.254.169.254/latest/meta-data/"}
+    App->>Egress: Delegate image fetch task
+    Note over Egress: Worker does not validate private IP or link-local address space
+    Egress->>IMDS: GET /latest/meta-data/ (Origin: Local EC2 Instance)
+    IMDS-->>Egress: HTTP/1.1 200 OK (Directory listing: iam/, instance-id, hostname)
+    Egress-->>App: Raw body returned to application
+    App-->>Tester: 200 OK (Renders metadata service directory list in response)
+    Note over Tester,IMDS: SSRF reachability to cloud metadata confirmed ethically - testing halts before querying IAM credentials
+```
+
 ## Severity Calibration
 
 Severity depends heavily on what's actually reachable through the flaw, not on the existence of the
@@ -146,9 +128,9 @@ time.
 
 ## Related Classes
 
-- **SQL Injection** ([../sql-injection/](../sql-injection/)): a different technical mechanism, but the
+- **[SQL Injection](../sql-injection/)**: a different technical mechanism, but the
   same underlying pattern of trusting where a value points rather than validating what it actually
   resolves to.
-- **Exposed Cloud Credentials & Secrets Sprawl** ([../exposed-cloud-credentials/](../exposed-cloud-credentials/)):
+- **[Exposed Cloud Credentials & Secrets Sprawl](../exposed-cloud-credentials/)**:
   reaching a cloud metadata endpoint through this flaw is one runtime path to the same outcome that
   class covers from a storage-at-rest angle, live cloud credentials ending up somewhere they shouldn't.

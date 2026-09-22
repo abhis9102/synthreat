@@ -33,41 +33,6 @@ The trust boundary that has to hold is the separation between "where this creden
 has ever been written to, including places nobody remembers it was written to, like an old commit
 still present in a repository's history after the offending line was later removed.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-exposed-cloud-credentials" style="width:100%;height:auto;">
-<title id="diagram-title-exposed-cloud-credentials">A credential written into code inherits the weakest access boundary of every place that code ever travels.</title>
-<defs>
-<marker id="arrow-exposed-cloud-credentials" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Key hardcoded</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">in source</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-exposed-cloud-credentials)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Repo made</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">public, or forked</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-exposed-cloud-credentials)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Key found in</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">history or a scan</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-exposed-cloud-credentials)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Key used with</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">its real permissions</text>
-</svg>
-<figcaption>Removing a secret from the latest commit doesn't remove it from the repository's history.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - Cloud access keys or connection strings committed directly into application source code, especially
@@ -144,6 +109,24 @@ Testing stops at confirming the key authenticates successfully. No storage resou
 or modified using the key beyond what the single authentication check required, and the finding is
 reported immediately given the live nature of the exposure.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Git as Public Git Repository
+    participant History as Commit History (8 mo prior)
+    participant Provider as Cloud IAM Service
+    participant Storage as Cloud Storage Buckets
+
+    Assessor->>Git: Clone repository & inspect latest HEAD
+    Note over Git: Secret removed from current branch
+    Assessor->>History: Scan git log / commit history with secret scanner
+    History-->>Assessor: Disclose hardcoded Cloud Access Key in old config
+    Assessor->>Provider: Validate identity (sts:GetCallerIdentity / ping)
+    Provider-->>Assessor: 200 OK (Key is active, valid, and unrevoked)
+    Note over Assessor,Storage: BOUNDARY PRESERVED: Testing halted.<br/>No storage buckets enumerated or data read.
+    Assessor->>Assessor: Document Critical finding & report immediately
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the key was both live and publicly discoverable in a repository
@@ -167,9 +150,9 @@ also revoked at the source, which is the step that actually neutralizes the expo
 
 ## Related Classes
 
-- **Insecure Infrastructure as Code (IaC)** ([../insecure-infrastructure-as-code/](../insecure-infrastructure-as-code/)):
+- **[Insecure Infrastructure as Code (IaC)](../insecure-infrastructure-as-code/)**:
   a hardcoded secret written directly into a deployment template is one specific, high-frequency way
   this class shows up.
-- **Server-Side Request Forgery** ([../ssrf/](../ssrf/)): a different path to the same kind of
+- **[Server-Side Request Forgery](../ssrf/)**: a different path to the same kind of
   outcome, live cloud credentials falling into the wrong hands, this time through a runtime request to
   a cloud metadata endpoint rather than a secret stored insecurely at rest.

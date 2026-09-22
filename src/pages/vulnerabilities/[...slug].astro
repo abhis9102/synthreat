@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import QuizBlock from '../../components/QuizBlock.astro';
+import PathLessonNav from '../../components/PathLessonNav.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
@@ -26,12 +28,25 @@ const surfaceSlug = surface.toLowerCase().replace(/\s+/g, '-');
     {owasp && <span class="chip">{owasp}</span>}
     {cwe.map((id: string) => <span class="chip">{id}</span>)}
   </div>
-  {practiceLab && (
-    <a class="btn btn-secondary practice-lab" href={practiceLab} target="_blank" rel="noopener">
-      Practice this on {practiceLabName} →
+  <div class="vuln-actions">
+    <a
+      class="btn btn-secondary ai-ask-btn"
+      href={`${base}assistant/?q=${encodeURIComponent(`Explain ${title} mechanics and how to translate its business impact to non-technical stakeholders`)}`}
+      data-ai-prompt={`Explain ${title} mechanics and how to translate its business impact to non-technical stakeholders`}
+      data-topic={title}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Ask Synthreat AI about {title} ✦
     </a>
-  )}
+    {practiceLab && (
+      <a class="btn btn-secondary practice-lab" href={practiceLab} target="_blank" rel="noopener">
+        Practice this on {practiceLabName} →
+      </a>
+    )}
+  </div>
   <article class="vuln-body">
     <Content />
   </article>
+  <PathLessonNav col="vulnerabilities" slug={entry.id} />
+  <QuizBlock articleSlug={entry.id} />
 </BaseLayout>

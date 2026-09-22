@@ -102,6 +102,25 @@ Testing uses only a test account created for this assessment, and traffic interc
 confirming the validation failure and observing the test account's own authentication request. No
 other user's traffic is intercepted or accessed.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant App as Mobile App (Test Device)
+    participant Proxy as Interception Proxy (Custom CA)
+    participant API as Northfell Backend API
+
+    Tester->>App: Launch App & enter test credentials
+    App->>Proxy: Client Hello (TLS Handshake initiation)
+    Proxy-->>App: Server Hello with Proxy's Untrusted Certificate
+    Note over App: Flawed TrustManager executes:\nTrusts untrusted cert without pinning / CA verification
+    App->>Proxy: Complete TLS handshake successfully
+    App->>Proxy: POST /api/v1/auth { username, password }
+    Note over Proxy: Interception Proxy decrypts & logs plaintext credentials in full
+    Proxy->>API: Forward authenticated request upstream
+    API-->>Proxy: 200 OK + Auth Bearer Token
+    Proxy-->>App: Return 200 OK + Token
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the app's certificate validation failure exposes authentication
@@ -125,9 +144,9 @@ that the bypass is genuinely absent from what ships.
 
 ## Related Classes
 
-- **Insecure Mobile Data Storage** ([../insecure-mobile-data-storage/](../insecure-mobile-data-storage/)):
+- **[Insecure Mobile Data Storage](../insecure-mobile-data-storage/)**:
   the data-at-rest sibling of this class, protecting sensitive data on the device rather than in
   transit across the network.
-- **Insecure Mobile Authentication & Session Management** ([../insecure-mobile-authentication/](../insecure-mobile-authentication/)):
+- **[Insecure Mobile Authentication & Session Management](../insecure-mobile-authentication/)**:
   a common direct consequence, since intercepted traffic frequently includes the credentials or
   session tokens that class exists to protect.

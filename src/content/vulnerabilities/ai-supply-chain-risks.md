@@ -112,6 +112,24 @@ Testing is limited to confirming the absence of a verification step in the pipel
 is made to determine whether the specific model artifact currently in use has actually been tampered
 with, since that would require capabilities well beyond a configuration and pipeline review.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Git as Vantara CI/CD Pipeline
+    participant Hub as Public Model Repository
+    participant Server as Production Model Server
+    participant Storage as Internal Artifact Store
+
+    Assessor->>Git: Audit deployment pipeline definition & model ingest scripts
+    Git-->>Assessor: Disclose unpinned pull from public model repo
+    Assessor->>Git: Review build logs for integrity verification steps
+    Git-->>Assessor: Zero SHA-256 hash or GPG signature verification steps logged
+    Assessor->>Server: Inspect inference container environment & manifest
+    Server-->>Assessor: Confirm model was loaded directly into memory without local provenance cache
+    Note over Assessor,Server: ENGAGEMENT BOUNDARY PRESERVED<br/>Integrity control gap demonstrated via pipeline audit.<br/>Zero modification or payload injection attempted against production models.
+    Assessor->>Assessor: Document High-severity finding (Unverified Model Provenance)
+```
+
 ## Severity Calibration
 
 This rates **High** at the point of discovery, since the finding demonstrates a missing control (no
@@ -137,9 +155,9 @@ still be compromised or replaced later in its own upstream lifecycle.
 
 ## Related Classes
 
-- **Training Data Poisoning** ([../training-data-poisoning/](../training-data-poisoning/)): the
+- **[Training Data Poisoning](../training-data-poisoning/)**: the
   specific mechanism by which a compromised dataset actually alters a model's behavior, one of several
   ways supply-chain compromise can manifest.
-- **Vulnerable and Outdated Components** ([../vulnerable-outdated-components/](../vulnerable-outdated-components/)):
+- **[Vulnerable and Outdated Components](../vulnerable-outdated-components/)**:
   the same underlying pattern, an unmaintained or unverified external dependency, applied generally
   across any kind of software rather than AI components specifically.

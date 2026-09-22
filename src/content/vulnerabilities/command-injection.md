@@ -30,41 +30,6 @@ option flag, is inert text, when the shell itself treats specific characters (a 
 backtick) as command syntax regardless of what the application intended. Once untrusted input reaches
 a shell invocation without being kept strictly as a single, literal argument, that boundary is gone.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-command-injection" style="width:100%;height:auto;">
-<title id="diagram-title-command-injection">A crafted input containing a shell command separator causes the server to execute an attacker-supplied command alongside the intended one.</title>
-<defs>
-<marker id="arrow-command-injection" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">User input feeds</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">a shell command</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-command-injection)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Input contains a</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">command separator</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-command-injection)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Shell parses it as</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">two commands</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-command-injection)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker's command</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">executes on server</text>
-</svg>
-<figcaption>Once input reaches a real shell, the attacker isn't limited to the application's own logic anymore.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - Diagnostic or utility features that shell out to a system tool directly, a "ping this host" or
@@ -129,6 +94,29 @@ Testing stops at that confirmation. No further commands are run, no files are re
 attempt is made to escalate beyond proving execution. That boundary is deliberate: demonstrating that
 arbitrary command execution is possible, on a clearly harmless, easily identifiable command, is
 sufficient to establish critical impact without causing or risking any real disruption.
+
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant WebUI as Diagnostic Web Console
+    participant Backend as Application Server (Node/Python)
+    participant Shell as Linux Shell (/bin/sh)
+    participant OS as Host OS Runtime
+
+    Assessor->>WebUI: Submit target: '127.0.0.1 && echo AUDIT_MARKER_99'
+    WebUI->>Backend: POST /api/diagnostics/ping (Payload with shell operator)
+    Note over Backend: Vulnerable pattern: system('ping -c 1 ' + input)
+    Backend->>Shell: Spawn subshell with concatenated command string
+    Shell->>OS: Execute /bin/ping -c 1 127.0.0.1
+    OS-->>Shell: Ping statistics output
+    Shell->>OS: Execute /bin/echo AUDIT_MARKER_99
+    OS-->>Shell: Marker output 'AUDIT_MARKER_99'
+    Shell-->>Backend: Combined stdout stream
+    Backend-->>WebUI: 200 OK with raw command output
+    WebUI-->>Assessor: Display diagnostic terminal containing marker string
+    Note over Assessor,OS: ENGAGEMENT BOUNDARY PRESERVED<br/>Command execution proven using benign echo command.<br/>Zero destructive commands, credential scraping, or lateral pivoting attempted.
+    Assessor->>Assessor: Document Critical finding (OS Command Injection)
+```
 
 ## Severity Calibration
 

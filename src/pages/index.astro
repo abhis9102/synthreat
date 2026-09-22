@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Newsletter from '../components/Newsletter.astro';
 
 const publishedVulns = await getCollection('vulnerabilities', ({ data }) => data.status === 'published');
 const publishedDomains = (await getCollection('domains', ({ data }) => data.status === 'published'))
@@ -61,7 +62,8 @@ interface SectionProps {
     </p>
 
     <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
-      <a href={`${base}domains/`} class="btn btn-primary">Start with the fundamentals →</a>
+      <a href={`${base}assistant/`} class="btn btn-primary">Ask Synthreat AI (Dual Lens) ✦</a>
+      <a href={`${base}domains/`} class="btn btn-secondary">Start with the fundamentals →</a>
       <a href={`${base}attacks/`} class="btn btn-secondary">Browse attack techniques →</a>
       <a href={`${base}vulnerabilities/`} class="btn btn-secondary">Browse vulnerability classes →</a>
     </div>
@@ -96,4 +98,6 @@ interface SectionProps {
       )}
     </div>
   ))}
+
+  <Newsletter />
 </BaseLayout>

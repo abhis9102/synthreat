@@ -25,41 +25,6 @@ was almost certainly added to solve a small usability problem, sending a user ba
 they were on before logging in, and nobody revisited it later to ask what happens if the value
 points somewhere the application never intended.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-open-redirect" style="width:100%;height:auto;">
-<title id="diagram-title-open-redirect">A link starting on the real, trusted domain silently forwards a victim to an attacker-controlled destination</title>
-<defs>
-<marker id="arrow-open-redirect" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Victim clicks link</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">on real domain</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-open-redirect)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Redirect param</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">is never validated</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-open-redirect)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Server sends</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">302 redirect</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-open-redirect)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Browser lands on</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">attacker's site</text>
-</svg>
-<figcaption>The link's visible domain and the page the victim actually ends up on are two different things.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Post-login "return to where you were" redirects**, one of the most common places a raw,
@@ -121,6 +86,29 @@ company link would, and silently forwards to a controlled test page clearly mark
 assessment. The proof of concept demonstrates the deception convincingly without hosting anything
 actually harmful or collecting any real user's information.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant Victim as Target User
+    participant Browser as User Browser
+    participant TargetApp as Aldercreek Financial App
+    participant PhishServer as Tester Audit Server
+
+    Tester->>TargetApp: Analyze /login?returnUrl= parameter
+    TargetApp-->>Tester: Confirms redirect logic does not enforce same-origin check
+    Tester->>PhishServer: Deploy harmless proof-of-concept landing page
+    Tester->>Victim: Send crafted link: https://aldercreek.example/login?returnUrl=https://phish.test/auth
+    Victim->>Browser: Click link in email
+    Browser->>TargetApp: GET /login?returnUrl=https://phish.test/auth
+    TargetApp-->>Browser: Render legitimate login form
+    Victim->>TargetApp: Submit valid username and password
+    TargetApp->>TargetApp: Authenticate user session
+    TargetApp-->>Browser: HTTP/1.1 302 Found (Location: https://phish.test/auth)
+    Browser->>PhishServer: GET /auth (Auto-navigates to external test page)
+    PhishServer-->>Browser: Render benign test banner confirming open redirect
+    Note over Tester,Victim: Attack chain demonstrated ethically without credential harvesting
+```
+
 ## Severity Calibration
 
 This instance rates **Medium** on its own: it does not directly expose data or grant unauthorized
@@ -142,5 +130,5 @@ actual underlying gap.
 
 ## Related Classes
 
-- **Phishing**: an open redirect is one of the most direct, practical ways to strengthen a phishing
+- **[Phishing](../../attacks/phishing/)**: an open redirect is one of the most direct, practical ways to strengthen a phishing
   campaign, since it lets a malicious link begin on a domain the victim already trusts.

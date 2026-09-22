@@ -30,41 +30,6 @@ specific object referenced actually belongs to that specific authenticated user.
 proves identity; it says nothing about which of the millions of records in the system that identity
 is entitled to touch, and IDOR is what happens when a codebase quietly treats those two facts as one.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-idor" style="width:100%;height:auto;">
-<title id="diagram-title-idor">A tester swaps an ID across three different request locations to confirm the same missing ownership check everywhere</title>
-<defs>
-<marker id="arrow-idor" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">ID swapped in</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">the URL path</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-idor)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">ID swapped in</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">the request body</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-idor)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">No ownership</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">check in either</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-idor)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Both return</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">another user's data</text>
-</svg>
-<figcaption>Testers often check only the visible URL. The same missing check usually sits in the request body too.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Sequential numeric IDs** in URLs or API paths, the easiest variant to spot and the easiest for a
@@ -149,6 +114,34 @@ order. Testing stops there: enough evidence exists to prove the entire order ran
 that write access is also exposed, without harvesting further real customer data beyond what was
 needed to demonstrate both findings.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Tester (Test Account A)
+    participant Browser as Intercepting Proxy
+    participant App as Ferngate Retail API
+    participant DB as Orders DB
+
+    Tester->>Browser: View legitimate order history (Order #5001)
+    Browser->>App: POST /api/orders/details {"order_id": 5001} [Session A]
+    App->>DB: Query order #5001
+    DB-->>App: Order #5001 data
+    App-->>Tester: Render Order #5001 (Belongs to Account A)
+
+    Note over Tester,Browser: Test IDOR: Alter parameter in request body
+    Tester->>Browser: Swap payload to {"order_id": 5002}
+    Browser->>App: POST /api/orders/details {"order_id": 5002} [Session A]
+    App->>App: Validate Session A (Authenticated)
+    Note over App: Omits ownership check: Session A != Owner of Order #5002
+    App->>DB: Query order #5002
+    DB-->>App: Order #5002 data (Belongs to Account B)
+    App-->>Tester: 200 OK (Leaks Account B shipping address & items)
+
+    Note over Tester,App: Confirm state-changing impact on adjacent endpoint
+    Tester->>App: POST /api/orders/cancel {"order_id": 5002} [Session A]
+    App-->>Tester: 200 OK (Cancellation processed)
+    Note over Tester,DB: IDOR confirmed for read and state change - testing halted ethically
+```
+
 ## Severity Calibration
 
 This instance rates **Critical**: reachable by any authenticated low-privilege account, demonstrated
@@ -173,6 +166,6 @@ actual missing ownership check was never addressed.
 
 ## Related Classes
 
-- **Broken Access Control**: this page is the specific, most common realization of that broader
+- **[Broken Access Control](../broken-access-control/)**: this page is the specific, most common realization of that broader
   category; see it for horizontal and vertical privilege escalation patterns beyond direct object
   references.

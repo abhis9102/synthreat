@@ -1,0 +1,2110 @@
+---
+interface Props {
+  defaultKey?: string;
+  base?: string;
+}
+
+const { defaultKey = '', base = '/synthreat/' } = Astro.props;
+---
+
+<!-- Popup Scrim Backdrop -->
+<div id="aiPopupScrim" class="ai-popup-scrim" aria-hidden="true"></div>
+
+<!-- Slide-over In-Page Chat Drawer -->
+<aside id="aiPopupDrawer" class="ai-popup-drawer" role="dialog" aria-modal="true" aria-labelledby="aiPopupTitle" data-base={base} data-default-key={defaultKey}>
+  <div class="ai-popup-header">
+    <div class="ai-popup-header-left">
+      <div class="ai-popup-brand">
+        <span class="pulse-dot"></span>
+        <span id="aiPopupTitle" class="ai-popup-title">Synthreat AI</span>
+      </div>
+      <span id="aiPopupTopicBadge" class="ai-topic-pill" style="display:none;"></span>
+    </div>
+
+    <div class="ai-popup-header-actions">
+      <button type="button" id="aiPopupClearHeaderBtn" class="ai-popup-icon-btn" title="Clear conversation" aria-label="Clear conversation" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+      <button type="button" id="aiPopupKeyToggleBtn" class="ai-popup-icon-btn" title="Gemini API Key Settings" aria-label="Gemini API Key Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M21 3l-8.5 8.5M15.5 8.5l2.5 2.5"/></svg>
+      </button>
+      <a id="aiPopupExpandBtn" href={`${base}assistant/`} class="ai-popup-icon-btn" title="Open Full Assistant Page" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+      </a>
+      <button type="button" id="aiPopupCloseBtn" class="ai-popup-icon-btn" title="Minimize chat" aria-label="Minimize assistant popup">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Key settings drawer panel -->
+  <div id="aiPopupKeyPanel" class="ai-popup-key-panel" style="display:none;">
+    <div class="key-panel-row">
+      <input type="password" id="aiPopupKeyInput" placeholder="Paste Gemini API key (AIza...)" class="key-panel-input" />
+      <button type="button" id="aiPopupSaveKeyBtn" class="key-panel-btn">Save Key</button>
+    </div>
+    <div id="aiPopupKeyStatus" class="key-panel-hint">Stored in browser local storage. Free keys from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</div>
+  </div>
+
+  <!-- Messages Thread -->
+  <div id="aiPopupThread" class="ai-popup-thread" aria-live="polite">
+    <div id="aiPopupWelcome" class="ai-popup-welcome">
+      <div class="welcome-icon">✦</div>
+      <h4>In-Page Synthreat AI</h4>
+      <p>Ask anything about this topic without leaving your reading place. Every answer delivers both <strong>technical mechanics</strong> and <strong>executive business framing</strong>.</p>
+    </div>
+  </div>
+
+  <!-- Floating Messenger Jump to Latest Button -->
+  <button type="button" id="aiPopupJumpBtn" class="ai-popup-jump-btn" title="Scroll to bottom" aria-label="Scroll to bottom" style="display:none;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+  </button>
+
+  <!-- Footer Input Area -->
+  <div class="ai-popup-footer">
+    <form id="aiPopupForm" class="ai-popup-form">
+      <div id="aiPopupFilePreview" class="ai-file-preview-bar" style="display:none;"></div>
+      <div class="ai-input-box">
+        <button type="button" id="aiPopupAttachBtn" class="ai-attach-btn" title="Attach file (PDF, TXT, Word, Images)" aria-label="Attach file">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <input type="file" id="aiPopupFileInput" accept=".txt,.md,.json,.csv,.log,.py,.js,.ts,.pdf,.docx,.doc,.jpg,.jpeg,.png,.webp,text/*,image/*,application/pdf" style="display:none;" />
+        <textarea
+          id="aiPopupInput"
+          rows="1"
+          placeholder="Ask a technical fix, cost impact, or upload a file..."
+          aria-label="Ask a question"
+        ></textarea>
+        <div class="ai-input-controls">
+          <button type="button" id="aiPopupClearBtn" class="ai-popup-clear-btn" title="Clear chat" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+          <button type="submit" id="aiPopupSendBtn" class="ai-popup-send-btn" aria-label="Send message">
+            <svg class="send-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <span class="spinner" style="display:none;"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</aside>
+
+<!-- Floating AI Trigger Button on Article Pages -->
+<button type="button" id="aiPopupFab" class="ai-popup-fab" aria-label="Ask Synthreat AI about this page">
+  <span class="fab-spark">✦</span>
+  <span>Ask AI</span>
+</button>
+
+<style>
+  /* Backdrop Scrim (Mobile only) */
+  .ai-popup-scrim {
+    display: none;
+  }
+  @media (max-width: 640px) {
+    .ai-popup-scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 12, 16, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 998;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.22s ease, visibility 0.22s ease;
+    }
+    .ai-popup-scrim.open {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  /* Messenger Chat Floating Window */
+  .ai-popup-drawer {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 440px;
+    max-width: calc(100vw - 32px);
+    height: 620px;
+    max-height: calc(100dvh - 72px);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 16px 48px -4px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--line);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(18px) scale(0.96);
+    transform-origin: bottom right;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s ease;
+  }
+  .ai-popup-drawer.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  @media (max-width: 640px) {
+    .ai-popup-drawer {
+      bottom: 0;
+      right: 0;
+      width: 100vw;
+      max-width: 100vw;
+      height: calc(100dvh - 30px);
+      max-height: 100dvh;
+      border-radius: 20px 20px 0 0;
+      border-bottom: none;
+      transform: translateY(100%);
+    }
+    .ai-popup-drawer.open {
+      transform: translateY(0);
+    }
+  }
+
+  /* Header */
+  .ai-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .ai-popup-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .ai-popup-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(196, 73, 29, 0.7);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(196, 73, 29, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(196, 73, 29, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(196, 73, 29, 0); }
+  }
+
+  .ai-topic-pill {
+    font-size: 11.5px;
+    font-weight: 600;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent-soft-line);
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+  }
+
+  .ai-popup-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .ai-popup-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .ai-popup-icon-btn:hover {
+    color: var(--ink);
+    background: var(--surface-2);
+    border-color: var(--accent-soft-line);
+  }
+
+  /* API Key Configuration Panel */
+  .ai-popup-key-panel {
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .key-panel-row {
+    display: flex;
+    gap: 8px;
+  }
+  .key-panel-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 7px 11px;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .key-panel-input:focus {
+    border-color: var(--accent);
+  }
+  .key-panel-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s ease;
+  }
+  .key-panel-btn:hover {
+    opacity: 0.9;
+  }
+  .key-panel-hint {
+    font-size: 11.5px;
+    color: var(--ink-faint);
+  }
+  .key-panel-hint a {
+    color: var(--accent-ink);
+  }
+
+  /* Thread */
+  .ai-popup-thread {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    padding: 16px 16px 36px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 20px;
+    scroll-behavior: auto;
+  }
+  .ai-popup-thread::-webkit-scrollbar {
+    width: 6px;
+  }
+  .ai-popup-thread::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .ai-popup-thread::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 4px;
+  }
+  .ai-popup-thread::-webkit-scrollbar-thumb:hover {
+    background: var(--ink-faint);
+  }
+
+  .ai-popup-jump-btn {
+    position: absolute;
+    bottom: 74px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--accent);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 25;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: popInJump 0.2s ease-out;
+  }
+  .ai-popup-jump-btn:hover {
+    background: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(196, 73, 29, 0.4);
+  }
+  @keyframes popInJump {
+    from { opacity: 0; transform: scale(0.75) translateY(6px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .ai-popup-welcome {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin: auto 0;
+  }
+  .welcome-icon {
+    font-size: 22px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .ai-popup-welcome h4 {
+    margin: 0 0 8px 0;
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .ai-popup-welcome p {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  /* Message entrance animations */
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(18px) translateY(6px); }
+    to   { opacity: 1; transform: translateX(0) translateY(0); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-12px) translateY(6px); }
+    to   { opacity: 1; transform: translateX(0) translateY(0); }
+  }
+
+  /* Chat Messages */
+  :global(.ai-popup-user-group) {
+    align-self: flex-end;
+    max-width: 88%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+    animation: slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  :global(.ai-popup-card) {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+    animation: slideInLeft 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+
+  :global(.ai-popup-user-bubble-box) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    max-width: 100%;
+  }
+
+  :global(.ai-popup-user-bubble) {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 14px 14px 4px 14px;
+    padding: 10px 16px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    word-break: break-word;
+    box-shadow: 0 2px 8px rgba(196, 73, 29, 0.25);
+    min-width: 120px;
+  }
+
+  :global(.ai-popup-msg-actions) {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+  }
+  :global(.ai-popup-user-group:hover .ai-popup-msg-actions) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  :global(.ai-popup-msg-btn) {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  :global(.ai-popup-msg-btn:hover) {
+    color: var(--ink);
+    border-color: var(--accent);
+  }
+  :global(.ai-popup-msg-btn.delete-btn:hover) {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+
+  /* Inline editing box */
+  :global(.ai-popup-user-edit-box) {
+    width: 100%;
+    min-width: 250px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  :global(.ai-popup-edit-textarea) {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    line-height: 1.45;
+    resize: vertical;
+    outline: none;
+    min-height: 46px;
+  }
+  :global(.ai-popup-edit-actions) {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid var(--line);
+  }
+  :global(.ai-popup-edit-cancel) {
+    padding: 3px 9px;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    cursor: pointer;
+  }
+  :global(.ai-popup-edit-cancel:hover) {
+    color: var(--ink);
+    background: var(--surface);
+  }
+  :global(.ai-popup-edit-save) {
+    padding: 3px 10px;
+    border-radius: 5px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+
+  :global(.ai-popup-card-header) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  :global(.ai-card-header-actions) {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  :global(.ai-popup-card-del-btn) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink-faint);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  :global(.ai-popup-card-del-btn:hover) {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+    background: var(--surface);
+  }
+
+  :global(.ai-popup-card-body) {
+    padding: 14px 16px;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+
+  :global(.ai-popup-card-body h2) {
+    font-size: 14px;
+    margin: 14px 0 8px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  :global(.ai-popup-card-body h2:first-child) {
+    margin-top: 0;
+  }
+  :global(.ai-popup-card-body ul),
+  :global(.ai-popup-card-body ol) {
+    margin: 6px 0 10px 0;
+    padding-left: 18px;
+  }
+  :global(.ai-popup-card-body li) {
+    margin-bottom: 5px;
+  }
+
+  :global(.ai-popup-toolbar) {
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
+    flex-wrap: wrap;
+  }
+  :global(.ai-popup-tool-btn) {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 9px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  :global(.ai-popup-tool-btn:hover) {
+    color: var(--ink);
+    border-color: var(--accent);
+  }
+  :global(.ai-popup-tool-btn.danger:hover) {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+    background: var(--surface-2);
+  }
+  :global(.ai-popup-tool-btn.success) {
+    background: #10b981;
+    color: #fff;
+    border-color: #10b981;
+  }
+
+  :global(.ai-popup-citations) {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    flex-wrap: wrap;
+    font-size: 11.5px;
+  }
+  :global(.ai-popup-cite-badge) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--accent-ink);
+    border: 1px solid var(--line);
+    text-decoration: none;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+  :global(.ai-popup-cite-badge:hover) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Input footer */
+  .ai-popup-footer {
+    padding: 10px 16px 12px 16px;
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
+    flex-shrink: 0;
+  }
+
+  .ai-file-preview-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    overflow-x: auto;
+  }
+  .ai-file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--accent-soft-line);
+    border-radius: 8px;
+    padding: 4px 8px;
+    max-width: 100%;
+    font-size: 12px;
+  }
+  .ai-file-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid var(--line);
+  }
+  .ai-file-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    color: var(--accent);
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .ai-file-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    line-height: 1.2;
+  }
+  .ai-file-name {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 210px;
+  }
+  .ai-file-size {
+    font-size: 10.5px;
+    color: var(--ink-faint);
+  }
+  .ai-file-remove-btn {
+    border: none;
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: color 0.15s ease;
+  }
+  .ai-file-remove-btn:hover {
+    color: #ef4444;
+  }
+
+  .ai-attach-btn {
+    border: none;
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    align-self: flex-end;
+    margin-bottom: 2px;
+  }
+  .ai-attach-btn:hover {
+    color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  :global(.ai-bubble-attachment) {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    font-size: 12px;
+    max-width: 100%;
+  }
+  :global(.ai-bubble-attachment img) {
+    max-width: 200px;
+    max-height: 140px;
+    border-radius: 6px;
+    object-fit: cover;
+    margin-bottom: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  :global(.ai-bubble-attachment-name) {
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #fff;
+  }
+
+  .ai-input-box {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 8px 12px;
+    transition: border-color 0.15s ease;
+  }
+  .ai-input-box:focus-within {
+    border-color: var(--accent);
+  }
+
+  #aiPopupInput {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.45;
+    resize: none;
+    outline: none;
+    max-height: 120px;
+    min-height: 22px;
+    padding: 2px 0;
+  }
+
+  .ai-input-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ai-popup-clear-btn {
+    background: transparent;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ai-popup-clear-btn:hover {
+    color: var(--ink);
+    background: var(--surface-2);
+  }
+
+  .ai-popup-send-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .ai-popup-send-btn:hover {
+    opacity: 0.9;
+  }
+  .ai-popup-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Floating Messenger Trigger Button */
+  .ai-popup-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--accent);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--line);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 990;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ai-popup-fab:hover {
+    background: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(196, 73, 29, 0.4);
+  }
+  .fab-spark {
+    color: var(--accent);
+    font-size: 15px;
+    line-height: 1;
+    transition: color 0.15s ease, transform 0.2s ease;
+  }
+  .ai-popup-fab:hover .fab-spark {
+    color: #fff;
+    transform: scale(1.2) rotate(15deg);
+  }
+  .ai-popup-fab.chat-open {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.85);
+  }
+</style>
+
+<script>
+  import { marked } from 'marked';
+
+  let knowledgeIndex: any[] = [];
+  let isGenerating = false;
+  let popupHistory: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+
+  interface AttachedFile {
+    name: string;
+    size: string;
+    type: 'image' | 'pdf' | 'text';
+    mimeType?: string;
+    data?: string;
+    dataUrl?: string;
+    textContent?: string;
+  }
+
+  interface PopupTurn {
+    id: string;
+    userQuery: string;
+    assistantText: string;
+    matched?: any[];
+    attachment?: {
+      name: string;
+      size: string;
+      type: 'image' | 'pdf' | 'text';
+      dataUrl?: string;
+    };
+  }
+  let popupTurns: PopupTurn[] = [];
+
+  const drawer = document.getElementById('aiPopupDrawer') as HTMLElement;
+  const scrim = document.getElementById('aiPopupScrim') as HTMLElement;
+  const closeBtn = document.getElementById('aiPopupCloseBtn');
+  const fab = document.getElementById('aiPopupFab');
+  const thread = document.getElementById('aiPopupThread') as HTMLElement;
+  const welcome = document.getElementById('aiPopupWelcome') as HTMLElement;
+  const input = document.getElementById('aiPopupInput') as HTMLTextAreaElement;
+  const form = document.getElementById('aiPopupForm');
+  const sendBtn = document.getElementById('aiPopupSendBtn') as HTMLButtonElement;
+  const clearBtn = document.getElementById('aiPopupClearBtn');
+  const clearHeaderBtn = document.getElementById('aiPopupClearHeaderBtn');
+  const topicBadge = document.getElementById('aiPopupTopicBadge');
+  const expandBtn = document.getElementById('aiPopupExpandBtn') as HTMLAnchorElement;
+
+  const attachBtn = document.getElementById('aiPopupAttachBtn');
+  const fileInput = document.getElementById('aiPopupFileInput') as HTMLInputElement;
+  const filePreview = document.getElementById('aiPopupFilePreview');
+  let currentAttachment: AttachedFile | null = null;
+
+  const keyToggleBtn = document.getElementById('aiPopupKeyToggleBtn');
+  const keyPanel = document.getElementById('aiPopupKeyPanel');
+  const keyInput = document.getElementById('aiPopupKeyInput') as HTMLInputElement;
+  const saveKeyBtn = document.getElementById('aiPopupSaveKeyBtn');
+  const keyStatus = document.getElementById('aiPopupKeyStatus');
+
+  const base = drawer?.dataset.base || '/synthreat/';
+  const defaultKey = drawer?.dataset.defaultKey || '';
+  let pendingQuery = '';
+
+  function getActiveApiKey(): string {
+    const stored = localStorage.getItem('synthreat_gemini_key');
+    if (stored && stored.trim()) return stored.trim();
+    return defaultKey;
+  }
+
+  function toggleKeyPanel(forceOpen?: boolean) {
+    if (!keyPanel) return;
+    const shouldOpen = forceOpen !== undefined ? forceOpen : keyPanel.style.display === 'none';
+    keyPanel.style.display = shouldOpen ? 'flex' : 'none';
+    if (shouldOpen) {
+      const active = getActiveApiKey();
+      if (active && keyInput) keyInput.value = active;
+      setTimeout(() => keyInput?.focus(), 60);
+    }
+  }
+
+  keyToggleBtn?.addEventListener('click', () => toggleKeyPanel());
+
+  saveKeyBtn?.addEventListener('click', () => {
+    const k = keyInput?.value.trim() || '';
+    if (k) {
+      localStorage.setItem('synthreat_gemini_key', k);
+      if (keyStatus) {
+        keyStatus.textContent = 'Key saved! Running your question...';
+        keyStatus.style.color = 'var(--accent-ink)';
+      }
+      setTimeout(() => {
+        if (keyPanel) keyPanel.style.display = 'none';
+        if (pendingQuery) {
+          const q = pendingQuery;
+          pendingQuery = '';
+          submitPopupPrompt(q);
+        }
+      }, 500);
+    } else {
+      localStorage.removeItem('synthreat_gemini_key');
+      if (keyStatus) {
+        keyStatus.textContent = 'Custom key cleared.';
+        keyStatus.style.color = 'var(--ink-faint)';
+      }
+    }
+  });
+
+  // Load index
+  async function loadKnowledgeIndex() {
+    try {
+      const res = await fetch(`${base}synthreat-ai-index.json`);
+      if (res.ok) knowledgeIndex = await res.json();
+    } catch {}
+  }
+
+  function isConversational(query: string): boolean {
+    const q = query.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '');
+    if (!q) return true;
+    const conversationalTokens = new Set([
+      'hi', 'hello', 'hey', 'greetings', 'howdy', 'hlow', 'hola',
+      'test', 'testing', 'ping',
+      'yes', 'no', 'es', 'ok', 'okay', 'sure', 'yep', 'yeah', 'cool',
+      'thanks', 'thank', 'you', 'got', 'it', 'thx',
+      'who', 'are', 'you', 'what', 'can', 'do', 'help'
+    ]);
+    const words = q.split(/\s+/);
+    return words.length <= 3 && words.every(w => conversationalTokens.has(w));
+  }
+
+  const GROUNDING_STOPWORDS = new Set([
+    'explain', 'what', 'how', 'why', 'can', 'does', 'with', 'for', 'from', 'about',
+    'into', 'that', 'this', 'business', 'impact', 'mechanics', 'technical', 'non',
+    'stakeholders', 'executive', 'translate', 'guidance', 'perspective', 'analysis',
+    'overview', 'summary', 'difference', 'diff', 'versus', 'vs', 'vulnerability',
+    'vulnerabilities', 'attack', 'attacks', 'security', 'issue', 'issues', 'risk',
+    'risks', 'report', 'check', 'test', 'help', 'and', 'the', 'its', 'are', 'you',
+    'who', 'which', 'where', 'when', 'will', 'should', 'would', 'could', 'want',
+    'please', 'tell', 'show', 'give', 'detail', 'details'
+  ]);
+
+  function findRelevantArticles(query: string, topN = 3) {
+    if (isConversational(query)) return [];
+    if (!knowledgeIndex || !knowledgeIndex.length) return [];
+
+    const queryClean = query.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
+    const tokens = queryClean.split(/\s+/).filter(t => t.length > 2 && !GROUNDING_STOPWORDS.has(t));
+    if (!tokens.length) return [];
+
+    const scored = knowledgeIndex.map(entry => {
+      let score = 0;
+      const titleL = (entry.title || '').toLowerCase();
+      const slugL = (entry.slug || '').toLowerCase();
+      const techL = (entry.tech || '').toLowerCase();
+      const bizL = (entry.biz || '').toLowerCase();
+      const summaryL = (entry.summary || '').toLowerCase();
+
+      for (const token of tokens) {
+        if (titleL.includes(token)) score += 15;
+        if (slugL.includes(token)) score += 12;
+        if (summaryL.includes(token)) score += 5;
+        if (techL.includes(token)) score += 3;
+        if (bizL.includes(token)) score += 3;
+      }
+
+      // Title phrase match bonus
+      if (queryClean.includes(titleL) || (titleL.length > 6 && queryClean.includes(titleL.slice(0, 15)))) {
+        score += 35;
+      }
+      return { entry, score };
+    });
+
+    const candidates = scored.filter(item => item.score >= 15).sort((a, b) => b.score - a.score);
+    if (!candidates.length) return [];
+
+    const topScore = candidates[0].score;
+    return candidates
+      .filter(item => item.score >= Math.max(15, topScore * 0.4))
+      .slice(0, topN)
+      .map(item => item.entry);
+  }
+
+  function buildPopupPrompt(matched: any[]) {
+    const grounded = matched.map(m => `
+--- Article: ${m.title} (${m.col}/${m.slug}) ---
+Surface: ${m.surface}
+CWE: ${m.cwe?.join(', ') || 'N/A'}
+Summary: ${m.summary}
+Technical: ${m.tech}
+Business: ${m.biz}
+Fix: ${m.fix}
+`).join('\n');
+
+    return `
+You are Synthreat AI, an expert cybersecurity copilot and consultant.
+
+CORE MANDATE (CRITICAL):
+- STRICT BREVITY: Total response MUST be under 160 words. No filler, no conversational preambles.
+- ZERO JARGON: Plain language mechanics over acronym stacking.
+- HIGH ACCURACY: Grounded in verified standards (OWASP, CWE, CVSS, NIST).
+
+DYNAMIC CONTEXT & INTENT:
+1. GREETINGS, CASUAL & TEST MESSAGES (e.g. "hi", "hello", "hlow", "test", "thanks", "ok", "yes", "es"):
+   - Reply naturally, politely, and concisely in 1-2 sentences.
+   - For tests: confirm system operational readiness immediately.
+   - NEVER output structural headings or exploit templates for greetings or tests.
+
+2. SPECIFIC QUESTIONS (e.g. "Can automated scanners detect IDOR?", "Difference between X and Y", "Show code fix"):
+   - Answer directly and concisely in 2-4 punchy sentences or clear bullets.
+   - Do not force rigid perspective headings unless full vulnerability analysis is requested.
+
+3. FULL VULNERABILITY / ATTACK TOPIC INQUIRIES (e.g. "Explain CSRF", deep-link button prompts, or topic overviews):
+   Deliver Synthreat's dual perspective strictly adhering to this concise format:
+
+## 🛠 Technical Perspective
+- **Broken Trust Boundary:** [1 concise sentence: what assumption failed]
+- **Exploit Flow:**
+  1. [Entry: trigger or unvalidated input - max 12 words]
+  2. [Bypass: boundary pivot or privilege escalation - max 12 words]
+  3. [Impact: data exfiltration or system control - max 12 words]
+- **The Real Fix:** [1 actionable sentence: verified defense, not just a band-aid]
+
+## 💼 Business & Executive Translation
+- **Real Cost Exposure:** [2-3 short bullet items: regulatory fines, downtime hours, breach response]
+- **Executive Talk Track:** "[Strictly 2 direct sentences for CEO/CFO without alarmism or tech buzzwords]"
+
+Grounded Synthreat Knowledge:
+${grounded || 'General cybersecurity principles apply.'}
+`;
+  }
+
+  // Open & Close
+  function openPopup(initialQuery?: string, topicName?: string) {
+    drawer?.classList.add('open');
+    fab?.classList.add('chat-open');
+    scrim?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    if (topicName && topicBadge) {
+      topicBadge.textContent = topicName;
+      topicBadge.style.display = 'inline-block';
+    }
+
+    if (initialQuery) {
+      if (expandBtn) expandBtn.href = `${base}assistant/?q=${encodeURIComponent(initialQuery)}`;
+      if (thread.children.length <= 1) {
+        submitPopupPrompt(initialQuery);
+      }
+    }
+
+    setTimeout(() => {
+      input?.focus();
+      if (thread) {
+        thread.scrollTop = thread.scrollHeight;
+        updateJumpButtonVisibility();
+      }
+    }, 150);
+  }
+
+  function closePopup() {
+    drawer?.classList.remove('open');
+    scrim?.classList.remove('open');
+    fab?.classList.remove('chat-open');
+    document.body.style.overflow = '';
+  }
+
+  scrim?.addEventListener('click', closePopup);
+  closeBtn?.addEventListener('click', closePopup);
+  fab?.addEventListener('click', () => {
+    if (drawer?.classList.contains('open')) {
+      closePopup();
+    } else {
+      const pageH1 = document.querySelector('h1')?.textContent?.trim() || '';
+      openPopup(pageH1 ? `Explain ${pageH1} mechanics and executive risk framing` : '', pageH1);
+    }
+  });
+
+  // Messenger-style scroll tracking & delegation
+  let userInterruptedScroll = false;
+  const jumpBtn = document.getElementById('aiPopupJumpBtn');
+
+  function isScrolledNearBottom(threshold = 80): boolean {
+    if (!thread) return true;
+    return thread.scrollHeight - thread.scrollTop - thread.clientHeight <= threshold;
+  }
+
+  function updateJumpButtonVisibility() {
+    if (!thread || !jumpBtn) return;
+    const isNear = isScrolledNearBottom(80);
+    const canScroll = thread.scrollHeight > thread.clientHeight + 30;
+    if (canScroll && !isNear) {
+      jumpBtn.style.display = 'flex';
+    } else {
+      jumpBtn.style.display = 'none';
+    }
+  }
+
+  thread?.addEventListener('scroll', () => {
+    if (isScrolledNearBottom(40)) {
+      userInterruptedScroll = false;
+    }
+    updateJumpButtonVisibility();
+  }, { passive: true });
+
+  jumpBtn?.addEventListener('click', () => {
+    userInterruptedScroll = false;
+    if (thread) {
+      thread.scrollTo({ top: thread.scrollHeight, behavior: 'smooth' });
+    }
+  });
+
+  // Direct, smooth wheel delegation: scrolling anywhere over the chat popup scrolls the thread and NEVER the background page
+  drawer?.addEventListener('wheel', (e) => {
+    // If horizontal trackpad scroll over code block or preview chips, allow native horizontal scroll
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      const target = e.target as HTMLElement;
+      if (target.closest('pre, code, .ai-file-preview-bar')) {
+        return;
+      }
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    if (thread) {
+      if (e.deltaY < 0) {
+        userInterruptedScroll = true;
+      } else if (thread.scrollHeight - thread.scrollTop - thread.clientHeight <= 40) {
+        userInterruptedScroll = false;
+      }
+      thread.scrollTop += e.deltaY;
+      updateJumpButtonVisibility();
+    }
+  }, { passive: false });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer?.classList.contains('open')) {
+      closePopup();
+    }
+  });
+
+  // Intercept all "Ask Synthreat AI about..." buttons across any page!
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement)?.closest?.('.ai-ask-btn') as HTMLElement | null;
+    if (!btn) return;
+    // Allow Cmd+click or Ctrl+click to open in new tab
+    if (e.metaKey || e.ctrlKey) return;
+    e.preventDefault();
+    const prompt = btn.dataset.aiPrompt || btn.textContent?.trim() || '';
+    const topic = btn.dataset.topic || document.querySelector('h1')?.textContent?.trim() || '';
+    openPopup(prompt, topic);
+  });
+
+  // Auto-resize textarea
+  input?.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, 120)}px`;
+  });
+
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      form?.dispatchEvent(new Event('submit'));
+    }
+  });
+
+  // --- File Upload & Attachment Processing ---
+  attachBtn?.addEventListener('click', () => {
+    fileInput?.click();
+  });
+
+  fileInput?.addEventListener('change', async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    await processSelectedFile(file);
+    fileInput.value = '';
+  });
+
+  // Paste image from clipboard directly into textarea
+  input?.addEventListener('paste', async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) {
+          e.preventDefault();
+          await processSelectedFile(file);
+          break;
+        }
+      }
+    }
+  });
+
+  // Drag & drop files onto the chat drawer
+  drawer?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+  });
+  drawer?.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer?.files?.[0];
+    if (file) {
+      await processSelectedFile(file);
+    }
+  });
+
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function readFileAsDataURL(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function readFileAsText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  }
+
+  // Lightweight standard-compliant .docx text extractor using DecompressionStream
+  async function extractDocxText(arrayBuffer: ArrayBuffer): Promise<string> {
+    const bytes = new Uint8Array(arrayBuffer);
+    const view = new DataView(arrayBuffer);
+    let offset = 0;
+    while (offset < bytes.length - 30) {
+      if (view.getUint32(offset, true) !== 0x04034b50) {
+        offset++;
+        continue;
+      }
+      const compression = view.getUint16(offset + 8, true);
+      const compressedSize = view.getUint32(offset + 18, true);
+      const fileNameLen = view.getUint16(offset + 26, true);
+      const extraLen = view.getUint16(offset + 28, true);
+      const fileNameBytes = bytes.subarray(offset + 30, offset + 30 + fileNameLen);
+      const fileName = new TextDecoder().decode(fileNameBytes);
+      const dataStart = offset + 30 + fileNameLen + extraLen;
+      const dataEnd = dataStart + compressedSize;
+
+      if (fileName === 'word/document.xml') {
+        const compData = bytes.subarray(dataStart, dataEnd);
+        let xml = '';
+        if (compression === 8 && typeof DecompressionStream !== 'undefined') {
+          const stream = new Response(compData).body?.pipeThrough(new DecompressionStream('deflate-raw'));
+          if (stream) xml = await new Response(stream).text();
+        } else {
+          xml = new TextDecoder().decode(compData);
+        }
+        return xml.replace(/<w:p[^>]*>/g, '\n').replace(/<[^>]+>/g, '').replace(/\n{3,}/g, '\n\n').trim();
+      }
+      offset = dataStart + compressedSize;
+    }
+    return '';
+  }
+
+  async function processSelectedFile(file: File) {
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File exceeds 10MB limit. Please choose a smaller file.');
+      return;
+    }
+
+    const name = file.name;
+    const size = formatFileSize(file.size);
+    const ext = name.split('.').pop()?.toLowerCase() || '';
+
+    // 1. Image (JPEG, PNG, WebP)
+    if (file.type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+      const dataUrl = await readFileAsDataURL(file);
+      const base64 = dataUrl.split(',')[1] || '';
+      const mimeType = file.type || (ext === 'png' ? 'image/png' : 'image/jpeg');
+      currentAttachment = { name, size, type: 'image', mimeType, data: base64, dataUrl };
+    }
+    // 2. PDF Document
+    else if (file.type === 'application/pdf' || ext === 'pdf') {
+      const dataUrl = await readFileAsDataURL(file);
+      const base64 = dataUrl.split(',')[1] || '';
+      currentAttachment = { name, size, type: 'pdf', mimeType: 'application/pdf', data: base64 };
+    }
+    // 3. Word Document (.docx)
+    else if (ext === 'docx') {
+      try {
+        const ab = await file.arrayBuffer();
+        const extracted = await extractDocxText(ab);
+        currentAttachment = { name, size, type: 'text', textContent: extracted || '[Empty Word document]' };
+      } catch (err) {
+        const text = await readFileAsText(file);
+        currentAttachment = { name, size, type: 'text', textContent: text };
+      }
+    }
+    // 4. Text / Code / CSV / Markdown
+    else {
+      const text = await readFileAsText(file);
+      currentAttachment = { name, size, type: 'text', textContent: text };
+    }
+
+    renderFilePreview();
+  }
+
+  function renderFilePreview() {
+    if (!filePreview) return;
+    if (!currentAttachment) {
+      filePreview.style.display = 'none';
+      filePreview.innerHTML = '';
+      return;
+    }
+    filePreview.style.display = 'flex';
+    filePreview.innerHTML = `
+      <div class="ai-file-chip">
+        ${currentAttachment.type === 'image' && currentAttachment.dataUrl
+          ? `<img src="${currentAttachment.dataUrl}" class="ai-file-thumb" alt="Preview" />`
+          : `<span class="ai-file-icon">${currentAttachment.type === 'pdf' ? '📄' : '📝'}</span>`
+        }
+        <div class="ai-file-info">
+          <span class="ai-file-name" title="${escapeHtml(currentAttachment.name)}">${escapeHtml(currentAttachment.name)}</span>
+          <span class="ai-file-size">${currentAttachment.size}</span>
+        </div>
+        <button type="button" class="ai-file-remove-btn" title="Remove file" aria-label="Remove attached file">✕</button>
+      </div>
+    `;
+    filePreview.querySelector('.ai-file-remove-btn')?.addEventListener('click', () => {
+      currentAttachment = null;
+      renderFilePreview();
+    });
+  }
+
+  function renderAttachmentBadge(att?: { name: string; size: string; type: 'image' | 'pdf' | 'text'; dataUrl?: string }): string {
+    if (!att) return '';
+    if (att.type === 'image' && att.dataUrl) {
+      return `
+        <div class="ai-bubble-attachment">
+          <img src="${att.dataUrl}" alt="${escapeHtml(att.name)}" />
+          <div class="ai-bubble-attachment-name">🖼️ ${escapeHtml(att.name)} <span style="font-weight:400; font-size:11px; color:var(--ink-faint);">(${att.size})</span></div>
+        </div>
+      `;
+    }
+    const icon = att.type === 'pdf' ? '📄' : '📝';
+    return `
+      <div class="ai-bubble-attachment">
+        <div class="ai-bubble-attachment-name">${icon} ${escapeHtml(att.name)} <span style="font-weight:400; font-size:11px; color:var(--ink-faint);">(${att.size})</span></div>
+      </div>
+    `;
+  }
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const val = input?.value.trim();
+    if ((!val && !currentAttachment) || isGenerating) return;
+    const toSend = val || (currentAttachment ? `Analyze this attached ${currentAttachment.name}:` : '');
+    input.value = '';
+    input.style.height = 'auto';
+    submitPopupPrompt(toSend);
+  });
+
+  function updatePopupClearVisibility(hasMessages: boolean) {
+    if (clearBtn) clearBtn.style.display = hasMessages ? 'inline-flex' : 'none';
+    if (clearHeaderBtn) clearHeaderBtn.style.display = hasMessages ? 'inline-flex' : 'none';
+  }
+
+  function savePopupState() {
+    try {
+      const pageKey = `synthreat_popup_turns_${encodeURIComponent(window.location.pathname)}`;
+      // Strip dataUrl (base64 image data) before saving — prevents quota errors
+      // Metadata (name, size, type) is kept so the badge still renders
+      const slim = popupTurns.map(t => ({
+        ...t,
+        attachment: t.attachment ? { name: t.attachment.name, size: t.attachment.size, type: t.attachment.type } : undefined
+      }));
+      localStorage.setItem(pageKey, JSON.stringify(slim));
+    } catch (e: any) {
+      if (e?.name === 'QuotaExceededError') {
+        // If storage full, keep only last 10 turns
+        try {
+          const pageKey = `synthreat_popup_turns_${encodeURIComponent(window.location.pathname)}`;
+          const slim = popupTurns.slice(-10).map(t => ({
+            ...t,
+            attachment: t.attachment ? { name: t.attachment.name, size: t.attachment.size, type: t.attachment.type } : undefined
+          }));
+          localStorage.setItem(pageKey, JSON.stringify(slim));
+        } catch {}
+      }
+    }
+  }
+
+  function clearPopupChat() {
+    thread.innerHTML = '';
+    popupTurns = [];
+    popupHistory = [];
+    try {
+      const pageKey = `synthreat_popup_turns_${encodeURIComponent(window.location.pathname)}`;
+      localStorage.removeItem(pageKey);
+    } catch {}
+    updatePopupClearVisibility(false);
+    if (welcome) thread.appendChild(welcome);
+  }
+
+  clearBtn?.addEventListener('click', clearPopupChat);
+  clearHeaderBtn?.addEventListener('click', clearPopupChat);
+
+  function deletePopupTurn(turnId: string) {
+    const turnIndex = popupTurns.findIndex(t => t.id === turnId);
+    if (turnIndex !== -1) {
+      popupTurns.splice(turnIndex, 1);
+      popupHistory = popupTurns.flatMap(t => [
+        { role: 'user', parts: [{ text: t.userQuery }] },
+        { role: 'model', parts: [{ text: t.assistantText }] }
+      ]);
+      savePopupState();
+    }
+
+    document.querySelectorAll(`#aiPopupThread [data-turn-id="${turnId}"]`).forEach(el => el.remove());
+
+    if (popupTurns.length === 0) {
+      if (welcome) thread.appendChild(welcome);
+      updatePopupClearVisibility(false);
+    } else {
+      updatePopupClearVisibility(true);
+    }
+  }
+
+  function editAndResubmitPopupTurn(turnId: string, newQuery: string) {
+    if (isGenerating) return;
+    const turnIndex = popupTurns.findIndex(t => t.id === turnId);
+    if (turnIndex === -1) {
+      submitPopupPrompt(newQuery);
+      return;
+    }
+
+    const turnsToRemove = popupTurns.slice(turnIndex);
+    popupTurns = popupTurns.slice(0, turnIndex);
+    popupHistory = popupTurns.flatMap(t => [
+      { role: 'user', parts: [{ text: t.userQuery }] },
+      { role: 'model', parts: [{ text: t.assistantText }] }
+    ]);
+    savePopupState();
+
+    for (const t of turnsToRemove) {
+      document.querySelectorAll(`#aiPopupThread [data-turn-id="${t.id}"]`).forEach(el => el.remove());
+    }
+
+    submitPopupPrompt(newQuery);
+  }
+
+  function attachPopupUserTurnHandlers(userGroup: HTMLElement, turnId: string) {
+    const bubbleBox = userGroup.querySelector('.ai-popup-user-bubble-box') as HTMLElement;
+    const editBox = userGroup.querySelector('.ai-popup-user-edit-box') as HTMLElement;
+    const editBtn = userGroup.querySelector('.edit-btn') as HTMLElement;
+    const deleteBtn = userGroup.querySelector('.delete-btn') as HTMLElement;
+    const textarea = userGroup.querySelector('.ai-popup-edit-textarea') as HTMLTextAreaElement;
+    const cancelBtn = userGroup.querySelector('.ai-popup-edit-cancel') as HTMLElement;
+    const saveBtn = userGroup.querySelector('.ai-popup-edit-save') as HTMLElement;
+
+    editBtn?.addEventListener('click', () => {
+      if (isGenerating) return;
+      if (bubbleBox && editBox && textarea) {
+        bubbleBox.style.display = 'none';
+        editBox.style.display = 'flex';
+        textarea.value = userGroup.querySelector('.ai-popup-user-bubble')?.textContent || '';
+        textarea.style.height = 'auto';
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
+        textarea.focus();
+      }
+    });
+
+    function closeEdit() {
+      if (bubbleBox && editBox) {
+        editBox.style.display = 'none';
+        bubbleBox.style.display = 'flex';
+      }
+    }
+
+    cancelBtn?.addEventListener('click', closeEdit);
+
+    function saveAndResubmit() {
+      const val = textarea?.value.trim();
+      if (!val) return;
+      closeEdit();
+      editAndResubmitPopupTurn(turnId, val);
+    }
+
+    saveBtn?.addEventListener('click', saveAndResubmit);
+
+    textarea?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        saveAndResubmit();
+      } else if (e.key === 'Escape') {
+        closeEdit();
+      }
+    });
+
+    textarea?.addEventListener('input', () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
+    });
+
+    deleteBtn?.addEventListener('click', () => {
+      deletePopupTurn(turnId);
+    });
+  }
+
+  async function submitPopupPrompt(userQuery: string) {
+    const apiKey = getActiveApiKey();
+    if (!apiKey) {
+      pendingQuery = userQuery;
+      toggleKeyPanel(true);
+      if (keyStatus) {
+        keyStatus.textContent = 'Enter your Gemini API key to ask questions directly on this page:';
+        keyStatus.style.color = 'var(--accent)';
+      }
+      return;
+    }
+
+    const attached = currentAttachment;
+    currentAttachment = null;
+    renderFilePreview();
+
+    if (welcome && welcome.parentElement) welcome.remove();
+    updatePopupClearVisibility(true);
+
+    const turnId = 'pturn_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+
+    // 1. User Message Group
+    const userGroup = document.createElement('div');
+    userGroup.className = 'ai-popup-user-group';
+    userGroup.dataset.turnId = turnId;
+    userGroup.innerHTML = `
+      <div class="ai-popup-user-bubble-box">
+        <div class="ai-popup-user-bubble">
+          ${renderAttachmentBadge(attached ? { name: attached.name, size: attached.size, type: attached.type, dataUrl: attached.dataUrl } : undefined)}
+          <div>${escapeHtml(userQuery)}</div>
+        </div>
+        <div class="ai-popup-msg-actions">
+          <button type="button" class="ai-popup-msg-btn edit-btn" title="Edit message" aria-label="Edit message">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <span>Edit</span>
+          </button>
+          <button type="button" class="ai-popup-msg-btn delete-btn" title="Delete turn" aria-label="Delete turn">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>
+      <div class="ai-popup-user-edit-box" style="display:none;">
+        <textarea class="ai-popup-edit-textarea" rows="2">${escapeHtml(userQuery)}</textarea>
+        <div class="ai-popup-edit-actions">
+          <button type="button" class="ai-popup-edit-cancel">Cancel</button>
+          <button type="button" class="ai-popup-edit-save">Save & Send</button>
+        </div>
+      </div>
+    `;
+    userInterruptedScroll = false;
+    attachPopupUserTurnHandlers(userGroup, turnId);
+    thread.appendChild(userGroup);
+    requestAnimationFrame(() => { thread.scrollTop = thread.scrollHeight; });
+
+    // 2. Assistant Card
+    const matched = findRelevantArticles(userQuery, 3);
+    const card = document.createElement('div');
+    card.className = 'ai-popup-card';
+    card.dataset.turnId = turnId;
+
+    const cardHeader = document.createElement('div');
+    cardHeader.className = 'ai-popup-card-header';
+    cardHeader.innerHTML = `
+      <span><strong>Synthreat AI</strong></span>
+      <div class="ai-card-header-actions">
+        <span class="ai-card-status">Generating...</span>
+        <button type="button" class="ai-popup-card-del-btn" title="Delete turn" aria-label="Delete turn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+    `;
+    cardHeader.querySelector('.ai-popup-card-del-btn')?.addEventListener('click', () => deletePopupTurn(turnId));
+    card.appendChild(cardHeader);
+
+    const body = document.createElement('div');
+    body.className = 'ai-popup-card-body';
+    body.innerHTML = '<span class="spinner" style="display:inline-block; border-color:var(--ink-faint); border-top-color:var(--accent);"></span> Connecting to Gemini...';
+    card.appendChild(body);
+
+    if (matched.length > 0) {
+      const cites = document.createElement('div');
+      cites.className = 'ai-popup-citations';
+      cites.innerHTML = `<strong>Grounded:</strong> ${matched.map(m => `<a href="${base}${m.col}/${m.slug}/" class="ai-popup-cite-badge" target="_blank" rel="noopener">${escapeHtml(m.title)}</a>`).join('')}`;
+      card.appendChild(cites);
+    }
+
+    thread.appendChild(card);
+    requestAnimationFrame(() => { thread.scrollTop = thread.scrollHeight; updateJumpButtonVisibility(); });
+
+
+    setGenerating(true);
+    let fullText = '';
+
+    try {
+      const systemPrompt = buildPopupPrompt(matched);
+
+      const userParts: any[] = [];
+      let queryForPrompt = userQuery;
+      if (attached) {
+        if (attached.type === 'text') {
+          queryForPrompt = (queryForPrompt ? queryForPrompt + '\n\n' : '') +
+            `--- Attached Document: ${attached.name} ---\n${attached.textContent || ''}\n--- End Document ---`;
+        } else if (!queryForPrompt) {
+          queryForPrompt = `Analyze this attached ${attached.name} (${attached.type}) for security vulnerabilities, technical root causes, and business risk.`;
+        }
+      }
+      userParts.push({ text: queryForPrompt });
+
+      if (attached?.type === 'image' && attached.data) {
+        userParts.push({
+          inline_data: {
+            mime_type: attached.mimeType || 'image/jpeg',
+            data: attached.data
+          }
+        });
+      } else if (attached?.type === 'pdf' && attached.data) {
+        userParts.push({
+          inline_data: {
+            mime_type: 'application/pdf',
+            data: attached.data
+          }
+        });
+      }
+
+      const contents = [
+        ...popupHistory,
+        { role: 'user', parts: userParts }
+      ];
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?key=${apiKey}&alt=sse`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents,
+          generationConfig: { temperature: 0.25, maxOutputTokens: 450 }
+        })
+      });
+
+      if (!res.ok) throw new Error(`API error (${res.status})`);
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error('Stream unreadable');
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const raw = line.slice(6).trim();
+            if (!raw) continue;
+            try {
+              const parsed = JSON.parse(raw);
+              const parts = parsed.candidates?.[0]?.content?.parts || [];
+              let chunk = '';
+              for (const p of parts) {
+                if (!p.thought && p.text) chunk += p.text;
+              }
+              if (chunk) {
+                fullText += chunk;
+                body.innerHTML = marked.parse(fullText) as string;
+                if (!userInterruptedScroll) {
+                  thread.scrollTop = thread.scrollHeight;
+                }
+                updateJumpButtonVisibility();
+              }
+            } catch {}
+          }
+        }
+      }
+
+      // Flush trailing buffer
+      if (buffer.trim()) {
+        const trailingLines = buffer.split('\n');
+        for (const line of trailingLines) {
+          if (line.startsWith('data: ')) {
+            const raw = line.slice(6).trim();
+            if (!raw) continue;
+            try {
+              const parsed = JSON.parse(raw);
+              const parts = parsed.candidates?.[0]?.content?.parts || [];
+              for (const p of parts) {
+                if (!p.thought && p.text) fullText += p.text;
+              }
+            } catch {}
+          }
+        }
+      }
+
+      // Fallback if fullText is somehow empty (e.g. rate limit, empty token candidate)
+      if (!fullText.trim()) {
+        fullText = isConversational(userQuery)
+          ? 'Systems operational. Synthreat AI is ready to assist your security operations. How can I help you today?'
+          : 'I received your query. Please specify a security topic or rephrase your question.';
+      }
+
+      body.innerHTML = marked.parse(fullText) as string;
+
+      const techMatch = fullText.match(/(?:##\s*🛠?[^\n]*Technical[^\n]*\n)([\s\S]*?)(?=(?:##\s*💼?[^\n]*Business)|$)/i);
+      const bizMatch = fullText.match(/(?:##\s*💼?[^\n]*Business[^\n]*\n)([\s\S]*?)$/i);
+
+      const statusSpan = cardHeader.querySelector('.ai-card-status');
+      if (statusSpan) {
+        if (techMatch && bizMatch) {
+          statusSpan.textContent = 'Dual Perspective';
+        } else {
+          statusSpan.textContent = 'Response';
+        }
+      }
+
+      // Add toolbar
+      const toolbar = document.createElement('div');
+      toolbar.className = 'ai-popup-toolbar';
+
+      let hasSpecial = false;
+
+      if (bizMatch) {
+        hasSpecial = true;
+        const copyBiz = document.createElement('button');
+        copyBiz.className = 'ai-popup-tool-btn';
+        copyBiz.innerHTML = `<span>Copy Talk Track</span>`;
+        copyBiz.addEventListener('click', () => {
+          navigator.clipboard.writeText(bizMatch[1].trim());
+          copyBiz.classList.add('success');
+          copyBiz.textContent = 'Copied!';
+          setTimeout(() => { copyBiz.classList.remove('success'); copyBiz.textContent = 'Copy Talk Track'; }, 2000);
+        });
+        toolbar.appendChild(copyBiz);
+      }
+
+      if (techMatch) {
+        hasSpecial = true;
+        const copyTech = document.createElement('button');
+        copyTech.className = 'ai-popup-tool-btn';
+        copyTech.innerHTML = `<span>Copy Tech Fix</span>`;
+        copyTech.addEventListener('click', () => {
+          navigator.clipboard.writeText(techMatch[1].trim());
+          copyTech.classList.add('success');
+          copyTech.textContent = 'Copied!';
+          setTimeout(() => { copyTech.classList.remove('success'); copyTech.textContent = 'Copy Tech Fix'; }, 2000);
+        });
+        toolbar.appendChild(copyTech);
+      }
+
+      if (!hasSpecial) {
+        const copyAll = document.createElement('button');
+        copyAll.className = 'ai-popup-tool-btn';
+        copyAll.innerHTML = `<span>Copy Response</span>`;
+        copyAll.addEventListener('click', () => {
+          navigator.clipboard.writeText(fullText);
+          copyAll.classList.add('success');
+          copyAll.textContent = 'Copied!';
+          setTimeout(() => { copyAll.classList.remove('success'); copyAll.textContent = 'Copy Response'; }, 2000);
+        });
+        toolbar.appendChild(copyAll);
+      }
+
+      // Delete Turn action button in toolbar
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'ai-popup-tool-btn danger';
+      deleteBtn.innerHTML = `
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span>Delete</span>
+      `;
+      deleteBtn.addEventListener('click', () => deletePopupTurn(turnId));
+      toolbar.appendChild(deleteBtn);
+
+      card.appendChild(toolbar);
+
+      popupTurns.push({
+        id: turnId,
+        userQuery,
+        assistantText: fullText,
+        matched,
+        attachment: attached ? { name: attached.name, size: attached.size, type: attached.type, dataUrl: attached.dataUrl } : undefined
+      });
+      popupHistory.push({ role: 'user', parts: [{ text: userQuery }] });
+      popupHistory.push({ role: 'model', parts: [{ text: fullText }] });
+      savePopupState();
+      updatePopupClearVisibility(true);
+      if (!userInterruptedScroll) {
+        thread.scrollTop = thread.scrollHeight;
+      }
+      updateJumpButtonVisibility();
+    } catch (err: any) {
+      body.innerHTML = `
+        <div style="color:#ef4444;">
+          <strong>Error:</strong> ${escapeHtml(err.message || 'Generation failed')}
+          <div style="margin-top:6px;">
+            <button type="button" class="ai-popup-tool-btn retry-btn" style="font-size:11px;">Retry</button>
+            <button type="button" class="ai-popup-tool-btn danger del-btn" style="font-size:11px; margin-left:4px;">Delete</button>
+          </div>
+        </div>
+      `;
+      body.querySelector('.retry-btn')?.addEventListener('click', () => {
+        deletePopupTurn(turnId);
+        submitPopupPrompt(userQuery);
+      });
+      body.querySelector('.del-btn')?.addEventListener('click', () => {
+        deletePopupTurn(turnId);
+      });
+    } finally {
+      setGenerating(false);
+      thread.scrollTop = thread.scrollHeight;
+    }
+  }
+
+  function setGenerating(loading: boolean) {
+    isGenerating = loading;
+    if (sendBtn) sendBtn.disabled = loading;
+    const spinner = sendBtn?.querySelector('.spinner') as HTMLElement;
+    const sendIcon = sendBtn?.querySelector('.send-icon') as HTMLElement;
+    if (spinner) spinner.style.display = loading ? 'inline-block' : 'none';
+    if (sendIcon) sendIcon.style.display = loading ? 'none' : 'inline';
+  }
+
+  function escapeHtml(str: string) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderCompletedPopupTurn(turn: PopupTurn) {
+    if (welcome && welcome.parentElement) welcome.remove();
+
+    // 1. User Message Group
+    const userGroup = document.createElement('div');
+    userGroup.className = 'ai-popup-user-group';
+    userGroup.dataset.turnId = turn.id;
+    userGroup.innerHTML = `
+      <div class="ai-popup-user-bubble-box">
+        <div class="ai-popup-user-bubble">
+          ${renderAttachmentBadge(turn.attachment)}
+          <div>${escapeHtml(turn.userQuery)}</div>
+        </div>
+        <div class="ai-popup-msg-actions">
+          <button type="button" class="ai-popup-msg-btn edit-btn" title="Edit message" aria-label="Edit message">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <span>Edit</span>
+          </button>
+          <button type="button" class="ai-popup-msg-btn delete-btn" title="Delete turn" aria-label="Delete turn">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>
+      <div class="ai-popup-user-edit-box" style="display:none;">
+        <textarea class="ai-popup-edit-textarea" rows="2">${escapeHtml(turn.userQuery)}</textarea>
+        <div class="ai-popup-edit-actions">
+          <button type="button" class="ai-popup-edit-cancel">Cancel</button>
+          <button type="button" class="ai-popup-edit-save">Save & Send</button>
+        </div>
+      </div>
+    `;
+    attachPopupUserTurnHandlers(userGroup, turn.id);
+    thread.appendChild(userGroup);
+
+    // 2. Assistant Card
+    const card = document.createElement('div');
+    card.className = 'ai-popup-card';
+    card.dataset.turnId = turn.id;
+
+    const techMatch = turn.assistantText.match(/(?:##\s*🛠?[^\n]*Technical[^\n]*\n)([\s\S]*?)(?=(?:##\s*💼?[^\n]*Business)|$)/i);
+    const bizMatch = turn.assistantText.match(/(?:##\s*💼?[^\n]*Business[^\n]*\n)([\s\S]*?)$/i);
+
+    const cardHeader = document.createElement('div');
+    cardHeader.className = 'ai-popup-card-header';
+    cardHeader.innerHTML = `
+      <span><strong>Synthreat AI</strong></span>
+      <div class="ai-card-header-actions">
+        <span class="ai-card-status">${techMatch && bizMatch ? 'Dual Perspective' : 'Response'}</span>
+        <button type="button" class="ai-popup-card-del-btn" title="Delete turn" aria-label="Delete turn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+    `;
+    cardHeader.querySelector('.ai-popup-card-del-btn')?.addEventListener('click', () => deletePopupTurn(turn.id));
+    card.appendChild(cardHeader);
+
+    const body = document.createElement('div');
+    body.className = 'ai-popup-card-body';
+    body.innerHTML = marked.parse(turn.assistantText) as string;
+    card.appendChild(body);
+
+    if (turn.matched && turn.matched.length > 0) {
+      const cites = document.createElement('div');
+      cites.className = 'ai-popup-citations';
+      cites.innerHTML = `<strong>Grounded:</strong> ${turn.matched.map((m: any) => `<a href="${base}${m.col}/${m.slug}/" class="ai-popup-cite-badge" target="_blank" rel="noopener">${escapeHtml(m.title)}</a>`).join('')}`;
+      card.appendChild(cites);
+    }
+
+    // Add toolbar
+    const toolbar = document.createElement('div');
+    toolbar.className = 'ai-popup-toolbar';
+
+    let hasSpecial = false;
+    if (bizMatch) {
+      hasSpecial = true;
+      const copyBiz = document.createElement('button');
+      copyBiz.className = 'ai-popup-tool-btn';
+      copyBiz.innerHTML = `<span>Copy Talk Track</span>`;
+      copyBiz.addEventListener('click', () => {
+        navigator.clipboard.writeText(bizMatch[1].trim());
+        copyBiz.classList.add('success');
+        copyBiz.textContent = 'Copied!';
+        setTimeout(() => { copyBiz.classList.remove('success'); copyBiz.textContent = 'Copy Talk Track'; }, 2000);
+      });
+      toolbar.appendChild(copyBiz);
+    }
+
+    if (techMatch) {
+      hasSpecial = true;
+      const copyTech = document.createElement('button');
+      copyTech.className = 'ai-popup-tool-btn';
+      copyTech.innerHTML = `<span>Copy Tech Fix</span>`;
+      copyTech.addEventListener('click', () => {
+        navigator.clipboard.writeText(techMatch[1].trim());
+        copyTech.classList.add('success');
+        copyTech.textContent = 'Copied!';
+        setTimeout(() => { copyTech.classList.remove('success'); copyTech.textContent = 'Copy Tech Fix'; }, 2000);
+      });
+      toolbar.appendChild(copyTech);
+    }
+
+    if (!hasSpecial) {
+      const copyAll = document.createElement('button');
+      copyAll.className = 'ai-popup-tool-btn';
+      copyAll.innerHTML = `<span>Copy Response</span>`;
+      copyAll.addEventListener('click', () => {
+        navigator.clipboard.writeText(turn.assistantText);
+        copyAll.classList.add('success');
+        copyAll.textContent = 'Copied!';
+        setTimeout(() => { copyAll.classList.remove('success'); copyAll.textContent = 'Copy Response'; }, 2000);
+      });
+      toolbar.appendChild(copyAll);
+    }
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'ai-popup-tool-btn danger';
+    deleteBtn.innerHTML = `
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <span>Delete</span>
+    `;
+    deleteBtn.addEventListener('click', () => deletePopupTurn(turn.id));
+    toolbar.appendChild(deleteBtn);
+
+    card.appendChild(toolbar);
+    thread.appendChild(card);
+  }
+
+  function restorePopupState() {
+    try {
+      const pageKey = `synthreat_popup_turns_${encodeURIComponent(window.location.pathname)}`;
+      const raw = localStorage.getItem(pageKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed) || parsed.length === 0) return;
+      popupTurns = parsed;
+      popupHistory = popupTurns.flatMap(t => [
+        { role: 'user', parts: [{ text: t.userQuery }] },
+        { role: 'model', parts: [{ text: t.assistantText }] }
+      ]);
+      for (const t of popupTurns) {
+        renderCompletedPopupTurn(t);
+      }
+      updatePopupClearVisibility(true);
+      requestAnimationFrame(() => {
+        thread.scrollTop = thread.scrollHeight;
+        updateJumpButtonVisibility();
+      });
+    } catch {}
+  }
+
+  loadKnowledgeIndex();
+  restorePopupState();
+</script>

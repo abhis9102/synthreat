@@ -7,6 +7,15 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import matter from 'gray-matter';
+import { JSDOM } from 'jsdom';
+
+const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+globalThis.window = dom.window;
+globalThis.document = dom.window.document;
+
+const mermaid = (await import('mermaid')).default;
+mermaid.initialize({ startOnLoad: false });
+
 
 const COLLECTIONS = [
   {
@@ -143,6 +152,19 @@ for (const { name, dir, sections } of COLLECTIONS) {
     } else {
       console.log(`ok    ${label}${extra.length ? `  (extra headings ignored: ${extra.join(', ')})` : ''}`);
     }
+
+    const MERMAID_RE = /```mermaid\s*\n([\s\S]*?)```/g;
+    for (const match of content.matchAll(MERMAID_RE)) {
+      const diagCode = match[1].trim();
+      try {
+        await mermaid.parse(diagCode);
+      } catch (err) {
+        hadFailure = true;
+        console.error(`FAIL  ${label}`);
+        console.error(`      Mermaid diagram syntax error: ${err.message}`);
+      }
+    }
+
   }
 }
 

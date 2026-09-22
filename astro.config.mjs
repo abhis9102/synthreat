@@ -7,4 +7,10 @@ export default defineConfig({
   // Trailing slash matters: import.meta.env.BASE_URL is used as `${base}vulnerabilities/` etc.
   // throughout the site, and without it every constructed link is missing a path separator.
   base: '/synthreat/',
+  vite: {
+    optimizeDeps: {
+      include: ['mermaid'],
+    },
+  },
 });
+

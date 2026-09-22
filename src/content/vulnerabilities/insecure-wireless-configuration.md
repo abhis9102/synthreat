@@ -101,6 +101,27 @@ Testing confirms network-layer reachability to the internal file-sharing service
 network. No file is accessed or downloaded; reachability to the service's login prompt is sufficient
 to demonstrate the isolation failure.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant AP as Office Wireless AP (Guest SSID)
+    participant DHCP as Network DHCP Server
+    participant Router as Internal Gateway / Router
+    participant FileServer as Corporate SMB File Server (10.10.5.20)
+
+    Assessor->>AP: Connect to Northfell-Guest using lobby Wi-Fi key
+    AP-->>Assessor: Association & 4-way handshake complete
+    Assessor->>DHCP: DHCP Request (Guest lease)
+    DHCP-->>Assessor: Assign IP 192.168.100.45, Gateway 192.168.100.1
+    Assessor->>Router: Send TCP SYN probe to 10.10.5.20:445 (SMB)
+    Note over Router: Router lacks ACL blocking guest-to-internal traffic
+    Router->>FileServer: Forward TCP SYN packet
+    FileServer-->>Router: Respond TCP SYN-ACK (Port 445 Open)
+    Router-->>Assessor: Forward SYN-ACK response
+    Note over Assessor,FileServer: ENGAGEMENT BOUNDARY PRESERVED<br/>Cross-VLAN reachability confirmed via SYN-ACK.<br/>Zero SMB sessions or file transfers initiated.
+    Assessor->>Assessor: Document Critical finding (Guest Wi-Fi Isolation Failure)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the guest wireless network, explicitly intended for untrusted
@@ -125,8 +146,8 @@ internal network segment.
 
 ## Related Classes
 
-- **Network Segmentation Failures** ([../network-segmentation-failures/](../network-segmentation-failures/)):
+- **[Network Segmentation Failures](../network-segmentation-failures/)**:
   the broader pattern behind the most common real-world wireless finding, a guest network with no
   actual isolation from trusted infrastructure.
-- **Man-in-the-Middle** ([../../attacks/man-in-the-middle/](../../attacks/man-in-the-middle/)): the
+- **[Man-in-the-Middle](../../attacks/man-in-the-middle/)**: the
   attack technique a rogue access point or a weak wireless configuration most directly enables.

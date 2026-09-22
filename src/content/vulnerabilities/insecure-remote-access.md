@@ -102,6 +102,27 @@ Testing is limited to the test account created for this assessment, and network 
 confirmed through connectivity checks alone. No system reached through the VPN connection is accessed
 or interacted with further.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Gateway as Alderbrook VPN Gateway
+    participant LDAP as Corporate Directory (LDAP)
+    participant CoreNet as Internal Core Subnet (10.20.0.0/16)
+    participant DC as Domain Controller (10.0.0.10)
+
+    Assessor->>Gateway: Connect IPsec/SSL VPN (Username + Password)
+    Gateway->>LDAP: Verify credentials
+    LDAP-->>Gateway: 200 OK (Valid user)
+    Note over Gateway: Gateway permits connection without MFA prompt
+    Gateway-->>Assessor: Tunnel established - Assigned 10.100.4.52
+    Assessor->>CoreNet: ICMP Ping & TCP SYN probe across internal subnets
+    CoreNet-->>Assessor: TCP SYN-ACK received from production database ports
+    Assessor->>DC: TCP SYN probe port 389/88 (LDAP/Kerberos)
+    DC-->>Assessor: Port Open response
+    Note over Assessor,DC: ENGAGEMENT BOUNDARY PRESERVED<br/>Reachability proven via non-destructive TCP probes.<br/>Zero login attempts or host interaction beyond connectivity checks.
+    Assessor->>Assessor: Document Critical finding (Single-Factor VPN + Flat Network)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because single-factor authentication combined with broad, unscoped network
@@ -125,8 +146,8 @@ be.
 
 ## Related Classes
 
-- **Network Segmentation Failures** ([../network-segmentation-failures/](../network-segmentation-failures/)):
+- **[Network Segmentation Failures](../network-segmentation-failures/)**:
   what determines the actual damage once a remote-access credential is compromised, since a
   well-segmented internal network limits what a VPN connection alone can reach.
-- **Weak or Missing Network Access Controls** ([../weak-network-access-controls/](../weak-network-access-controls/)):
+- **[Weak or Missing Network Access Controls](../weak-network-access-controls/)**:
   the specific mechanism that should scope a connected VPN client's reach, and frequently doesn't.

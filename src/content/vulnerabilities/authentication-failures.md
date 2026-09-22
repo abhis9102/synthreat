@@ -29,41 +29,6 @@ afterward, and the recovery paths that exist for when a legitimate user loses ac
 teams often harden the login form carefully (password rules, lockouts) while leaving the token that
 represents a successful login, or the recovery flow that bypasses it entirely, far less protected.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-authentication-failures" style="width:100%;height:auto;">
-<title id="diagram-title-authentication-failures">A session identifier passed in a URL parameter ends up logged and exposed, bypassing the login step entirely for whoever obtains it</title>
-<defs>
-<marker id="arrow-authentication-failures" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">User logs in,</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">ID placed in URL</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-authentication-failures)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">URL logged by</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">server and browser</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-authentication-failures)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Identifier reaches</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">someone else</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-authentication-failures)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Session reused,</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">login step skipped</text>
-</svg>
-<figcaption>The password never had to be attacked at all: the token carrying it around was the actual weak point.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - No multi-factor authentication available or enforced, leaving a password as the single point of
@@ -135,6 +100,27 @@ Testing stops at confirming replay works against a test account created specific
 assessment. No real patient session is ever captured or reused, and no actual patient data is
 accessed, since proving the mechanism is sufficient without touching anything real.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant User as Legitimate Test Patient
+    participant Logs as Server Access Logs / Shared Link
+    participant Server as Corvale Health Portal API
+    participant DB as Patient Records Database
+
+    User->>Server: POST /login (Username + Password)
+    Server-->>User: 302 Redirect to /dashboard?sid=sess_98234a
+    Note over User,Logs: Session ID recorded in web server access logs & browser history
+    Assessor->>Logs: Inspect access logs & extract session identifier sess_98234a
+    Assessor->>Server: Replay GET /patient/records?sid=sess_98234a (Different IP)
+    Note over Server: Server validates URL token without IP or device binding check
+    Server->>DB: Query patient records for test user
+    DB-->>Server: Return test record payload
+    Server-->>Assessor: 200 OK with sensitive test patient data
+    Note over Assessor,DB: ENGAGEMENT BOUNDARY PRESERVED<br/>Demonstrated session replay on synthetic test account.<br/>Zero real patient records accessed or targeted.
+    Assessor->>Assessor: Document Critical finding (Session Exposure in URL)
+```
+
 ## Severity Calibration
 
 This instance rates **Critical**: unauthenticated in the sense that no password is required once a
@@ -162,5 +148,5 @@ token that was never actually protected after issuance.
 - **[Cryptographic Failures](../cryptographic-failures/)**, a closely adjacent class worth checking
   as a pair: weak login and session handling here, weak password hashing there, since a real
   assessment frequently finds both on the same application.
-- **Session Hijacking**, the attack technique that directly exploits many of the weaknesses described
-  here. See [Session Hijacking](../../attacks/session-hijacking/).
+- **[Session Hijacking](../../attacks/session-hijacking/)**, the attack technique that directly exploits many of the weaknesses described
+  here.

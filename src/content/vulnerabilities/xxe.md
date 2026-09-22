@@ -31,41 +31,6 @@ application's own logic intended to allow. This is structurally the same failure
 delivered through XML parsing rather than through a dedicated "fetch this URL" feature. Same root
 cause (the server trusts a destination it never validated), different delivery mechanism.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-xxe" style="width:100%;height:auto;">
-<title id="diagram-title-xxe">A malicious XML document declares an external entity that the parser resolves, reading a local file or reaching an internal resource</title>
-<defs>
-<marker id="arrow-xxe" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker submits</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">crafted XML</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-xxe)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Parser resolves</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">external entity</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-xxe)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Local file or</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">internal URL read</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-xxe)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Content returned</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">to attacker</text>
-</svg>
-<figcaption>The entity is resolved by the parser itself, before the application's own logic ever runs.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - Any feature accepting XML input directly from a user: a file-import feature, an API accepting XML
@@ -134,6 +99,33 @@ owns. The controlled endpoint's own logs confirm an inbound request from the tar
 server, proving the parser also makes outbound network requests during entity resolution, not just
 local file reads. Testing stops there: table existence for a genuinely sensitive internal resource
 is never actually confirmed, since the two proofs already demonstrate the mechanism unambiguously.
+
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant App as Ferngrove Logistics Portal
+    participant Parser as XML Parser Runtime
+    participant FS as Local Filesystem (/etc/hosts)
+    participant OutboundServer as Tester External Server
+
+    Note over Tester,App: Phase 1: Local File Entity Resolution (LFI via XXE)
+    Tester->>App: POST /import (XML declaring ENTITY xxe SYSTEM "file:///etc/hosts")
+    App->>Parser: parse(uploadedXML)
+    Note over Parser: Default settings allow DTD external entity parsing
+    Parser->>FS: Read file:///etc/hosts
+    FS-->>Parser: Return contents of /etc/hosts
+    Parser-->>App: XML document with entity expanded to file content
+    App-->>Tester: HTTP 200 OK (Page reflects /etc/hosts contents)
+
+    Note over Tester,OutboundServer: Phase 2: Out-of-Band SSRF Entity Resolution
+    Tester->>App: POST /import (XML declaring ENTITY xxe SYSTEM "http://tester.test/callback")
+    App->>Parser: parse(uploadedXML)
+    Parser->>OutboundServer: Outbound HTTP GET /callback
+    OutboundServer-->>Tester: Listener logs inbound HTTP request from target server IP
+    OutboundServer-->>Parser: HTTP 200 OK
+    Parser-->>App: Parse complete
+    Note over Tester,App: Both local file read and external SSRF proven - testing concludes ethically
+```
 
 ## Severity Calibration
 

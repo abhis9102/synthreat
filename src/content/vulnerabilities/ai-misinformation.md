@@ -102,6 +102,26 @@ Testing is limited to comparing the assistant's stated answer against the actual
 documentation for a small set of edge-case questions prepared for this assessment. No customer
 interaction or real support case is involved.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant UI as Northfell Support Chatbot UI
+    participant RAG as Knowledge Retrieval (RAG)
+    participant Model as LLM Backend
+    participant Policy as Verified Corporate Policy Store
+
+    Assessor->>UI: Submit edge-case query (Return window for open-box software)
+    UI->>RAG: Retrieve matching policy chunks
+    RAG-->>Model: Zero high-confidence chunks retrieved
+    Note over Model: Flawed fallback: Model generates plausible continuation rather than abstaining
+    Model-->>UI: 'Yes, open-box software is fully refundable within 60 days'
+    UI-->>Assessor: Deliver confident, authoritative answer
+    Assessor->>Policy: Cross-reference against official policy documentation
+    Policy-->>Assessor: Confirm official limit is 14 days and open software is non-refundable
+    Note over Assessor,Policy: ENGAGEMENT BOUNDARY PRESERVED<br/>Hallucination proven by cross-referencing published truth.<br/>Zero customer-facing tickets or production transactions affected.
+    Assessor->>Assessor: Document High-severity finding (Ungrounded Policy Fabrication)
+```
+
 ## Severity Calibration
 
 This rates **High** because the fabricated answer concerns a customer-facing policy that, if acted on,
@@ -126,9 +146,9 @@ confident-sounding ones, happens to be wrong.
 
 ## Related Classes
 
-- **Excessive Agency** ([../excessive-agency/](../excessive-agency/)): what turns a single
+- **[Excessive Agency](../excessive-agency/)**: what turns a single
   hallucinated fact into a real, executed action, when an agent acts on its own generated output with
   no human checkpoint.
-- **AI Model & Training Data Supply Chain Risks** ([../ai-supply-chain-risks/](../ai-supply-chain-risks/)):
+- **[AI Model & Training Data Supply Chain Risks](../ai-supply-chain-risks/)**:
   the concrete path by which a hallucinated software dependency name becomes an actual, exploitable
   supply-chain compromise.

@@ -102,6 +102,23 @@ Testing confirms verbatim reproduction of the specific test content planted for 
 attempt is made to extract real internal company documents, and no query is directed at content
 outside the test artifacts prepared for the assessment.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Admin as Fine-Tuning Pipeline
+    participant Corpus as Training Corpus (Synthetic Canary)
+    participant Model as Fine-Tuned LLM Service
+
+    Assessor->>Admin: Insert approved synthetic canary doc into training set
+    Admin->>Corpus: Embed Project Canary-7492 document
+    Admin->>Model: Execute fine-tuning epochs without differential privacy
+    Note over Model: Overfitting occurs - Canary sentences memorized into model weights
+    Assessor->>Model: Prompt: 'Complete the executive brief for Project Canary-7492...'
+    Model-->>Assessor: Returns verbatim paragraphs of synthetic canary text
+    Note over Assessor,Model: ENGAGEMENT BOUNDARY PRESERVED<br/>Model memorization proven using planted canary data.<br/>Zero confidential production documents targeted or extracted.
+    Assessor->>Assessor: Document Critical finding (Weight-Level Training Data Memorization)
+```
+
 ## Severity Calibration
 
 This rates **Critical** in cases where verified memorized content includes real, sensitive customer
@@ -127,14 +144,14 @@ or isolation gap that made the disclosure possible in the first place.
 
 ## Related Classes
 
-- **Prompt Injection** ([../prompt-injection/](../prompt-injection/)): a related but distinct
+- **[Prompt Injection](../prompt-injection/)**: a related but distinct
   mechanism, an attacker's deliberate instruction manipulating behavior, as opposed to information
   surfacing through the model's own learned or session-handling behavior.
-- **Cryptographic Failures** ([../cryptographic-failures/](../cryptographic-failures/)): the
+- **[Cryptographic Failures](../cryptographic-failures/)**: the
   traditional data-protection class this is the AI-specific analogue of, sensitive data ending up
   somewhere it shouldn't through a mechanism specific to how the system actually works.
-- **System Prompt Leakage** ([../system-prompt-leakage/](../system-prompt-leakage/)): a narrower,
+- **[System Prompt Leakage](../system-prompt-leakage/)**: a narrower,
   dedicated treatment of one specific disclosure target, the system's own confidential instructions.
-- **Vector and Embedding Weaknesses** ([../vector-embedding-weaknesses/](../vector-embedding-weaknesses/)):
+- **[Vector and Embedding Weaknesses](../vector-embedding-weaknesses/)**:
   the retrieval-layer mechanism behind a common real-world path to this same outcome in
   retrieval-augmented systems.

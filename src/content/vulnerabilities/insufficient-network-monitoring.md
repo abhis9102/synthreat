@@ -99,6 +99,27 @@ Testing is limited to the pre-agreed test range and conducted with full coordina
 organization's security team throughout, specifically to avoid any disruption to real production
 systems or confusion with an actual incident.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant SOC as Vantara Security Team
+    participant TargetSubnet as Test Subnet (10.50.12.0/24)
+    participant NIDS as Network IDS / Sensor
+    participant SIEM as Central SIEM / Alert Queue
+
+    Assessor->>SOC: Notify of planned synthetic probe against test subnet
+    SOC-->>Assessor: Acknowledge authorization & start time window
+    Assessor->>TargetSubnet: Execute conspicuous TCP SYN port scan (nmap -sS)
+    TargetSubnet-->>Assessor: TCP SYN-ACK / RST response traffic
+    TargetSubnet--)NIDS: Mirror network packets via SPAN port
+    Note over NIDS,SIEM: Signature fires but alert is unrouted or discarded as noise
+    NIDS--xSIEM: No high-priority incident raised in SOC queue
+    Assessor->>SOC: Review detection alerts post-test window
+    SOC-->>Assessor: Confirm zero alerts observed or escalated
+    Note over Assessor,SOC: ENGAGEMENT BOUNDARY PRESERVED<br/>Scan restricted strictly to pre-agreed test CIDR.<br/>No production services disrupted or targeted.
+    Assessor->>Assessor: Document High-severity finding (Undetected Network Probing)
+```
+
 ## Severity Calibration
 
 This rates **High** because a clearly identifiable, deliberately conspicuous test activity went
@@ -122,9 +143,9 @@ sophisticated the underlying tooling is.
 
 ## Related Classes
 
-- **Network Segmentation Failures** ([../network-segmentation-failures/](../network-segmentation-failures/)):
+- **[Network Segmentation Failures](../network-segmentation-failures/)**:
   monitoring is what would normally catch an attacker moving laterally across a flat network before
   segmentation exists to stop them; the two controls compensate for each other's gaps.
-- **Weak or Missing Network Access Controls** ([../weak-network-access-controls/](../weak-network-access-controls/)):
+- **[Weak or Missing Network Access Controls](../weak-network-access-controls/)**:
   monitoring is the control that catches misuse of an overly broad access rule after the fact, when the
   rule itself wasn't tightened in time.

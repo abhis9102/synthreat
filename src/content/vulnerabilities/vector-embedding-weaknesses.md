@@ -109,6 +109,27 @@ Testing confirms retrieval of the planted test document only. No real department
 targeted or referenced, and access is limited to test accounts and test content created for this
 assessment.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor (Marketing Test Role)
+    participant UI as Vantara Assistant UI
+    participant Backend as RAG Application Backend
+    participant VectorDB as Shared Vector Store (Milvus / Pinecone)
+    participant LLM as Inference Engine
+
+    Assessor->>UI: Prompt: 'What are the strategic initiatives for Project Canary-Finance?'
+    UI->>Backend: Forward query with Marketing user session token
+    Backend->>VectorDB: Query embeddings (k=3) without metadata filter
+    Note over VectorDB: Missing ACL filter: Search scans entire global collection
+    VectorDB-->>Backend: Top match: Planted Canary-Finance planning chunk
+    Backend->>LLM: Pass prompt + retrieved Canary-Finance context
+    LLM-->>Backend: Generate summary based on retrieved sensitive text
+    Backend-->>UI: Deliver response containing Canary-Finance details
+    UI-->>Assessor: Display confidential finance summary to marketing role
+    Note over Assessor,VectorDB: ENGAGEMENT BOUNDARY PRESERVED<br/>Cross-department RAG leak proven using synthetic canary document.<br/>Zero real internal corporate documents queried or accessed.
+    Assessor->>Assessor: Document Critical finding (Missing RAG Access Controls)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the retrieval layer demonstrated no access boundary at all between
@@ -133,8 +154,8 @@ Control](../broken-access-control/) exists to make generally.
 
 ## Related Classes
 
-- **Cross-Tenant Isolation Failure** ([../cross-tenant-isolation-failure/](../cross-tenant-isolation-failure/)):
+- **[Cross-Tenant Isolation Failure](../cross-tenant-isolation-failure/)**:
   the same underlying missing-boundary pattern, applied generally across a multi-tenant platform
   rather than specifically at the RAG retrieval layer.
-- **AI Sensitive Information Disclosure** ([../ai-sensitive-information-disclosure/](../ai-sensitive-information-disclosure/)):
+- **[AI Sensitive Information Disclosure](../ai-sensitive-information-disclosure/)**:
   the broader disclosure outcome this class is one specific, retrieval-layer mechanism for reaching.

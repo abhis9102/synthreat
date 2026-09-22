@@ -26,41 +26,6 @@ enough detail to spot a pattern, or aren't logged at all. Even where logs exist,
 "we log things" is often mistaken for "we would notice if something happened," when nobody has
 actually connected those logs to an alert that fires on a realistic attack pattern.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-logging" style="width:100%;height:auto;">
-<title id="diagram-title-logging">How a real attack pattern goes unnoticed despite logs technically existing</title>
-<defs>
-<marker id="arrow-logging" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker probes</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">a login endpoint</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-logging)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Failed attempts</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">are logged</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-logging)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">No alert tied</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">to the pattern</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-logging)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Compromise goes</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">unnoticed for weeks</text>
-</svg>
-<figcaption>The log entries existed the whole time. Nothing was watching them.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Authentication failures not logged**, or logged without enough detail (source, timing, target
@@ -130,6 +95,29 @@ The finding isn't that logging is entirely absent; it's that the gap between "te
 "actually monitored" is wide enough that a real attack of this shape would run to completion
 unnoticed. Testing stops at confirming this detection gap, without pursuing account compromise itself.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant App as Aldercreek Financial Portal
+    participant Disk as Local Server Log File
+    participant SIEM as SIEM / Alerting Pipeline
+    participant SOC as Security Operations Center
+
+    Note over Tester,App: Tester executes anomalous high-volume authentication probe
+    loop 50 Failed Login Attempts in 2 Minutes
+        Tester->>App: POST /api/login {"user": "target_test", "password": "wrong_password"}
+        App->>Disk: Write log: "Auth failed for target_test from IP 198.51.100.24"
+        App-->>Tester: 401 Unauthorized
+    end
+
+    Note over Disk,SIEM: Evaluation of Detection Pipeline
+    App->>Disk: 50 failure events recorded in raw disk logs
+    Disk-->>SIEM: Logs stream to central storage (passive storage)
+    Note over SIEM,SOC: Missing Correlation Rule: No alert triggers on threshold exceedance
+    SIEM--xSOC: Zero alerts or notifications dispatched
+    Note over Tester,SOC: Detection gap confirmed: sustained brute force invisible in real time
+```
+
 ## Severity Calibration
 
 This class typically rates lower on its own than most vulnerability classes on this site, since a
@@ -148,7 +136,6 @@ know if something happened" without the monitoring that claim actually depends o
 
 ## Related Classes
 
-- **Advanced Persistent Threat**
-  ([../../attacks/advanced-persistent-threat/](../../attacks/advanced-persistent-threat/)): the attack
+- **[Advanced Persistent Threat](../../attacks/advanced-persistent-threat/)**: the attack
   pattern this specific gap enables most directly, since prolonged, undetected access is its entire
   premise.

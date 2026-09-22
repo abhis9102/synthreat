@@ -31,41 +31,6 @@ The assumption that fails is treating "this feature works correctly for a legiti
 
 Threat modeling, when it happens at all, is often treated as an optional step that gets skipped under deadline pressure, precisely because skipping it produces no visible defect: the feature demonstrably works when tested the intended way. Unlike a coding bug, there is no failing test, no crash, and no scanner alert to catch a missing design consideration; the only way it surfaces is if someone specifically asks "how would I abuse this" before it ships, or an actual attacker asks that question after it does.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-insecure-design" style="width:100%;height:auto;">
-<title id="diagram-title-insecure-design">A password reset feature works exactly as designed, and that design has no limit on guess attempts</title>
-<defs>
-<marker id="arrow-insecure-design" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Feature designed</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">for legitimate use</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-insecure-design)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">No abuse case</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">ever considered</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-insecure-design)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Built exactly</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">as designed</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-insecure-design)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Freely guessable,</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">no rate limit exists</text>
-</svg>
-<figcaption>No code here is wrong. The implementation matches the design perfectly; the design itself never included a limit.</figcaption>
-</figure>
-
 ## How to Find It
 
 Threat modeling and abuse-case testing, not a scanner, is what finds this class. A scanner checks implementation against known-bad patterns; it has nothing to compare against when the pattern is "a control that was never designed in." In practice: walk through each significant feature and ask, for every input and every state transition, what happens if a user does this the wrong number of times, in the wrong order, or with a value outside what a legitimate user would ever send. Contrast this directly with SQL Injection or Cross-Site Scripting, both of which a targeted technical test can usually surface directly; insecure design requires asking a different kind of question earlier in the process.
@@ -90,6 +55,31 @@ Insecure design findings tend to be more expensive to fix than an equivalent imp
 Meridian Financial's password reset flow, reviewed during an authorized assessment, sends a six-digit numeric code to the user's registered email and accepts that code on a confirmation page with no limit on the number of attempts and no expiry shorter than 24 hours. Every part of the flow works exactly as intended for a legitimate user who receives their code and enters it correctly on the first try.
 
 Testing against a disposable test account shows the confirmation endpoint accepts an unlimited number of guesses with no lockout, no delay, and no CAPTCHA, meaning the full six-digit space (one million possible codes) is exhaustible by automated, scripted guessing well within the code's 24-hour validity window. The design never included a rate limit at all; there is no faulty rate limiter to find, because none was ever specified.
+
+```mermaid
+sequenceDiagram
+    participant Attacker as Security Tester
+    participant App as Meridian Web App
+    participant Auth as Auth / Reset Service
+    participant Email as User Email Inbox
+
+    Note over Attacker,Auth: Legitimate Flow Designed:
+    Attacker->>App: Request password reset for target@test.local
+    App->>Auth: Generate 6-digit OTP (Valid for 24 hours)
+    Auth->>Email: Send code to registered address
+    Note over Auth: Architecture omits attempt counter or IP throttle
+
+    Note over Attacker,Auth: Abuse Scenario (Never Threat Modeled):
+    loop Automated Brute-Force Probing
+        Attacker->>App: POST /api/reset/confirm {"email": "target@test.local", "code": 000001}
+        App->>Auth: Verify code
+        Auth-->>App: 400 Invalid code
+        App-->>Attacker: 400 Invalid code (No delay, no CAPTCHA)
+        Attacker->>App: Rapid sequential attempts (000002, 000003...)
+    end
+    Note over Attacker,Auth: 100 requests/sec permitted - keyspace of 10^6 exhausted in under 3 hours
+    Note over Attacker,App: Tester halts after proving unthrottled response behavior
+```
 
 ## Severity Calibration
 

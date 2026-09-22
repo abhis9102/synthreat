@@ -32,41 +32,6 @@ across a caching or queuing layer without being re-checked, for the isolation bo
 one path while holding everywhere else. The tenant on the other side of that gap never opted into
 sharing anything; they typically don't even know which other tenants share the same platform.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-cross-tenant-isolation-failure" style="width:100%;height:auto;">
-<title id="diagram-title-cross-tenant-isolation-failure">One code path forgets to filter by tenant, and Tenant A's request returns Tenant B's data from the same shared store.</title>
-<defs>
-<marker id="arrow-cross-tenant-isolation-failure" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Tenant A</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">sends a request</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cross-tenant-isolation-failure)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">One path skips</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">the tenant filter</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cross-tenant-isolation-failure)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Shared store</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">holds every tenant</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cross-tenant-isolation-failure)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Tenant B's data</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">comes back instead</text>
-</svg>
-<figcaption>Every other path on the platform filters by tenant correctly. This is the one that didn't.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - A shared database query missing a tenant-identifier filter on one specific endpoint, while every
@@ -143,6 +108,29 @@ Testing confirms the issue using only the two dedicated test-tenant accounts and
 created solely for this purpose. No real customer tenant's identifiers or data are accessed or
 referenced at any point.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant API as Vantara API (/api/reports/export)
+    participant Auth as Session & Token Validator
+    participant DataLayer as PostgreSQL Shared DB
+
+    Note over Assessor,API: Baseline: Assessor logs in as Test Tenant A
+    Assessor->>API: GET /api/reports/export?id=rep_tenantA_01
+    API->>Auth: Validate Tenant A Bearer Token (PASS)
+    API->>DataLayer: SELECT * FROM reports WHERE id = 'rep_tenantA_01'
+    DataLayer-->>API: Return Tenant A Report
+    API-->>Assessor: 200 OK with Tenant A Report
+
+    Note over Assessor,API: Exploit Probe: Swap to known Test Tenant B Report ID
+    Assessor->>API: GET /api/reports/export?id=rep_tenantB_99 (Session: Tenant A)
+    API->>Auth: Validate Tenant A Token (PASS - Session is valid)
+    Note over API: Isolation Defect: Query filters ONLY on report ID, omitting tenant_id
+    API->>DataLayer: SELECT * FROM reports WHERE id = 'rep_tenantB_99'
+    DataLayer-->>API: Return Tenant B Confidential Data
+    API-->>Assessor: 200 OK with Tenant B Report (CRITICAL ISOLATION BREACH)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the endpoint returned another tenant's actual business data with no
@@ -166,9 +154,9 @@ other endpoints built the same way.
 
 ## Related Classes
 
-- **Broken Access Control** ([../broken-access-control/](../broken-access-control/)): the same
+- **[Broken Access Control](../broken-access-control/)**: the same
   underlying failure, an authorization check that should have limited access but didn't, at the scale
   of an entire tenant rather than a single object or user.
-- **Overly Permissive Cloud IAM** ([../cloud-iam-misconfiguration/](../cloud-iam-misconfiguration/)):
+- **[Overly Permissive Cloud IAM](../cloud-iam-misconfiguration/)**:
   a related but distinct failure mode, excess permission granted to a cloud identity, as opposed to a
   missing tenant-scoping check in the platform's own application logic.

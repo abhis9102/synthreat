@@ -101,6 +101,28 @@ Testing stops at confirming the tag is interpreted rather than displayed as text
 beyond a benign, clearly identifiable marker is used, and no other user's session or data is
 targeted.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Portal as Support Portal UI (Browser)
+    participant API as Knowledge-Base API
+    participant LLM as Summarization LLM
+    participant DOM as Browser Document Object Model
+
+    Assessor->>API: Upload test document containing benign marker tag
+    Note over API: Tag: '<b id="audit-test-marker">Audit</b>'
+    Assessor->>Portal: Request document summary
+    Portal->>API: GET /api/v1/docs/summary?id=test_doc
+    API->>LLM: Summarize document content
+    LLM-->>API: Return text with unescaped marker tag preserved
+    API-->>Portal: JSON response with unencoded marker
+    Note over Portal: Portal assigns response directly to element.innerHTML
+    Portal->>DOM: DOM Injection without HTML entity encoding
+    DOM-->>Assessor: Browser interprets and renders tag as active HTML element
+    Note over Assessor,DOM: ENGAGEMENT BOUNDARY PRESERVED<br/>Unsanitized DOM rendering proven using safe HTML element.<br/>Zero malicious JavaScript or session stealing payloads executed.
+    Assessor->>Assessor: Document Critical finding (Insecure Output Handling / XSS)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the unencoded rendering path is a direct, browser-executable
@@ -125,8 +147,8 @@ any part of what influenced it was ever exposed to untrusted input.
 
 ## Related Classes
 
-- **Prompt Injection** ([../prompt-injection/](../prompt-injection/)): the most common way an
+- **[Prompt Injection](../prompt-injection/)**: the most common way an
   attacker gets to influence what a model's output actually contains in the first place.
-- **Cross-Site Scripting** ([../cross-site-scripting/](../cross-site-scripting/)): the exact
+- **[Cross-Site Scripting](../cross-site-scripting/)**: the exact
   underlying vulnerability this class becomes the moment unencoded model output is rendered into a
   web page.

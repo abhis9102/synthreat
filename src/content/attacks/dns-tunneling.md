@@ -125,5 +125,5 @@ leaving it entirely unmonitored while every other protocol on the network receiv
 
 ## Related Attacks & Vulnerabilities
 
-- **DNS Spoofing** ([../dns-spoofing/](../dns-spoofing/)): a different failure in the same protocol,
+- [DNS Spoofing](../dns-spoofing/): a different failure in the same protocol,
   corrupting resolution itself rather than using it as a covert channel.

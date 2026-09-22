@@ -36,47 +36,6 @@ never actually drew it. The difference is where it happens: SQL injection crosse
 database's SQL parser; XSS crosses it at the browser's HTML and JavaScript parser instead. Same root
 cause, different parser on the other side of the mistake.
 
-<figure class="diagram">
-<svg viewBox="0 0 930 130" role="img" aria-labelledby="diagram-title-xss" style="width:100%;height:auto;">
-<title id="diagram-title-xss">How a stored cross-site scripting payload travels from submission to execution in a victim's browser</title>
-<defs>
-<marker id="arrow-xss" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker submits</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">script as input</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-xss)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Server stores it</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">without encoding</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-xss)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Victim's browser</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">loads the page</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-xss)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Script executes as</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">the site's own code</text>
-<line x1="730" y1="72" x2="770" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-xss)"/>
-<circle cx="782" cy="20" r="11" fill="var(--accent)"/>
-<text x="782" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text>
-<rect x="770" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="845" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker captures</text>
-<text x="845" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">session or data</text>
-</svg>
-<figcaption>A stored payload (as shown here) hits every visitor who views the page: the highest-impact of the three XSS variants.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Reflected XSS**: a value from the request itself (commonly a URL parameter) is echoed directly
@@ -157,6 +116,28 @@ could exfiltrate that same session to an external server, without ever actually 
 agent's live session or taking any action inside the dashboard. Testing stops at that proof, the same
 ethical boundary demonstrated on the SQL Injection page: proving exploitability is the job, not
 causing the harm itself.
+
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor (Customer Role)
+    participant Portal as Meridian Customer Portal
+    participant DB as Support Ticket Database
+    participant AdminDashboard as Admin Portal (Staff Role)
+    participant AdminBrowser as Staff Browser Runtime
+
+    Assessor->>Portal: POST /tickets/create (Payload with script tag)
+    Portal->>DB: INSERT INTO tickets (body) VALUES ('script tag')
+    DB-->>Portal: Ticket Created (ID 9021)
+    Portal-->>Assessor: Customer View: Escaped HTML script tag
+    Note over AdminDashboard: Admin logs in & opens ticket #9021
+    AdminDashboard->>DB: SELECT body FROM tickets WHERE id = 9021
+    DB-->>AdminDashboard: Return raw unescaped payload string
+    AdminDashboard-->>AdminBrowser: HTTP 200 with raw script tag in HTML stream
+    Note over AdminBrowser: HTML parser executes script in admin session context
+    AdminBrowser-->>Assessor: Script triggers benign origin verification ping
+    Note over Assessor,AdminBrowser: ENGAGEMENT BOUNDARY PRESERVED<br/>Stored XSS execution proven using benign console marker.<br/>Zero admin session tokens exfiltrated - zero admin actions performed.
+    Assessor->>Assessor: Document High-severity finding (Stored XSS in Admin Dashboard)
+```
 
 ## Severity Calibration
 

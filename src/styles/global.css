@@ -62,6 +62,7 @@
 :root[data-theme='dark'] .theme-icon-moon { display: block; }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 /* overflow-x guards against a real Safari/WebKit quirk: .site-header's backdrop-filter makes it the
    containing block for its position:fixed descendant (.site-nav, the mobile slide-in menu), so the
    off-canvas nav computes its "hidden" offset against the header's box instead of the viewport and
@@ -148,22 +149,66 @@ p { margin: 0 0 1em 0; }
 .site-header .brand .dot { color: var(--accent); }
 
 /* --- Desktop nav + mega-menu dropdowns (no JS required: :hover / :focus-within reveal them) --- */
-.site-nav { display: flex; gap: 4px; }
-.nav-item { position: relative; }
-.nav-row { display: flex; align-items: center; }
-.nav-link {
+.header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 12px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.nav-row {
+  display: flex;
+  align-items: center;
+}
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 10px;
   text-decoration: none;
   color: var(--ink-soft);
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 500;
+  line-height: 1.2;
   border-radius: 8px;
+  white-space: nowrap;
   transition: color 0.12s ease, background 0.12s ease;
 }
-.nav-link .chev { color: var(--ink-faint); transition: transform 0.15s ease; }
+.nav-link-assistant {
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-line);
+  padding: 6px 10px;
+}
+.nav-link-assistant .nav-ai-spark {
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1;
+  display: inline-block;
+  transition: transform 0.2s ease, color 0.15s ease;
+}
+@media (hover: hover) {
+  .nav-link-assistant:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .nav-link-assistant:hover .nav-ai-spark {
+    color: #fff;
+    transform: scale(1.25) rotate(15deg);
+  }
+}
+.nav-link .chev { color: var(--ink-faint); transition: transform 0.15s ease; flex-shrink: 0; }
 @media (hover: hover) {
   .nav-link:hover { color: var(--ink); background: var(--surface-2); }
   .nav-item:hover .chev { transform: rotate(180deg); }
@@ -331,7 +376,7 @@ p { margin: 0 0 1em 0; }
 }
 .nav-scrim.open { opacity: 1; visibility: visible; }
 
-@media (max-width: 880px) {
+@media (max-width: 980px) {
   .nav-toggle { display: flex; }
   .nav-close {
     display: flex;
@@ -356,6 +401,7 @@ p { margin: 0 0 1em 0; }
     height: 100dvh;
     background: var(--surface);
     flex-direction: column;
+    align-items: stretch;
     gap: 2px;
     padding: 84px 20px 32px 20px;
     overflow-y: auto;
@@ -368,6 +414,14 @@ p { margin: 0 0 1em 0; }
   .nav-row { justify-content: space-between; }
   .nav-link { flex: 1; padding: 14px 4px; }
   .nav-link .chev { display: none; }
+  .site-nav .nav-link-assistant {
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent-soft-line);
+    padding: 12px 14px;
+    margin: 8px 0;
+    border-radius: 9px;
+  }
   .nav-chevron {
     display: flex;
     align-items: center;
@@ -494,7 +548,30 @@ a.tagline:active { background: var(--accent-soft-line); border-color: var(--acce
   display: flex;
   flex-wrap: wrap;
   gap: 8px 10px;
-  margin: 16px 0 32px 0;
+  margin: 16px 0 20px 0;
+}
+.vuln-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 32px 0;
+}
+.vuln-actions .btn {
+  margin: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.2;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+.vuln-actions .btn svg {
+  flex-shrink: 0;
+}
+.vuln-actions .practice-lab {
+  margin: 0 !important;
 }
 .practice-lab {
   margin-bottom: 32px;
@@ -801,21 +878,339 @@ article.vuln-body tbody tr { background: var(--surface); }
   color: transparent;
 }
 
-/* Inline SVG process/flow diagrams embedded directly in Markdown content. Kept theme-aware by
-   using `currentColor` and the same custom properties as the rest of the page, rather than fixed
-   colors, so a diagram drawn once looks right in both light and dark mode automatically. */
+/* Executive-Grade Diagram Containers & Mermaid Styling */
 figure.diagram {
-  margin: 30px 0;
-  padding: 20px 16px 14px 16px;
+  margin: 36px 0;
+  padding: 0;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  text-align: center;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -2px rgba(20, 23, 27, 0.05), 0 1px 3px rgba(20, 23, 27, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-figure.diagram svg { max-width: 100%; height: auto; color: var(--ink); }
+
+:root[data-theme='dark'] figure.diagram {
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.diagram-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  user-select: none;
+}
+
+.diagram-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diagram-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.diagram-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.diagram-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.diagram-canvas {
+  padding: 28px 20px 36px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: radial-gradient(var(--line) 0.75px, transparent 0.75px);
+  background-size: 20px 20px;
+  background-position: 10px 10px;
+}
+
+:root[data-theme='dark'] .diagram-canvas {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 0.75px, transparent 0.75px);
+}
+
+/* Scrollbar styling for wide diagrams */
+.diagram-canvas::-webkit-scrollbar {
+  height: 6px;
+}
+.diagram-canvas::-webkit-scrollbar-track {
+  background: transparent;
+}
+.diagram-canvas::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 3px;
+}
+.diagram-canvas::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-faint);
+}
+
+/* SVG Rendering within Canvas */
+figure.diagram svg {
+  display: block;
+  height: auto;
+  color: var(--ink);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.03));
+  max-width: 100%;
+}
+
+/* Mobile responsive diagram rules */
+@media (max-width: 720px) {
+  /* Diagrams that do NOT fit accordingly (sequence diagrams or wide layouts): do not show on mobile view */
+  figure.diagram.diagram-desktop-only {
+    display: none !important;
+  }
+
+  /* Diagrams that fit mobile cleanly: scale responsively without horizontal overflow */
+  figure.diagram.diagram-mobile-fit {
+    display: block !important;
+    margin: 20px 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  figure.diagram.diagram-mobile-fit .diagram-canvas {
+    padding: 14px 6px !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  figure.diagram.diagram-mobile-fit svg {
+    min-width: unset !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+
+  figure.diagram.diagram-mobile-fit .diagram-toolbar {
+    padding: 8px 12px !important;
+  }
+
+  figure.diagram.diagram-mobile-fit .diagram-title {
+    font-size: 10.5px !important;
+  }
+
+  figure.diagram.diagram-mobile-fit .diagram-badge {
+    font-size: 9.5px !important;
+    padding: 2px 6px !important;
+  }
+}
+
+@media (min-width: 721px) {
+  figure.diagram.diagram-desktop-only,
+  figure.diagram.diagram-mobile-fit {
+    display: block !important;
+  }
+  figure.diagram svg {
+    min-width: unset;
+  }
+}
+
+/* SVG Node Styling */
+.mermaid-diagram .node rect,
+.mermaid-diagram .node polygon,
+.mermaid-diagram .node circle {
+  rx: 8px !important;
+  ry: 8px !important;
+  stroke-width: 1.5px !important;
+  transition: all 0.15s ease;
+}
+
+/* Prevent foreignObject and label clipping */
+.mermaid-diagram foreignObject,
+.mermaid-diagram .label,
+.mermaid-diagram .cluster-label {
+  overflow: visible !important;
+}
+
+.mermaid-diagram code {
+  white-space: nowrap !important;
+}
+
+/* Subgraph Clusters */
+.mermaid-diagram .cluster rect {
+  rx: 12px !important;
+  ry: 12px !important;
+  stroke-dasharray: 4 4 !important;
+  stroke-width: 1.5px !important;
+}
+.mermaid-diagram .cluster text,
+.mermaid-diagram .cluster span.nodeLabel {
+  font-family: 'Archivo', system-ui, -apple-system, sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  fill: var(--ink-faint) !important;
+  color: var(--ink-faint) !important;
+}
+
+/* Edge Labels */
+.mermaid-diagram .edgeLabel {
+  background: transparent !important;
+  color: var(--ink) !important;
+  font-family: 'Archivo', system-ui, -apple-system, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+.mermaid-diagram .edgeLabel span {
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  padding: 2px 7px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  color: var(--ink) !important;
+  display: inline-block !important;
+}
+:root[data-theme='dark'] .mermaid-diagram .edgeLabel span {
+  background: var(--surface-2) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+
+/* Scoped code styles inside diagrams to prevent article.vuln-body code bloat */
+.mermaid-diagram code,
+article.vuln-body .mermaid-diagram code {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11.5px !important;
+  line-height: 1.35 !important;
+  padding: 1px 4px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--surface-2) !important;
+  color: var(--ink) !important;
+}
+
+.mermaid-diagram .node .label {
+  text-align: center !important;
+  font-family: 'Archivo', system-ui, -apple-system, sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  color: var(--ink) !important;
+}
+
+.mermaid-diagram .node .nodeLabel {
+  display: inline-block !important;
+  text-align: center !important;
+  font-family: 'Archivo', system-ui, -apple-system, sans-serif !important;
+  font-size: 13px !important;
+  color: var(--ink) !important;
+  line-height: 1.45 !important;
+}
+
+.mermaid-diagram p,
+article.vuln-body .mermaid-diagram p,
+article.attack-body .mermaid-diagram p,
+article.framework-body .mermaid-diagram p,
+article.methodology-body .mermaid-diagram p {
+  margin: 0 !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+}
+
+/* Threat / Breach / Danger Nodes */
+.mermaid-diagram .node.danger rect,
+.mermaid-diagram .node.breach rect,
+.mermaid-diagram .node.danger polygon,
+.mermaid-diagram .node.breach polygon {
+  fill: var(--accent-soft) !important;
+  stroke: var(--accent) !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 2px 8px rgba(196, 73, 29, 0.2)) !important;
+}
+.mermaid-diagram .node.danger .nodeLabel,
+.mermaid-diagram .node.breach .nodeLabel {
+  color: var(--accent-ink) !important;
+  font-weight: 600 !important;
+}
+
+/* Safe Nodes */
+.mermaid-diagram .node.safe rect,
+.mermaid-diagram .node.safe polygon {
+  fill: rgba(34, 197, 94, 0.08) !important;
+  stroke: #22c55e !important;
+  stroke-width: 2px !important;
+}
+.mermaid-diagram .node.safe .nodeLabel {
+  color: #15803d !important;
+  font-weight: 600 !important;
+}
+:root[data-theme='dark'] .mermaid-diagram .node.safe .nodeLabel {
+  color: #4ade80 !important;
+}
+
+/* Sequence Diagram Participants / Lifelines / Arrows */
+.mermaid-diagram .actor {
+  stroke-width: 1.5px !important;
+  rx: 8px !important;
+  ry: 8px !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04)) !important;
+}
+.mermaid-diagram text.actor > tspan {
+  font-family: 'Archivo', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 13.5px !important;
+}
+.mermaid-diagram .actor-line {
+  stroke-dasharray: 4 4 !important;
+  stroke-width: 1.5px !important;
+  stroke: var(--line) !important;
+}
+.mermaid-diagram .messageText {
+  font-family: 'Archivo', system-ui, sans-serif !important;
+  font-size: 12.5px !important;
+  fill: var(--ink) !important;
+}
+.mermaid-diagram .messageLine0,
+.mermaid-diagram .messageLine1 {
+  stroke-width: 1.5px !important;
+  stroke: var(--ink-soft) !important;
+}
+.mermaid-diagram #arrowhead path,
+.mermaid-diagram #crosshead path {
+  fill: var(--ink-soft) !important;
+  stroke: var(--ink-soft) !important;
+}
+.mermaid-diagram .sequenceNumber {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+
 figure.diagram figcaption {
-  margin-top: 12px;
-  font-size: 13.5px;
+  margin: 12px 16px 14px 16px;
+  font-size: 13px;
   color: var(--ink-faint);
   font-style: italic;
+  text-align: center;
 }

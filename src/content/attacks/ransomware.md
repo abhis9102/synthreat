@@ -39,47 +39,6 @@ the moment data is exfiltrated before encryption ever starts. What almost never 
 the attacker's own technical sophistication requirement: modern ransomware-as-a-service kits mean the
 person deploying the attack often didn't write any of the code themselves.
 
-<figure class="diagram">
-<svg viewBox="0 0 930 130" role="img" aria-labelledby="diagram-title-ransomware" style="width:100%;height:auto;">
-<title id="diagram-title-ransomware">The five typical stages of a ransomware incident, from initial access through to encryption and a ransom note.</title>
-<defs>
-<marker id="arrow-ransomware" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Initial access</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">(phishing, exposed RDP)</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-ransomware)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Lateral movement</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">finds backup systems</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-ransomware)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Backups disabled</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">or deleted</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-ransomware)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Data exfiltrated</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">(double extortion)</text>
-<line x1="730" y1="72" x2="770" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-ransomware)"/>
-<circle cx="782" cy="20" r="11" fill="var(--accent)"/>
-<text x="782" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text>
-<rect x="770" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="845" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Files encrypted,</text>
-<text x="845" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">ransom note dropped</text>
-</svg>
-<figcaption>By the time the ransom note appears, the attacker has usually already removed the easy way out.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Phishing** as the most common initial access vector, followed closely by exposed remote-access
@@ -156,6 +115,30 @@ directly, confirming the double-extortion pattern. Because the backup deletion h
 Ferro's IT team initially believes their most recent backup is intact and only discovers otherwise
 once they attempt an actual restore. The exact gap a tested restoration drill, run in advance, would
 have caught before it mattered.
+
+```mermaid
+sequenceDiagram
+    participant Adversary as Ransomware Operator
+    participant VictimPC as Compromised Workstation
+    participant BackupServer as Backup Infrastructure
+    participant C2 as External Drop Server
+    participant DomainCtrl as Domain Controller / File Servers
+
+    Note over Adversary,VictimPC: Day 1 (Tuesday): Initial Lure Execution
+    Adversary->>VictimPC: Malicious invoice macro runs (Cobalt Strike beacon)
+    VictimPC-->>Adversary: Interactive reverse shell established
+
+    Note over Adversary,BackupServer: Day 3 (Thursday): Stealth Backup Neutralization
+    Adversary->>BackupServer: Authenticates using dumped backup service credentials
+    Adversary->>BackupServer: Delete volume shadow copies & purge snapshot catalog
+
+    Note over Adversary,C2: Day 4 (Friday): Exfiltration Phase (Double Extortion)
+    Adversary->>C2: Upload 450 GB of unencrypted shipping & customer PII
+
+    Note over Adversary,DomainCtrl: Day 5 (Saturday 02:00 AM): Detonation
+    Adversary->>DomainCtrl: Push encryptor binary via Active Directory GPO
+    DomainCtrl->>DomainCtrl: Mass encryption locks disks & writes ransom notes
+```
 
 ## Severity Calibration
 

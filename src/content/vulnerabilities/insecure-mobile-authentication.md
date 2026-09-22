@@ -25,7 +25,7 @@ session should.
 Web authentication logic runs almost entirely server-side: the client just presents credentials and
 receives a result. A mobile app, running compiled code on the user's own device, tempts developers
 into moving some of that decision-making client-side, checking a login state locally, or gating access
-to a feature based on a flag set after a successful login, because it's simpler and feels faster. That
+to a feature based on a flag set after a successful login, because it's simpler and feels faster. The
 temptation is exactly where the trust boundary breaks: any check performed only in code running on the
 attacker's own device can be inspected, patched, or bypassed by an attacker with the tools and time to
 reverse engineer it, which is a meaningfully lower bar than compromising a server directly.
@@ -105,6 +105,27 @@ independently validate token expiration, relying instead on the app's own local 
 Testing is limited to a test account created for this assessment, and confirms only that the expired
 token still functions against the endpoint. No other user's session or record is accessed.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant App as Mobile App (Test Device)
+    participant Proxy as Interception Proxy (Burp)
+    participant API as Patient Portal Backend API
+    participant DB as Production Health Database
+
+    Assessor->>App: Authenticate test account & record session token
+    Note over App: App displays 'Session Expired' after timeout
+    Assessor->>Proxy: Replay expired Bearer token directly via HTTP request
+    Proxy->>API: GET /api/v1/patient/records (Header: Bearer [ExpiredToken])
+    Note over API: Backend validates signature only<br/>fails to verify server-side TTL or revocation
+    API->>DB: Query test account patient records
+    DB-->>API: Return test records
+    API-->>Proxy: 200 OK with patient data
+    Proxy-->>Assessor: Payload rendered successfully
+    Note over Assessor,DB: ENGAGEMENT BOUNDARY PRESERVED<br/>Confirmed server does not enforce expiration.<br/>Zero other patient records accessed or enumerated.
+    Assessor->>Assessor: Document Critical finding (Perpetual Session Validity)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because a token the app itself indicates has expired remains fully valid
@@ -129,9 +150,9 @@ or replayed directly against the backend.
 
 ## Related Classes
 
-- **Insecure Mobile Data Storage** ([../insecure-mobile-data-storage/](../insecure-mobile-data-storage/)):
+- **[Insecure Mobile Data Storage](../insecure-mobile-data-storage/)**:
   the most common source of a token or credential that this class's weak server-side validation then
   fails to properly invalidate or expire.
-- **Insecure Mobile Communication** ([../insecure-mobile-communication/](../insecure-mobile-communication/)):
+- **[Insecure Mobile Communication](../insecure-mobile-communication/)**:
   a common path by which a session token is intercepted in the first place, before this class's
   weaknesses determine how long that intercepted token stays useful.

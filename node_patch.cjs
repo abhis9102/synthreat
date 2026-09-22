@@ -1,0 +1,1 @@
+Object.defineProperty(process.versions, "node", {value: "22.12.0", configurable: true});

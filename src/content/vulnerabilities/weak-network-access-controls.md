@@ -103,6 +103,23 @@ Testing is limited to confirming network-layer reachability to the administrativ
 authentication attempt or further interaction with the database service is made beyond confirming the
 port responds, sufficient to demonstrate the access control gap.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Workstation as Corporate Workstation Subnet (10.10.0.0/16)
+    participant Firewall as Corporate Inter-VLAN Firewall
+    participant DB as Production DB Server (10.20.5.10)
+
+    Assessor->>Workstation: Connect assessment system (IP 10.10.40.12)
+    Assessor->>Firewall: Send TCP SYN probe to 10.20.5.10:5432 (Postgres)
+    Note over Firewall: Rule matches broad subnet grant (10.10.0.0/16 -> 10.20.0.0/16 ANY)
+    Firewall->>DB: Forward TCP SYN packet without restriction
+    DB-->>Firewall: Return TCP SYN-ACK (Port 5432 Listening)
+    Firewall-->>Assessor: Relay TCP SYN-ACK to assessor
+    Note over Assessor,DB: ENGAGEMENT BOUNDARY PRESERVED<br/>Confirmed direct database port reachability from user subnet.<br/>Zero login attempts or SQL queries dispatched.
+    Assessor->>Assessor: Document Critical finding (Overly Broad Firewall Rule)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because a broad, unreviewed firewall rule exposes a sensitive administrative
@@ -126,9 +143,9 @@ determines what's reachable in practice.
 
 ## Related Classes
 
-- **Network Segmentation Failures** ([../network-segmentation-failures/](../network-segmentation-failures/)):
+- **[Network Segmentation Failures](../network-segmentation-failures/)**:
   the broader architectural pattern this class's rules are meant to enforce; segmentation without
   correctly restrictive rules behind it provides no real protection.
-- **Unencrypted Network Protocols in Use** ([../cleartext-network-protocols/](../cleartext-network-protocols/)):
+- **[Unencrypted Network Protocols in Use](../cleartext-network-protocols/)**:
   a related, frequently co-occurring gap, since a permissive access control rule often exposes a
   legacy, unencrypted service that shouldn't have been reachable at all.

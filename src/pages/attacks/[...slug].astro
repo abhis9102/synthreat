@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import QuizBlock from '../../components/QuizBlock.astro';
+import PathLessonNav from '../../components/PathLessonNav.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('attacks', ({ data }) => data.status === 'published');
@@ -37,7 +39,20 @@ const attackUrl = (id: string) => `https://attack.mitre.org/techniques/${id.repl
       <a class="chip" href={attackUrl(id)} target="_blank" rel="noopener">ATT&amp;CK {id}</a>
     ))}
   </div>
+  <div class="vuln-actions">
+    <a
+      class="btn btn-secondary ai-ask-btn"
+      href={`${base}assistant/?q=${encodeURIComponent(`Explain ${title} attack mechanics and how to build a defense talk track for executives`)}`}
+      data-ai-prompt={`Explain ${title} attack mechanics and how to build a defense talk track for executives`}
+      data-topic={title}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Ask Synthreat AI about {title} ✦
+    </a>
+  </div>
   <article class="vuln-body">
     <Content />
   </article>
+  <PathLessonNav col="attacks" slug={entry.id} />
+  <QuizBlock articleSlug={entry.id} />
 </BaseLayout>

@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import { VULN_SURFACES } from '../content.config';
+import AiChatPopup from '../components/AiChatPopup.astro';
 
 interface Props {
   title: string;
@@ -11,6 +12,8 @@ interface Props {
 }
 const { title, description, wide = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const defaultKey = process.env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || '';
+const isAssistantPage = Astro.url.pathname.includes('/assistant');
 
 const domainEntries = (await getCollection('domains', ({ data }) => data.status === 'published')).sort(
   (a, b) => a.data.title.localeCompare(b.data.title)
@@ -91,10 +94,6 @@ const NAV_SECTIONS = [
     <header class="site-header">
       <div class="inner">
         <a class="brand" href={base}>Synthreat<span class="dot">.</span></a>
-
-        <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle navigation menu">
-          <span></span><span></span><span></span>
-        </button>
 
         <nav class="site-nav" id="siteNav">
           <button class="nav-close" id="navClose" aria-label="Close navigation menu">
@@ -181,8 +180,26 @@ const NAV_SECTIONS = [
               <a class="nav-viewall" href={`${base}vulnerabilities/`}>View all Vulnerabilities →</a>
             </div>
           </div>
+
+          <div class="nav-item">
+            <div class="nav-row">
+              <a href={`${base}assistant/`} class="nav-link nav-link-assistant">
+                <span class="nav-ai-spark">✦</span>
+                <span>Synthreat AI</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="nav-item">
+            <div class="nav-row">
+              <a href={`${base}paths/`} class="nav-link">
+                <span>🏷️ Paths</span>
+              </a>
+            </div>
+          </div>
         </nav>
 
+        <div class="header-actions">
           <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="Switch to dark mode">
             <svg class="theme-icon theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8" />
@@ -193,6 +210,11 @@ const NAV_SECTIONS = [
             </svg>
             <span class="theme-toggle-label">Dark</span>
           </button>
+
+          <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle navigation menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -235,6 +257,11 @@ const NAV_SECTIONS = [
               <a href={`${base}vulnerabilities/${item.id}/`}>{item.data.title}</a>
             ))}
             <a href={`${base}vulnerabilities/`} class="footer-more">View all →</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-col-title">Intelligence & Practice</span>
+            <a href={`${base}assistant/`}>Synthreat AI (Dual Lens)</a>
+            <a href={`${base}paths/`}>Learning Paths</a>
           </div>
         </div>
         <div class="footer-bottom">
@@ -392,6 +419,214 @@ const NAV_SECTIONS = [
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeNav();
       });
+
+      // Render Mermaid diagrams
+      const mermaidElements = document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]');
+      if (mermaidElements.length > 0) {
+        import('mermaid').then(({ default: mermaid }) => {
+          function getMermaidConfig(isDark: boolean) {
+            return {
+              startOnLoad: false,
+              securityLevel: 'loose' as const,
+              fontFamily: "'Archivo', system-ui, -apple-system, sans-serif",
+              fontSize: 13,
+              theme: 'base' as const,
+              flowchart: {
+                htmlLabels: true,
+                curve: 'basis' as const,
+                padding: 14,
+                nodeSpacing: 32,
+                rankSpacing: 32,
+                useMaxWidth: false
+              },
+              sequence: {
+                diagramMarginX: 20,
+                diagramMarginY: 20,
+                actorMargin: 50,
+                width: 160,
+                height: 46,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 36,
+                mirrorActors: false,
+                bottomMarginAdj: 1,
+                useMaxWidth: false,
+                rightAngles: false,
+                showSequenceNumbers: false
+              },
+              themeCSS: `
+                .node .label, .node .nodeLabel, .node p {
+                  font-family: 'Archivo', system-ui, -apple-system, sans-serif;
+                  font-size: 13px;
+                  line-height: 1.45;
+                  text-align: center;
+                  margin: 0;
+                }
+                .cluster text, .cluster span.nodeLabel {
+                  font-family: 'Archivo', system-ui, -apple-system, sans-serif;
+                  font-size: 11.5px;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                  letter-spacing: 0.04em;
+                }
+                .edgeLabel, .edgeLabel span, .edgeLabel p {
+                  font-family: 'Archivo', system-ui, -apple-system, sans-serif;
+                  font-size: 12px;
+                  line-height: 1.35;
+                  margin: 0;
+                }
+                .edgeLabel span {
+                  padding: 2px 7px;
+                  border: 1px solid #CBD5E1;
+                  border-radius: 6px;
+                }
+                p {
+                  margin: 0;
+                }
+                code {
+                  font-family: 'JetBrains Mono', monospace;
+                  font-size: 11.5px;
+                  padding: 1px 4px;
+                  white-space: nowrap;
+                }
+              `,
+              themeVariables: isDark ? {
+                darkMode: true,
+                background: 'transparent',
+                primaryColor: '#181F2A',
+                primaryTextColor: '#F1F5F9',
+                primaryBorderColor: '#334155',
+                lineColor: '#94A3B8',
+                secondaryColor: '#1E293B',
+                tertiaryColor: '#0F172A',
+                clusterBkg: '#111722',
+                clusterBorder: '#263344',
+                edgeLabelBackground: '#181F2A',
+                noteBkgColor: '#2A180F',
+                noteTextColor: '#FFC4A3',
+                noteBorderColor: '#492A18',
+                actorBkg: '#181F2A',
+                actorTextColor: '#F1F5F9',
+                actorBorder: '#334155',
+                actorLineColor: '#334155',
+                signalColor: '#94A3B8',
+                signalTextColor: '#F1F5F9',
+                labelBoxBkgColor: '#181F2A',
+                labelBoxBorderColor: '#334155',
+                labelTextColor: '#F1F5F9',
+                loopTextColor: '#94A3B8',
+                activationBorderColor: '#FF7A45',
+                activationBkgColor: '#2A180F',
+                sequenceNumberColor: '#FFC4A3'
+              } : {
+                darkMode: false,
+                background: 'transparent',
+                primaryColor: '#F8FAFC',
+                primaryTextColor: '#0F172A',
+                primaryBorderColor: '#CBD5E1',
+                lineColor: '#64748B',
+                secondaryColor: '#F1F5F9',
+                tertiaryColor: '#FFFFFF',
+                clusterBkg: '#F8FAFC',
+                clusterBorder: '#E2E8F0',
+                edgeLabelBackground: '#FFFFFF',
+                noteBkgColor: '#FBE9E1',
+                noteTextColor: '#8F3313',
+                noteBorderColor: '#F0C9B6',
+                actorBkg: '#F8FAFC',
+                actorTextColor: '#0F172A',
+                actorBorder: '#CBD5E1',
+                actorLineColor: '#CBD5E1',
+                signalColor: '#334155',
+                signalTextColor: '#0F172A',
+                labelBoxBkgColor: '#F1F5F9',
+                labelBoxBorderColor: '#CBD5E1',
+                labelTextColor: '#0F172A',
+                loopTextColor: '#64748B',
+                activationBorderColor: '#C4491D',
+                activationBkgColor: '#FBE9E1',
+                sequenceNumberColor: '#8F3313'
+              }
+            };
+          }
+
+          let diagramIdCounter = 0;
+          async function renderAllDiagrams() {
+            if (document.fonts?.ready) {
+              await document.fonts.ready;
+            }
+            const isDark = document.documentElement.dataset.theme === 'dark';
+            mermaid.initialize(getMermaidConfig(isDark));
+
+            const containers = document.querySelectorAll<HTMLElement>('figure.mermaid-diagram');
+            for (const container of containers) {
+              let code = container.dataset.src;
+              if (!code) continue;
+
+              // Convert stick-figure actors to clean rectangular participants
+              code = code.replace(/^\s*actor\s+/gm, '    participant ');
+              // Remove raw autonumber circles to avoid line collisions
+              code = code.replace(/^\s*autonumber\s*$/gm, '');
+
+              const isSequence = /^\s*sequenceDiagram/m.test(code);
+              const id = `mermaid-svg-${diagramIdCounter++}`;
+              try {
+                let { svg } = await mermaid.render(id, code);
+
+                if (isDark) {
+                  // In dark mode, ensure breach and safe node fills adapt to dark theme with proper high contrast
+                  svg = svg.replace(/fill:#fee2e2/g, 'fill:#2A180F');
+                  svg = svg.replace(/fill:#dcfce7/g, 'fill:#0f291e');
+                  svg = svg.replace(/fill:#ffedd5/g, 'fill:#2b1d0c');
+                  svg = svg.replace(/fill:#f8fafc/g, 'fill:#181F2A');
+                  svg = svg.replace(/fill:#f1f5f9/g, 'fill:#1e293b');
+                  svg = svg.replace(/fill:#eff6ff/g, 'fill:#172554');
+                }
+
+                // Determine if diagram fits cleanly on mobile screens (not sequence, natural width <= 600px)
+                const vbMatch = svg.match(/viewBox=["']\s*([-\d.]+)\s+([-\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+                const vbWidth = vbMatch ? parseFloat(vbMatch[3]) : 0;
+                const fitsMobile = !isSequence && vbWidth > 0 && vbWidth <= 600;
+
+                container.classList.remove('diagram-mobile-fit', 'diagram-desktop-only');
+                container.classList.add(fitsMobile ? 'diagram-mobile-fit' : 'diagram-desktop-only');
+
+                const toolbar = `
+                  <div class="diagram-toolbar">
+                    <div class="diagram-tag">
+                      <span class="diagram-indicator"></span>
+                      <span class="diagram-title">${isSequence ? 'ATTACK EXECUTION SEQUENCE' : 'TRUST BOUNDARY & FLOW ARCHITECTURE'}</span>
+                    </div>
+                    <span class="diagram-badge">${isSequence ? 'PROTOCOL TIMELINE' : 'SYSTEM BOUNDARIES'}</span>
+                  </div>
+                `;
+                container.innerHTML = `${toolbar}<div class="diagram-canvas">${svg}</div>`;
+              } catch (err) {
+                console.error('Failed to render Mermaid diagram:', err);
+              }
+            }
+          }
+
+          // Initial conversion from <pre> to <figure>
+          mermaidElements.forEach((pre) => {
+            const code = pre.textContent?.trim() || '';
+            const isSequence = /^\s*sequenceDiagram/m.test(code);
+            const figure = document.createElement('figure');
+            figure.className = `diagram mermaid-diagram ${isSequence ? 'diagram-desktop-only' : 'diagram-mobile-fit'}`;
+            figure.dataset.src = code;
+            pre.replaceWith(figure);
+          });
+
+          renderAllDiagrams();
+
+          // Re-render when theme is toggled
+          themeToggle?.addEventListener('click', () => {
+            setTimeout(renderAllDiagrams, 50);
+          });
+        });
+      }
     </script>
+    {!isAssistantPage && <AiChatPopup defaultKey={defaultKey} base={base} />}
   </body>
 </html>

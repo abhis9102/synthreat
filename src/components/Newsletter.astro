@@ -1,0 +1,177 @@
+---
+// Newsletter.astro — Buttondown embed signup with localStorage persistence
+---
+
+<div class="newsletter-block">
+  <div class="newsletter-inner">
+    <div class="newsletter-copy">
+      <h3 class="newsletter-heading">📨 Stay Updated</h3>
+      <p class="newsletter-desc">
+        Get notified when new vulnerabilities, attack techniques, and guides are published.
+      </p>
+    </div>
+    <form class="newsletter-form" id="newsletterForm" novalidate>
+      <div class="newsletter-row">
+        <input
+          type="email"
+          placeholder="your@email.com"
+          required
+          class="newsletter-input"
+          id="newsletterEmail"
+          autocomplete="email"
+        />
+        <button type="submit" class="newsletter-btn">Subscribe</button>
+      </div>
+      <p class="newsletter-fine">No spam. Unsubscribe anytime.</p>
+    </form>
+    <div id="newsletterSuccess" class="newsletter-success" aria-live="polite" hidden>
+      ✅ You're subscribed! Check your email to confirm.
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('newsletterForm') as HTMLFormElement | null;
+  const emailInput = document.getElementById('newsletterEmail') as HTMLInputElement | null;
+  const successDiv = document.getElementById('newsletterSuccess') as HTMLElement | null;
+
+  // Restore subscribed state from localStorage
+  if (localStorage.getItem('synthreat_newsletter_email')) {
+    form?.style && (form.style.display = 'none');
+    if (successDiv) successDiv.hidden = false;
+  }
+
+  form?.addEventListener('submit', async (e: Event) => {
+    e.preventDefault();
+    const email = emailInput?.value?.trim();
+    if (!email) return;
+
+    // Persist to localStorage immediately
+    localStorage.setItem('synthreat_newsletter_email', email);
+
+    // Show success state right away — don't make the user wait on the network
+    if (form) form.style.display = 'none';
+    if (successDiv) successDiv.hidden = false;
+
+    // Best-effort POST to Buttondown embed endpoint
+    try {
+      const fd = new FormData();
+      fd.append('email', email);
+      fd.append('embed', '1');
+      await fetch('https://buttondown.email/api/emails/embed-subscribe/synthreat', {
+        method: 'POST',
+        body: fd,
+        mode: 'no-cors', // Buttondown's embed endpoint uses redirect responses
+      });
+    } catch {
+      // Silently ignore — success state is already shown
+    }
+  });
+</script>
+
+<style>
+  .newsletter-block {
+    margin-top: 64px;
+    border-radius: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+  }
+
+  .newsletter-inner {
+    max-width: 680px;
+  }
+
+  .newsletter-heading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 10px;
+  }
+
+  .newsletter-desc {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+    line-height: 1.6;
+  }
+
+  .newsletter-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .newsletter-input {
+    flex: 1 1 220px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.18s;
+    min-width: 180px;
+  }
+
+  .newsletter-input::placeholder {
+    color: var(--ink-faint);
+  }
+
+  .newsletter-input:focus {
+    border-color: var(--accent);
+  }
+
+  .newsletter-btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.18s, transform 0.12s;
+  }
+
+  .newsletter-btn:hover {
+    opacity: 0.88;
+  }
+
+  .newsletter-btn:active {
+    transform: scale(0.97);
+  }
+
+  .newsletter-fine {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    margin: 10px 0 0;
+  }
+
+  .newsletter-success {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    padding: 14px 18px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  @media (max-width: 480px) {
+    .newsletter-block {
+      padding: 24px 20px;
+    }
+
+    .newsletter-row {
+      flex-direction: column;
+    }
+
+    .newsletter-btn {
+      width: 100%;
+    }
+  }
+</style>

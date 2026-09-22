@@ -22,41 +22,6 @@ Most developers build a clear check for "is this request coming from someone who
 
 The trust boundary that actually needs to hold is per-record, not per-session: a valid session proves identity, nothing more. The moment a developer treats "has a valid session" as equivalent to "is authorized for this exact resource," that boundary is gone, and the only thing standing between an attacker and someone else's data is whatever value happens to sit in a URL or request body.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-broken-access-control" style="width:100%;height:auto;">
-<title id="diagram-title-broken-access-control">A logged-in user edits an ID in a request and reaches another customer's record because ownership is never rechecked</title>
-<defs>
-<marker id="arrow-broken-access-control" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">User logs in,</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">views invoice 1041</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-broken-access-control)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">User edits URL</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">to invoice 1042</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-broken-access-control)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Server checks:</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">session valid?</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-broken-access-control)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Returns another</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">customer's data</text>
-</svg>
-<figcaption>The session check passes at step 3. Nothing ever asks whether this user owns invoice 1042.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Direct object references**: endpoints like `/api/invoices/1042` or `/documents/edit?id=1042`, where the ID itself is the only thing standing between a user and someone else's record.
@@ -99,6 +64,27 @@ Incrementing the ID by one, to 4472, while still authenticated as the same test 
 
 Testing continues by sampling a handful of further sequential IDs, confirming the pattern holds consistently rather than being a one-off anomaly, and confirming the same flaw exists on the equivalent PDF-download endpoint. Testing stops there: enough evidence exists to prove the entire invoice range is enumerable, without actually harvesting real customer data beyond what was needed to demonstrate the finding.
 
+```mermaid
+sequenceDiagram
+    participant Attacker as Authenticated User (Account A)
+    participant Portal as Customer Portal API (/api/invoices/)
+    participant DB as Billing Database
+
+    Note over Attacker,Portal: Step 1: Legitimate query for owned resource
+    Attacker->>Portal: GET /api/invoices/4471 (Session: User A)
+    Portal->>DB: Query invoice 4471
+    DB-->>Portal: Return invoice 4471 record
+    Portal-->>Attacker: HTTP 200 OK (User A's Invoice)
+
+    Note over Attacker,Portal: Step 2: Modifying object reference to Target B
+    Attacker->>Portal: GET /api/invoices/4472 (Session: User A)
+    Portal->>Portal: Verify Session Valid? (YES)
+    Note right of Portal: Flaw: Server fails to verify if User A owns 4472
+    Portal->>DB: Query invoice 4472
+    DB-->>Portal: Return invoice 4472 record (Belongs to User B)
+    Portal-->>Attacker: HTTP 200 OK (CRITICAL: Full PII & Financial Data Leaked)
+```
+
 ## Severity Calibration
 
 This instance rates **Critical**: unauthenticated in the sense that matters most (any valid low-privilege account, not just a compromised admin account, can reach it), trivially exploitable by anyone who can count, and demonstrated against real financial and personal data across a range of sequential IDs rather than a single isolated record. A version of this same bug on a resource containing nothing sensitive, or requiring a non-sequential, non-guessable identifier that isn't practically enumerable, would rate meaningfully lower; the identifier's predictability and the data's sensitivity are doing the real work in this rating, not the vulnerability class by itself.
@@ -111,7 +97,7 @@ The common bad fix is relying on obscurity: assuming that because an ID is a lon
 
 ## Related Classes
 
-- **SQL Injection**: a structurally different root cause, but access control failures are frequently what a chained SQL injection exploit ultimately unlocks once an attacker is inside a system.
+- [SQL Injection](../sql-injection/): a structurally different root cause, but access control failures are frequently what a chained SQL injection exploit ultimately unlocks once an attacker is inside a system.
 - [Insecure Direct Object Reference (IDOR)](../idor/): the single most common real-world realization of this exact vulnerability class, covered in its own dedicated depth.
 - [Cross-Site Request Forgery (CSRF)](../csrf/): a different mechanism for reaching the same outcome, tricking a user's own browser into an unauthorized action rather than directly manipulating an object reference.
 - [Path Traversal](../path-traversal/): another access-control failure, at the filesystem layer instead of the object-reference layer.

@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # ── 1. Relational Database with Vector Support ──────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: synthreat-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: synthreat_dev
+      POSTGRES_USER: synthreat_admin
+      POSTGRES_PASSWORD: synthreat_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U synthreat_admin -d synthreat_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 2. In-Memory Cache & Pub/Sub ───────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: synthreat-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 3. Core Platform API Service (Fastify / TypeScript) ─────────────────────
+  core-api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    container_name: synthreat-core-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      DATABASE_URL: "postgresql://synthreat_admin:synthreat_secret@postgres:5432/synthreat_dev?schema=public"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── 4. AI & RAG Orchestration Microservice (Python FastAPI) ─────────────────
+  ai-service:
+    build:
+      context: ./services/ai
+      dockerfile: Dockerfile
+    container_name: synthreat-ai-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

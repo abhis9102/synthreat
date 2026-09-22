@@ -29,41 +29,6 @@ The trust boundary that has to hold is the line between "fields that exist on th
 "fields a given caller is allowed to set." Those are two different questions, and mass assignment
 happens when the application only ever answers the first one.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-mass-assignment" style="width:100%;height:auto;">
-<title id="diagram-title-mass-assignment">An attacker adds one extra field to a normal request, and the framework binds it without checking whether it should be allowed.</title>
-<defs>
-<marker id="arrow-mass-assignment" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Normal fields</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">plus one extra</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-mass-assignment)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Framework binds</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">every field</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-mass-assignment)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Extra field</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">reaches the model</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-mass-assignment)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Privilege field</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">is now set</text>
-</svg>
-<figcaption>No malformed request is needed: one extra, well-formed field is enough.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - Account-creation or profile-update endpoints backed directly by an internal model object, rather
@@ -124,6 +89,28 @@ Testing stops there. The extra field being accepted and taking effect on a dispo
 is sufficient to prove the vulnerability; no other account is touched, and no further privilege is
 exercised beyond confirming the field's effect.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant Proxy as HTTP Interceptor
+    participant App as Corvane Retail API
+    participant ORM as ORM / Model Layer
+    participant DB as User Database
+
+    Tester->>Proxy: Initiate normal registration (name, email, password)
+    Note over Tester,Proxy: Inject extra parameter: "account_tier": "enterprise_admin"
+    Proxy->>App: POST /api/register {"name": "TestUser", "email": "test@corvane.test", "password": "...", "account_tier": "enterprise_admin"}
+    App->>ORM: User.create(request.body)
+    Note over App,ORM: No Data Transfer Object (DTO) restricting permitted fields
+    ORM->>DB: INSERT INTO users (name, email, password_hash, account_tier) VALUES (...)
+    DB-->>ORM: Record created with tier='enterprise_admin'
+    ORM-->>App: User object
+    App-->>Tester: 201 Created {"id": 1045, "tier": "enterprise_admin"}
+    Tester->>App: GET /api/user/profile (Auth: Session 1045)
+    App-->>Tester: 200 OK (Confirms elevated privileges active)
+    Note over Tester,App: Mass assignment verified ethically without accessing production tenant data
+```
+
 ## Severity Calibration
 
 This class rates **Critical** specifically because the affected field controlled account privilege
@@ -144,9 +131,9 @@ remembering to add it to the denylist too.
 
 ## Related Classes
 
-- **Software and Data Integrity Failures** ([../software-data-integrity-failures/](../software-data-integrity-failures/)):
+- **[Software and Data Integrity Failures](../software-data-integrity-failures/)**:
   the broader OWASP category this class falls under, trusting incoming data structure without
   verifying what it is actually allowed to change.
-- **Broken Access Control** ([../broken-access-control/](../broken-access-control/)): the outcome is
+- **[Broken Access Control](../broken-access-control/)**: the outcome is
   often identical, an unauthorized level of access, even though the mechanism that reaches it here is
   different.

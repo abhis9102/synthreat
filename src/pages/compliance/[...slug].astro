@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PathLessonNav from '../../components/PathLessonNav.astro';
+import QuizBlock from '../../components/QuizBlock.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('compliance', ({ data }) => data.status === 'published');
@@ -20,7 +22,20 @@ const base = import.meta.env.BASE_URL;
   <a class="tagline" href={`${base}compliance/`}>← Compliance & Regulation</a>
   <h1>{title}</h1>
   <p style="font-size:18px;color:var(--ink-soft);margin-top:14px;">{summary}</p>
+  <div class="vuln-actions">
+    <a
+      class="btn btn-secondary ai-ask-btn"
+      href={`${base}assistant/?q=${encodeURIComponent(`Explain ${title} compliance requirements and how to explain them to client executives`)}`}
+      data-ai-prompt={`Explain ${title} compliance requirements and how to explain them to client executives`}
+      data-topic={title}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Ask Synthreat AI about {title} ✦
+    </a>
+  </div>
   <article class="vuln-body">
     <Content />
   </article>
+  <PathLessonNav col="compliance" slug={entry.id} />
+  <QuizBlock articleSlug={entry.id} />
 </BaseLayout>

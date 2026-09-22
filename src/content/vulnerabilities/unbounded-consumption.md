@@ -101,6 +101,26 @@ missing limit and measure the disproportionate resource consumption. No attempt 
 volume of requests large enough to cause an actual availability or cost impact against the live
 system.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Gateway as Meridian Summarization API
+    participant Worker as Document Processing Worker
+    participant Provider as Foundation LLM API (Metered)
+    participant Billing as Cloud Billing Ledger
+
+    Assessor->>Gateway: Upload oversized test document (150k tokens)
+    Note over Gateway: Intake lacks byte ceiling & token budget checks
+    Gateway->>Worker: Enqueue document for full summarization
+    Worker->>Provider: Forward 150k input tokens to model endpoint
+    Note over Provider,Billing: Metered charge incurred: 100x normal request cost
+    Provider-->>Worker: Stream 4,000 output tokens (Latency: 45s)
+    Worker-->>Gateway: Summarization complete
+    Gateway-->>Assessor: 200 OK with rendered summary
+    Note over Assessor,Billing: ENGAGEMENT BOUNDARY PRESERVED<br/>Demonstrated missing input limits using single synthetic test file.<br/>Zero sustained request floods or Denial-of-Wallet attacks launched.
+    Assessor->>Assessor: Document High-severity finding (Unbounded Resource Consumption)
+```
+
 ## Severity Calibration
 
 This rates **High** because the finding demonstrates a clearly exploitable, disproportionate
@@ -125,6 +145,6 @@ reached.
 
 ## Related Classes
 
-- **Excessive Agency** ([../excessive-agency/](../excessive-agency/)): the mechanism that most often
+- **[Excessive Agency](../excessive-agency/)**: the mechanism that most often
   turns unbounded consumption into a serious issue, when an agent with broad, chained tool access has
   no step limit on how far a single manipulated or unproductive task can run.

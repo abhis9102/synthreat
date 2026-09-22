@@ -31,41 +31,6 @@ and "this specific action was deliberately triggered by the user," and CSRF exis
 most applications never draw that second line. If a state-changing endpoint accepts any request that
 carries a valid cookie, with no additional proof of intent, the boundary was never really there.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-csrf" style="width:100%;height:auto;">
-<title id="diagram-title-csrf">A victim visits a malicious page while already logged into a target site, and their browser silently sends a forged authenticated request.</title>
-<defs>
-<marker id="arrow-csrf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Victim logs into</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">target site</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-csrf)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Victim visits</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">malicious page</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-csrf)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Hidden form auto</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">submits to target</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-csrf)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Browser attaches</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">cookie, request runs</text>
-</svg>
-<figcaption>The target server has no way to tell this request apart from one the victim deliberately clicked.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - State-changing actions with no CSRF protection at all: changing an email address, changing a
@@ -139,6 +104,32 @@ currently on file, this single CSRF-forgeable endpoint is sufficient to demonstr
 takeover path: change the email via CSRF, then trigger and receive a password reset at the
 attacker-controlled address. Testing stops at proving this chain end to end on the test account
 itself; no other account's email or password is ever touched.
+
+```mermaid
+sequenceDiagram
+    participant Victim as Test User
+    participant Tester as Security Tester
+    participant Browser as User Browser
+    participant ExploitServer as Tester Host Server
+    participant TargetApp as Ferngate Retail Portal
+    participant DB as Ferngate Database
+
+    Tester->>TargetApp: Inspect POST /account/email endpoint
+    TargetApp-->>Tester: Confirms form lacks anti-CSRF token and SameSite restriction
+    Tester->>ExploitServer: Host POC page with auto-submitting hidden form
+    Note over Victim,Browser: Test user authenticated in Ferngate active session
+    Victim->>ExploitServer: Visit external POC page link
+    ExploitServer-->>Browser: Return HTML payload with auto-submit script
+    Browser->>TargetApp: POST /account/email (email=tester@controlled.test)
+    Note over Browser,TargetApp: Browser automatically attaches target session cookie
+    TargetApp->>TargetApp: Verify session cookie (Valid)
+    TargetApp->>DB: Update email to tester@controlled.test
+    DB-->>TargetApp: Update committed
+    TargetApp-->>Browser: 200 OK (Email updated)
+    Tester->>TargetApp: Trigger password reset for test account
+    TargetApp-->>Tester: Password reset link delivered to tester inbox
+    Note over Tester,TargetApp: Account takeover chain demonstrated ethically on test account
+```
 
 ## Severity Calibration
 

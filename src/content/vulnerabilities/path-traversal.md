@@ -31,41 +31,6 @@ boundary only exists if the server explicitly resolves the final path and checks
 allowed base directory before ever opening the file. Skipping that check means the boundary was never
 enforced at all, only assumed.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-path-traversal" style="width:100%;height:auto;">
-<title id="diagram-title-path-traversal">A crafted filename with traversal sequences resolves outside the intended directory and reaches an unintended file.</title>
-<defs>
-<marker id="arrow-path-traversal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">User supplies</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">filename parameter</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-path-traversal)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Value contains</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">../ sequences</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-path-traversal)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Server resolves</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">path unchecked</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-path-traversal)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">File outside</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">folder returned</text>
-</svg>
-<figcaption>The application never checks whether the final, resolved path actually stayed inside the folder it meant to serve from.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - File-download or file-preview features that take a filename directly as a parameter, such as
@@ -134,6 +99,36 @@ database connection string. Testing stops at confirming reachability and structu
 contents of that configuration file, including any credentials it holds, are not read out or used
 further. That boundary is deliberate: proving the path is reachable is sufficient to establish
 serious impact without actually extracting the secret itself.
+
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant App as Alderpine Logistics Portal
+    participant OS as Server Operating System
+    participant FS as Local Filesystem
+
+    Note over Tester,App: Step 1: Baseline legitimate document retrieval
+    Tester->>App: GET /invoices/view?document=INV-2291.pdf
+    App->>OS: open("/var/app/invoices/" + "INV-2291.pdf")
+    OS->>FS: Read /var/app/invoices/INV-2291.pdf
+    FS-->>App: PDF binary stream
+    App-->>Tester: 200 OK (Invoice downloaded)
+
+    Note over Tester,App: Step 2: Inject encoded directory traversal sequence
+    Tester->>App: GET /invoices/view?document=..%2F..%2F..%2Fetc%2Fhosts
+    App->>OS: open("/var/app/invoices/../../../etc/hosts")
+    Note over App,OS: Server omits canonical base-path boundary verification
+    OS->>FS: Resolve canonical path /etc/hosts
+    FS-->>App: Return contents of /etc/hosts
+    App-->>Tester: 200 OK (Host file contents reflected)
+
+    Note over Tester,App: Step 3: Probe application configuration existence
+    Tester->>App: GET /invoices/view?document=..%2F..%2Fconfig%2Fdatabase.yml
+    App->>OS: open("/var/app/invoices/../../config/database.yml")
+    OS-->>App: File handle opened (Size: 1,420 bytes)
+    App-->>Tester: 200 OK (Header confirms config reachability)
+    Note over Tester,FS: Impact proven ethically - testing halts before extracting live secrets
+```
 
 ## Severity Calibration
 

@@ -29,41 +29,6 @@ hold is between "how this was configured for convenience during development" and
 be configured for a system the public can reach." When nothing forces that transition to happen, it
 often just doesn't.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-security-misconfiguration" style="width:100%;height:auto;">
-<title id="diagram-title-security-misconfiguration">A malformed request reveals a verbose stack trace, which exposes internal details an attacker uses to plan a further attack</title>
-<defs>
-<marker id="arrow-security-misconfiguration" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Malformed request</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">sent to the API</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-security-misconfiguration)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Verbose error</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">mode still enabled</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-security-misconfiguration)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Full stack trace</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">returned to client</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-security-misconfiguration)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Internal paths and</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">versions exposed</text>
-</svg>
-<figcaption>Nothing here required an exploit: reading the response was the entire attack.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - Default administrative credentials shipped by a platform or vendor, never changed after
@@ -137,6 +102,24 @@ Testing stops at confirming the exposure and what it reveals. No attempt is made
 connection string to actually reach the database; demonstrating that the information is exposed is
 sufficient to prove the finding without going further than necessary.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant API as Ferngate Tracking API
+    participant Framework as Backend Web Framework
+    participant DB as Backend Database Driver
+
+    Tester->>API: GET /api/shipments/track?date=INVALID_DATE_PARAM
+    API->>Framework: Parse date parameter
+    Framework->>DB: Execute query with malformed date
+    DB-->>Framework: Database exception (Query syntax failure)
+    Note over Framework: Exception bubble-up: DEBUG mode enabled in production config
+    Framework-->>API: Full stack trace with internal file paths & DB connection string snippet
+    API-->>Tester: HTTP 500 Internal Server Error (Verbose Stack Trace Body)
+    Note over Tester: Tester extracts framework version (v2.4.1) & internal path (/var/app/backend)
+    Note over Tester,API: Assessment boundary honored: configuration finding reported without credential exploitation
+```
+
 ## Severity Calibration
 
 This instance rates **High**: unauthenticated, requires no special access, and demonstrably exposes
@@ -160,12 +143,11 @@ someone without authorization to be looking.
 
 ## Related Classes
 
-- **Vulnerable and Outdated Components**, a closely related failure mode where the insecure element
-  isn't a setting but an entire piece of software nobody kept current. See
-  [Vulnerable and Outdated Components](../vulnerable-outdated-components/).
+- **[Vulnerable and Outdated Components](../vulnerable-outdated-components/)**, a closely related failure mode where the insecure element
+  isn't a setting but an entire piece of software nobody kept current.
 - **[Broken Access Control](../broken-access-control/)**, since a misconfigured administrative
   interface often becomes an access control failure the moment it's actually reachable by someone
   who shouldn't be able to reach it.
-- **Public Cloud Storage Exposure** ([../cloud-storage-exposure/](../cloud-storage-exposure/)): the
+- **[Public Cloud Storage Exposure](../cloud-storage-exposure/)**: the
   single highest-frequency real-world instance of this class, a permissive default left unreviewed on
   a cloud storage resource specifically.

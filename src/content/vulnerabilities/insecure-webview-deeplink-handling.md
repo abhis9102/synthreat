@@ -106,6 +106,24 @@ Testing is limited to two test accounts created specifically for this assessment
 account is targeted, and the session switch is confirmed and immediately reverted without further
 action taken within the switched session.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Browser as Mobile Browser / Messaging App
+    participant OS as Mobile OS Intent Manager
+    participant App as Vantara Companion App
+    participant Session as Local Session Manager
+
+    Assessor->>Browser: Open craft deep link vantara://account/switch?id=test_account_2
+    Browser->>OS: Dispatch deep link Intent
+    OS->>App: Launch App with URI data payload
+    Note over App: Deep link handler extracts user_id without origin verification
+    App->>Session: Execute switchAccount(test_account_2)
+    Session-->>App: Active session updated to target account
+    Note over Assessor,Session: ENGAGEMENT BOUNDARY PRESERVED<br/>Demonstrated unauthorized session switch on test account.<br/>Switched session immediately reverted - zero real users touched.
+    Assessor->>Assessor: Document Critical finding (Unvalidated Deep Link Account Switch)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the deep link handler performs a sensitive account-level action
@@ -130,9 +148,9 @@ request.
 
 ## Related Classes
 
-- **Insecure Mobile Authentication & Session Management** ([../insecure-mobile-authentication/](../insecure-mobile-authentication/)):
+- **[Insecure Mobile Authentication & Session Management](../insecure-mobile-authentication/)**:
   a frequent direct consequence, when a deep link can manipulate session or account state without
   proper authorization.
-- **Cross-Site Scripting** ([../cross-site-scripting/](../cross-site-scripting/)): the underlying
+- **[Cross-Site Scripting](../cross-site-scripting/)**: the underlying
   web-layer vulnerability this class inherits and extends the moment an exposed native bridge turns
   script execution inside a WebView into a path to native functionality.

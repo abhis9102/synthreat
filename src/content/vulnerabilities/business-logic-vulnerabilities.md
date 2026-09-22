@@ -59,41 +59,6 @@ deliberately trying to break them, will ever find it. Teams under deadline press
 threat-model the code they are writing, not the business process the code is meant to enforce, which
 is exactly where this gap lives.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-business-logic" style="width:100%;height:auto;">
-<title id="diagram-title-business-logic">A discount code is submitted twice in the timing window before its usage count is updated, applying it twice</title>
-<defs>
-<marker id="arrow-business-logic" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Code submitted</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">request #1</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-business-logic)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Code submitted</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">request #2, same instant</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-business-logic)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Both read</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">"not yet used"</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-business-logic)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Discount applied</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">twice</text>
-</svg>
-<figcaption>Neither request is malformed. The flaw is in the gap between checking a code's status and recording its use.</figcaption>
-</figure>
-
 ## How to Find It
 
 1. Map out the complete intended workflow for a feature, step by step, exactly as a legitimate user
@@ -144,6 +109,30 @@ timing, consistently reproducing the double-application rather than treating the
 fluke. No real customer promotional codes or real payment transactions are involved at any point;
 every test purchase uses test-only credentials specifically provisioned for the assessment.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Client as Script / Turbo Intruder
+    participant API as Brindlewood Checkout API
+    participant DB as Orders & Promotions Database
+
+    Assessor->>Client: Send concurrent requests with single-use promo SAVE50
+    par Concurrent Thread 1
+        Client->>API: POST /api/checkout (Request A)
+        API->>DB: Check usage status (used_count == 0)
+        DB-->>API: Status: Valid (Not yet used)
+    and Concurrent Thread 2 (Race Window)
+        Client->>API: POST /api/checkout (Request B)
+        API->>DB: Check usage status (used_count == 0)
+        DB-->>API: Status: Valid (Not yet used)
+    end
+    API->>DB: Apply discount & commit Order A ($50 discount)
+    API->>DB: Apply discount & commit Order B ($50 discount)
+    API-->>Assessor: Order A & Order B both confirmed with discount
+    Note over Assessor,DB: ENGAGEMENT BOUNDARY PRESERVED<br/>Race condition proven using test credentials & test promotion codes.<br/>Zero financial loss or real customer transactions incurred.
+    Assessor->>Assessor: Document High-severity finding (Business Logic Race Condition)
+```
+
 ## Severity Calibration
 
 This instance rates **High**: reliably reproducible, directly resulting in unintended financial
@@ -167,5 +156,5 @@ to the underlying API rather than through the intended interface.
 
 ## Related Classes
 
-- **Insecure Design**: the broader architecture-level category this class sits closest to; see it
+- **[Insecure Design](../insecure-design/)**: the broader architecture-level category this class sits closest to; see it
   for design-phase gaps that exist even before a specific workflow abuse is demonstrated.

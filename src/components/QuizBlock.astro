@@ -1,0 +1,994 @@
+---
+// QuizBlock.astro — Pure AI Technical Quiz Engine for all articles with customizable question counts
+interface Props {
+  articleSlug: string;
+}
+
+const { articleSlug } = Astro.props;
+const defaultKey = process.env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || '';
+---
+
+<div
+  class="quiz-block"
+  id="quizBlock"
+  data-slug={articleSlug}
+  data-default-key={defaultKey}
+>
+  <!-- Header with Badges -->
+  <div class="quiz-header">
+    <div class="quiz-header-left">
+      <span class="quiz-badge">AI Technical Drill</span>
+      <span class="quiz-saved-pill" id="quizSavedPill" style="display: none;"></span>
+    </div>
+  </div>
+
+  <h3 class="quiz-title" id="quizTitle">Test Your Understanding</h3>
+  <p class="quiz-subtitle" id="quizSubtitle">
+    On-demand, Gemini-generated technical drill testing root causes, exploit chains, and verified defenses.
+  </p>
+
+  <!-- ── 1. Initial Generator Prompt Box ──────────────────────────────────── -->
+  <div class="ai-prompt-box" id="aiPromptBox">
+    <div class="ai-prompt-icon">🤖</div>
+    <div class="ai-prompt-body">
+      <h4>Generate On-Demand Technical Quiz</h4>
+      <p>Synthreat AI analyzes this topic's attack surface and compiles custom multiple-choice questions with verified explanations.</p>
+
+      <!-- Question Count Selector -->
+      <div class="quiz-config-row">
+        <span class="config-label">Question Count:</span>
+        <div class="count-selector" role="radiogroup" aria-label="Select number of questions">
+          <button type="button" class="count-pill" data-count="3">3 Quick</button>
+          <button type="button" class="count-pill is-selected" data-count="5">5 Standard</button>
+          <button type="button" class="count-pill" data-count="10">10 Deep Dive</button>
+        </div>
+      </div>
+
+      <div class="ai-prompt-actions">
+        <button type="button" class="quiz-btn quiz-btn-generate" id="btnGenerateAiQuiz">
+          <span id="btnGenerateText">✨ Generate AI Quiz (5 Questions) ✦</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. Loading State ────────────────────────────────────────────────── -->
+  <div class="ai-quiz-loading" id="aiQuizLoading" style="display: none;">
+    <div class="ai-loading-spinner"></div>
+    <div class="ai-loading-text">
+      <strong id="aiLoadingTitle">Generating technical questions...</strong>
+      <span>Synthesizing root causes, exploit flows, and defensive architecture with Gemini</span>
+    </div>
+  </div>
+
+  <!-- ── 3. Error State ──────────────────────────────────────────────────── -->
+  <div class="ai-quiz-error" id="aiQuizError" style="display: none;">
+    <div class="error-msg" id="aiQuizErrorMsg">Generation failed</div>
+    <button type="button" class="quiz-btn quiz-btn-retake" id="aiQuizRetryBtn">Try Again</button>
+  </div>
+
+  <!-- ── 4. Active Quiz Form ─────────────────────────────────────────────── -->
+  <form class="quiz-form" id="aiQuizForm" novalidate style="display: none;">
+    <div id="aiQuestionsContainer"></div>
+    <div class="quiz-actions">
+      <button type="submit" class="quiz-btn quiz-btn-check" id="aiSubmitBtn">Check Answers</button>
+      <button type="button" class="quiz-btn quiz-btn-add-more" id="btnAddMoreQuestions">➕ Add 3 More Questions</button>
+      <button type="button" class="quiz-btn quiz-btn-regenerate" id="btnRegenerateAiQuiz">↺ Fresh Quiz</button>
+    </div>
+  </form>
+
+  <!-- ── 5. Results Card ─────────────────────────────────────────────────── -->
+  <div class="quiz-result" id="aiQuizResult" style="display: none;">
+    <div class="quiz-result-card">
+      <div class="result-score-row">
+        <span class="quiz-score" id="aiScore"></span>
+        <span class="quiz-verdict" id="aiVerdict"></span>
+      </div>
+      <p class="quiz-feedback" id="aiFeedback"></p>
+      <div class="quiz-result-actions">
+        <button type="button" class="quiz-btn quiz-btn-retake" id="aiRetake">↩ Retake This Quiz</button>
+        <button type="button" class="quiz-btn quiz-btn-generate" id="aiGenerateAnother">✨ Fresh Quiz</button>
+        <button type="button" class="quiz-btn quiz-btn-add-more" id="aiAddMoreAfterResult">➕ Add More Questions</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface QuizQuestion {
+    q: string;
+    options: string[];
+    correct: number;
+    explanation: string;
+  }
+
+  interface SavedScore {
+    score: number;
+    total: number;
+    passed: boolean;
+    date: string;
+    isAi?: boolean;
+  }
+
+  const block = document.getElementById('quizBlock') as HTMLElement | null;
+  if (block) {
+    const slug = block.dataset.slug ?? '';
+    const defaultKey = block.dataset.defaultKey ?? '';
+
+    const savedPill = document.getElementById('quizSavedPill');
+    const promptBox = document.getElementById('aiPromptBox');
+    const loadingEl = document.getElementById('aiQuizLoading');
+    const loadingTitle = document.getElementById('aiLoadingTitle');
+    const errorEl = document.getElementById('aiQuizError');
+    const errorMsg = document.getElementById('aiQuizErrorMsg');
+    const retryBtn = document.getElementById('aiQuizRetryBtn');
+    const formEl = document.getElementById('aiQuizForm') as HTMLFormElement | null;
+    const questionsContainer = document.getElementById('aiQuestionsContainer');
+    const submitBtn = document.getElementById('aiSubmitBtn') as HTMLButtonElement | null;
+    const resultEl = document.getElementById('aiQuizResult');
+    const scoreEl = document.getElementById('aiScore');
+    const verdictEl = document.getElementById('aiVerdict');
+    const feedbackEl = document.getElementById('aiFeedback');
+    const retakeBtn = document.getElementById('aiRetake');
+    const btnGenerate = document.getElementById('btnGenerateAiQuiz');
+    const btnGenerateText = document.getElementById('btnGenerateText');
+    const btnRegenerate = document.getElementById('btnRegenerateAiQuiz');
+    const btnAddMore = document.getElementById('btnAddMoreQuestions');
+    const btnAddMoreAfter = document.getElementById('aiAddMoreAfterResult');
+    const btnGenerateAnother = document.getElementById('aiGenerateAnother');
+
+    let selectedQuestionCount = 5;
+    let activeQuestions: QuizQuestion[] = [];
+
+    // ── Question Count Selection ─────────────────────────────────────────────
+    document.querySelectorAll<HTMLButtonElement>('.count-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.count-pill').forEach(p => p.classList.remove('is-selected'));
+        pill.classList.add('is-selected');
+        selectedQuestionCount = parseInt(pill.dataset.count || '5', 10);
+        if (btnGenerateText) {
+          btnGenerateText.textContent = `✨ Generate AI Quiz (${selectedQuestionCount} Questions) ✦`;
+        }
+      });
+    });
+
+    function getActiveApiKey(): string {
+      try {
+        const stored = localStorage.getItem('synthreat_gemini_key');
+        if (stored && stored.trim()) return stored.trim();
+      } catch { /* ignore */ }
+      return defaultKey;
+    }
+
+    // ── Load Saved Score Pill ────────────────────────────────────────────────
+    function loadSavedScore() {
+      try {
+        const raw = localStorage.getItem('synthreat_quiz_scores');
+        if (!raw) return;
+        const store = JSON.parse(raw);
+        const saved: SavedScore = store[slug];
+        if (saved && savedPill) {
+          savedPill.style.display = 'inline-block';
+          if (saved.passed) {
+            savedPill.className = 'quiz-saved-pill is-passed';
+            savedPill.innerHTML = `✓ Passed (${saved.score}/${saved.total}) · AI`;
+          } else {
+            savedPill.className = 'quiz-saved-pill is-failed';
+            savedPill.innerHTML = `Score: ${saved.score}/${saved.total} · AI`;
+          }
+        }
+      } catch { /* ignore */ }
+    }
+
+    loadSavedScore();
+
+    // ── Check Cached Quiz ────────────────────────────────────────────────────
+    function loadCachedQuiz() {
+      try {
+        const raw = localStorage.getItem('synthreat_ai_quizzes');
+        if (!raw) return;
+        const cache = JSON.parse(raw);
+        if (cache[slug]?.questions?.length) {
+          renderQuestions(cache[slug].questions);
+        }
+      } catch { /* ignore */ }
+    }
+
+    loadCachedQuiz();
+
+    // ── Call Gemini with Schema ──────────────────────────────────────────────
+    async function fetchQuestionsFromGemini(count: number, existingQuestions: QuizQuestion[] = []): Promise<QuizQuestion[]> {
+      const apiKey = getActiveApiKey();
+      if (!apiKey) {
+        throw new Error('Please configure your Gemini API Key in the Synthreat AI assistant settings or .env file.');
+      }
+
+      const title = document.querySelector('h1')?.textContent?.trim() || slug;
+      const summary = document.querySelector('p')?.textContent?.trim() || '';
+
+      const avoidText = existingQuestions.length > 0
+        ? `Avoid repeating these already asked concepts:\n${existingQuestions.map(q => `- ${q.q}`).join('\n')}`
+        : '';
+
+      const promptText = `Generate a rigorous ${count}-question multiple-choice technical quiz testing deep understanding of: "${title}".
+Summary context: "${summary}".
+${avoidText}
+
+Focus questions on:
+1. Root cause vulnerability mechanism or protocol flaw
+2. Exploit execution chain and attacker payloads
+3. Verified defense, architecture pattern, or remediation control
+
+Requirements:
+- Provide 4 technically plausible options per question.
+- Randomize the correct option index (0, 1, 2, or 3) across questions.
+- Write clear, authoritative explanations for why the correct answer is secure.`;
+
+      const payload = {
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: {
+          response_mime_type: 'application/json',
+          temperature: 0.35,
+          response_schema: {
+            type: 'ARRAY',
+            items: {
+              type: 'OBJECT',
+              properties: {
+                q: { type: 'STRING' },
+                options: { type: 'ARRAY', items: { type: 'STRING' } },
+                correct: { type: 'INTEGER' },
+                explanation: { type: 'STRING' }
+              },
+              required: ['q', 'options', 'correct', 'explanation']
+            }
+          }
+        }
+      };
+
+      const models = ['gemini-3.5-flash-lite', 'gemini-3.6-flash'];
+      let lastErr: any = null;
+
+      for (const model of models) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            throw new Error(errJson?.error?.message || `HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!raw) throw new Error('Empty model response');
+
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map((item: any) => ({
+              q: item.q || 'Technical Question',
+              options: Array.isArray(item.options) ? item.options : [],
+              correct: typeof item.correct === 'number' ? item.correct : 0,
+              explanation: item.explanation || 'Verified defense principle.'
+            }));
+          }
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+
+      throw lastErr || new Error('Failed to generate quiz');
+    }
+
+    // ── Generate AI Quiz ─────────────────────────────────────────────────────
+    async function generateQuiz(count: number) {
+      if (promptBox) promptBox.style.display = 'none';
+      if (formEl) formEl.style.display = 'none';
+      if (resultEl) resultEl.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'none';
+      if (loadingEl) {
+        if (loadingTitle) loadingTitle.textContent = `Generating ${count} technical questions...`;
+        loadingEl.style.display = 'flex';
+      }
+
+      try {
+        const questions = await fetchQuestionsFromGemini(count);
+        activeQuestions = questions;
+
+        // Save to cache
+        try {
+          const rawQ = localStorage.getItem('synthreat_ai_quizzes');
+          const cache = rawQ ? JSON.parse(rawQ) : {};
+          cache[slug] = { questions, generatedAt: new Date().toISOString() };
+          localStorage.setItem('synthreat_ai_quizzes', JSON.stringify(cache));
+        } catch { /* ignore */ }
+
+        if (loadingEl) loadingEl.style.display = 'none';
+        renderQuestions(questions);
+      } catch (err: any) {
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (errorEl) {
+          errorEl.style.display = 'flex';
+          if (errorMsg) errorMsg.textContent = `Quiz Generation Error: ${err.message || 'Network request failed'}`;
+        }
+      }
+    }
+
+    // ── Add More Questions to Existing Quiz ──────────────────────────────────
+    async function addMoreQuestions(countToAdd = 3) {
+      if (loadingEl) {
+        if (loadingTitle) loadingTitle.textContent = `Adding ${countToAdd} more questions...`;
+        loadingEl.style.display = 'flex';
+      }
+      if (errorEl) errorEl.style.display = 'none';
+
+      try {
+        const moreQuestions = await fetchQuestionsFromGemini(countToAdd, activeQuestions);
+        activeQuestions = [...activeQuestions, ...moreQuestions];
+
+        // Update cache
+        try {
+          const rawQ = localStorage.getItem('synthreat_ai_quizzes');
+          const cache = rawQ ? JSON.parse(rawQ) : {};
+          cache[slug] = { questions: activeQuestions, generatedAt: new Date().toISOString() };
+          localStorage.setItem('synthreat_ai_quizzes', JSON.stringify(cache));
+        } catch { /* ignore */ }
+
+        if (loadingEl) loadingEl.style.display = 'none';
+        renderQuestions(activeQuestions);
+
+        // Scroll smoothly to the newly added questions
+        setTimeout(() => {
+          const allQs = questionsContainer?.querySelectorAll('.quiz-question');
+          if (allQs && allQs.length > moreQuestions.length) {
+            allQs[allQs.length - moreQuestions.length].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      } catch (err: any) {
+        if (loadingEl) loadingEl.style.display = 'none';
+        alert(`Could not add more questions: ${err.message || 'Network error'}`);
+      }
+    }
+
+    // ── Render Questions into Form ───────────────────────────────────────────
+    function renderQuestions(questions: QuizQuestion[]) {
+      activeQuestions = questions;
+      if (!questionsContainer || !formEl) return;
+
+      if (promptBox) promptBox.style.display = 'none';
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'none';
+      if (resultEl) resultEl.style.display = 'none';
+
+      questionsContainer.innerHTML = questions.map((q, qi) => `
+        <div class="quiz-question" data-qi="${qi}" data-correct="${q.correct}">
+          <p class="question-text">
+            <span class="question-num">Q${qi + 1}.</span> ${escapeHtml(q.q)}
+          </p>
+          <ul class="options-list" role="radiogroup">
+            ${q.options.map((opt, oi) => `
+              <li class="option-item">
+                <label class="option-label" data-qi="${qi}" data-oi="${oi}">
+                  <input
+                    type="radio"
+                    name="ai_q_${qi}"
+                    value="${oi}"
+                    class="option-radio"
+                    required
+                  />
+                  <span class="option-marker"></span>
+                  <span class="option-text">${escapeHtml(opt)}</span>
+                </label>
+              </li>
+            `).join('')}
+          </ul>
+          <div class="question-explanation" id="ai_exp_${qi}" style="display: none;">
+            <div class="exp-icon">💡</div>
+            <div class="exp-body">
+              <strong>Why:</strong> ${escapeHtml(q.explanation)}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      if (submitBtn) submitBtn.disabled = false;
+      formEl.style.display = 'flex';
+    }
+
+    function escapeHtml(str: string): string {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ── Check Answers ────────────────────────────────────────────────────────
+    formEl?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const questionEls = formEl.querySelectorAll<HTMLElement>('.quiz-question');
+      let score = 0;
+      const total = questionEls.length;
+
+      questionEls.forEach((qEl) => {
+        const qi = parseInt(qEl.dataset.qi ?? '0', 10);
+        const correct = parseInt(qEl.dataset.correct ?? '0', 10);
+        const chosen = formEl.elements.namedItem(`ai_q_${qi}`) as RadioNodeList | null;
+        const chosen_val = chosen ? parseInt((chosen as RadioNodeList).value, 10) : -1;
+
+        const labels = qEl.querySelectorAll<HTMLElement>('.option-label');
+        labels.forEach((lbl, oi) => {
+          if (oi === correct) {
+            lbl.classList.add('is-correct');
+          } else if (oi === chosen_val && chosen_val !== correct) {
+            lbl.classList.add('is-wrong');
+          }
+          const radio = lbl.querySelector<HTMLInputElement>('input[type="radio"]');
+          if (radio) radio.disabled = true;
+        });
+
+        const exp = qEl.querySelector<HTMLElement>('.question-explanation');
+        if (exp) exp.style.display = 'flex';
+
+        if (chosen_val === correct) score++;
+      });
+
+      if (submitBtn) submitBtn.disabled = true;
+      const passed = score >= Math.ceil(total * 0.65);
+
+      if (resultEl) resultEl.style.display = 'block';
+      if (scoreEl) scoreEl.textContent = `Score: ${score} / ${total}`;
+      if (verdictEl) {
+        verdictEl.className = passed ? 'quiz-verdict is-pass' : 'quiz-verdict is-fail';
+        verdictEl.textContent = passed ? '🏆 AI Drill Passed' : '📚 Review Concepts';
+      }
+      if (feedbackEl) {
+        feedbackEl.textContent = passed
+          ? (score === total ? `Flawless execution! You got all ${total} questions correct.` : `Solid work! You achieved ${Math.round((score / total) * 100)}% mastery.`)
+          : 'Review the technical explanations above and retake to lock in your understanding.';
+      }
+
+      // Persist score & trigger course progress sync
+      try {
+        const raw = localStorage.getItem('synthreat_quiz_scores') ?? '{}';
+        const store = JSON.parse(raw);
+        store[slug] = {
+          score,
+          total,
+          passed,
+          isAi: true,
+          date: new Date().toISOString(),
+        };
+        localStorage.setItem('synthreat_quiz_scores', JSON.stringify(store));
+        loadSavedScore();
+
+        window.dispatchEvent(new CustomEvent('synthreat:learning-updated', {
+          detail: { slug, score, total, passed, isAi: true }
+        }));
+      } catch { /* ignore */ }
+    });
+
+    // ── Retake Current Quiz ──────────────────────────────────────────────────
+    retakeBtn?.addEventListener('click', () => {
+      formEl?.querySelectorAll<HTMLElement>('.option-label').forEach((lbl) => {
+        lbl.classList.remove('is-correct', 'is-wrong');
+        const radio = lbl.querySelector<HTMLInputElement>('input[type="radio"]');
+        if (radio) {
+          radio.disabled = false;
+          radio.checked = false;
+        }
+      });
+      formEl?.querySelectorAll<HTMLElement>('.question-explanation').forEach((exp) => exp.style.display = 'none');
+      if (submitBtn) submitBtn.disabled = false;
+      if (resultEl) resultEl.style.display = 'none';
+      formEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // ── Action Buttons ───────────────────────────────────────────────────────
+    btnGenerate?.addEventListener('click', () => generateQuiz(selectedQuestionCount));
+    retryBtn?.addEventListener('click', () => generateQuiz(selectedQuestionCount));
+    btnRegenerate?.addEventListener('click', () => generateQuiz(activeQuestions.length || selectedQuestionCount));
+    btnGenerateAnother?.addEventListener('click', () => generateQuiz(activeQuestions.length || selectedQuestionCount));
+    btnAddMore?.addEventListener('click', () => addMoreQuestions(3));
+    btnAddMoreAfter?.addEventListener('click', () => addMoreQuestions(3));
+  }
+</script>
+
+<style>
+  [hidden] {
+    display: none !important;
+  }
+
+  .quiz-block {
+    margin-top: 56px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-2);
+    box-shadow: var(--shadow);
+    padding: 32px 36px;
+  }
+
+  /* ── Header ── */
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .quiz-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .quiz-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  .quiz-saved-pill {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  .quiz-saved-pill.is-passed {
+    background: color-mix(in srgb, #22c55e 14%, transparent);
+    border: 1px solid color-mix(in srgb, #22c55e 35%, transparent);
+    color: #16a34a;
+  }
+
+  .quiz-saved-pill.is-failed {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+  }
+
+  .quiz-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+
+  .quiz-subtitle {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin: 0 0 24px;
+  }
+
+  /* ── Prompt Box & Config ── */
+  .ai-prompt-box {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .ai-prompt-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+
+  .ai-prompt-body {
+    flex: 1;
+  }
+
+  .ai-prompt-body h4 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .ai-prompt-body p {
+    margin: 0 0 18px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  .quiz-config-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .config-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  .count-selector {
+    display: inline-flex;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 4px;
+  }
+
+  .count-pill {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .count-pill:hover {
+    color: var(--ink);
+  }
+
+  .count-pill.is-selected {
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  /* ── Loading ── */
+  .ai-quiz-loading {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 32px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .ai-loading-spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid var(--line);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .ai-loading-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .ai-loading-text strong {
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+
+  .ai-loading-text span {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  /* ── Error ── */
+  .ai-quiz-error {
+    background: color-mix(in srgb, #ef4444 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .error-msg {
+    color: #ef4444;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  /* ── Form & Questions ── */
+  .quiz-form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  :global(.quiz-block .quiz-question) {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  :global(.quiz-block .question-text) {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  :global(.quiz-block .question-num) {
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 4px;
+  }
+
+  :global(.quiz-block .options-list) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  :global(.quiz-block .option-item) {
+    display: block;
+  }
+
+  :global(.quiz-block .option-radio) {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  :global(.quiz-block .option-label) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 11px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 14px;
+    color: var(--ink);
+    user-select: none;
+  }
+
+  :global(.quiz-block .option-label:hover) {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  }
+
+  :global(.quiz-block .option-marker) {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    background: transparent;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+
+  :global(.quiz-block .option-radio:checked + .option-marker) {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  :global(.quiz-block .option-radio:checked + .option-marker::after) {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  :global(.quiz-block .option-label.is-correct) {
+    border-color: #22c55e !important;
+    background: color-mix(in srgb, #22c55e 12%, transparent) !important;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  :global(.quiz-block .option-label.is-correct .option-marker) {
+    border-color: #22c55e;
+    background: #22c55e;
+  }
+
+  :global(.quiz-block .option-label.is-wrong) {
+    border-color: #ef4444 !important;
+    background: color-mix(in srgb, #ef4444 12%, transparent) !important;
+    color: var(--ink);
+  }
+
+  :global(.quiz-block .option-label.is-wrong .option-marker) {
+    border-color: #ef4444;
+    background: #ef4444;
+  }
+
+  /* ── Explanations ── */
+  :global(.quiz-block .question-explanation) {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  :global(.quiz-block .exp-icon) {
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  :global(.quiz-block .exp-body strong) {
+    color: var(--ink);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Actions ── */
+  .quiz-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  .quiz-btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.18s, transform 0.12s;
+  }
+
+  .quiz-btn:hover {
+    opacity: 0.88;
+  }
+
+  .quiz-btn:active {
+    transform: scale(0.97);
+  }
+
+  .quiz-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .quiz-btn-check {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .quiz-btn-generate {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .quiz-btn-regenerate,
+  .quiz-btn-add-more,
+  .quiz-btn-retake {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  .quiz-btn-regenerate:hover,
+  .quiz-btn-add-more:hover,
+  .quiz-btn-retake:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── Result Card ── */
+  .quiz-result {
+    margin-top: 24px;
+    animation: fadeIn 0.25s ease-out;
+  }
+
+  .quiz-result-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .result-score-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .quiz-score {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .quiz-verdict {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  .quiz-verdict.is-pass {
+    background: color-mix(in srgb, #22c55e 16%, transparent);
+    color: #16a34a;
+    border: 1px solid color-mix(in srgb, #22c55e 35%, transparent);
+  }
+
+  .quiz-verdict.is-fail {
+    background: color-mix(in srgb, #ef4444 14%, transparent);
+    color: #dc2626;
+    border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
+  }
+
+  .quiz-feedback {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .quiz-result-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 600px) {
+    .quiz-block {
+      padding: 24px 18px;
+    }
+    .ai-prompt-box {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .quiz-config-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+</style>

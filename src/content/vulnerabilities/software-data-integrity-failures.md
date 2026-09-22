@@ -29,41 +29,6 @@ the moment an attacker can insert or alter data anywhere along that channel: a c
 object, a compromised build step, or a tampered update package all look, from the application's
 point of view, exactly like the real thing.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-integrity" style="width:100%;height:auto;">
-<title id="diagram-title-integrity">How an unverified serialized object leads to code execution during deserialization</title>
-<defs>
-<marker id="arrow-integrity" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Attacker crafts</text>
-<text x="85" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">malicious object</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-integrity)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Object submitted</text>
-<text x="275" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">in place of real one</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-integrity)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Server deserializes</text>
-<text x="465" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">it without checking</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-integrity)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="68" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Payload executes</text>
-<text x="655" y="86" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">during the process</text>
-</svg>
-<figcaption>The exploit runs during deserialization itself, before any application logic ever inspects the result.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - **Insecure deserialization**: an application deserializes a user-supplied serialized object
@@ -132,6 +97,30 @@ explainable by execution during deserialization, using a non-destructive marker 
 payload designed to persist or spread. No production data is touched, and no further access is
 pursued beyond what's needed to prove the flaw is real.
 
+```mermaid
+sequenceDiagram
+    participant Tester as Security Tester
+    participant Client as HTTP Client
+    participant App as Ferrowick Logistics App
+    participant Deserializer as Native Deserialization Engine
+    participant OS as Server Operating System
+
+    Tester->>Client: Inspect Cookie: session=rO0ABXNy...
+    Client->>App: GET /dashboard (Normal serialized session)
+    App-->>Client: 200 OK (Session validated)
+
+    Note over Tester,Client: Construct benign diagnostic gadget chain (DNS callback probe)
+    Tester->>Client: Craft serialized gadget payload (e.g., URLDNS / Sleep marker)
+    Client->>App: POST /api/session (Session-Data: rO0ABXNyM...[Gadget Blob])
+    App->>Deserializer: deserialize(rawInputStream)
+    Note over Deserializer: No HMAC or type allowlist: Native stream instantiates classes directly
+    Deserializer->>OS: Gadget invokes system diagnostic / outbound DNS callback
+    OS-->>Deserializer: Trigger completed
+    Deserializer-->>App: Exception / Modified state
+    App-->>Client: 500 Deserialization error (Callback received on tester listener)
+    Note over Tester,OS: RCE potential proven via benign callback without modifying production records
+```
+
 ## Severity Calibration
 
 This class typically rates at the high end because the exploit executes before most application-level
@@ -152,6 +141,6 @@ matter.
 
 ## Related Classes
 
-- **Supply Chain Attack** ([../../attacks/supply-chain-attack/](../../attacks/supply-chain-attack/))
+- **[Supply Chain Attack](../../attacks/supply-chain-attack/)**
   is the closest attack-technique parallel: both exploit the same "trusted because of where it came
   from" assumption, just at different points in the software lifecycle.

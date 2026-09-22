@@ -1,0 +1,180 @@
+// Prisma Schema for Synthreat Platform (Aurora PostgreSQL 16)
+// Multi-Tenant Isolation via Row-Level Security
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ORG_ADMIN
+  SECURITY_LEAD
+  ENGINEER
+  AUDITOR
+}
+
+enum PathLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+model Organization {
+  id               String   @id @default(uuid()) @db.Uuid
+  name             String
+  domain           String   @unique
+  plan             String   @default("enterprise")
+  ssoProvider      String?
+  securitySettings Json     @default("{}")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  users            User[]
+  teams            Team[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  email          String    @unique
+  fullName       String    @map("full_name")
+  role           UserRole  @default(ENGINEER)
+  status         String    @default("active")
+  lastLogin      DateTime? @map("last_login")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  teamMembers    TeamMember[]
+  pathProgress   PathProgress[]
+  quizAttempts   QuizAttempt[]
+  conversations  ChatConversation[]
+
+  @@index([organizationId, email])
+  @@map("users")
+}
+
+model Team {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  name           String
+  description    String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members        TeamMember[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  teamId    String   @map("team_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  role      String   @default("member")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model LearningPath {
+  id             String         @id @default(uuid()) @db.Uuid
+  slug           String         @unique
+  title          String
+  description    String
+  icon           String
+  duration       String
+  level          PathLevel      @default(BEGINNER)
+  isPublished    Boolean        @default(true) @map("is_published")
+  lessons        PathLesson[]
+  progress       PathProgress[]
+
+  @@map("learning_paths")
+}
+
+model PathLesson {
+  id           String       @id @default(uuid()) @db.Uuid
+  pathId       String       @map("path_id") @db.Uuid
+  col          String
+  slug         String
+  title        String
+  sortOrder    Int          @map("sort_order")
+
+  path         LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+
+  @@unique([pathId, col, slug])
+  @@map("path_lessons")
+}
+
+model PathProgress {
+  id                  String       @id @default(uuid()) @db.Uuid
+  userId              String       @map("user_id") @db.Uuid
+  pathId              String       @map("path_id") @db.Uuid
+  completedLessonIds  String[]     @default([]) @map("completed_lesson_ids")
+  scoreAverage        Int          @default(0) @map("score_average")
+  completedAt         DateTime?    @map("completed_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  path                LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pathId])
+  @@map("path_progress")
+}
+
+model QuizAttempt {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  articleSlug      String   @map("article_slug")
+  questionCount    Int      @map("question_count")
+  score            Int
+  passed           Boolean
+  questionSnapshot Json     @map("question_snapshot")
+  userResponses    Json     @map("user_responses")
+  attemptedAt      DateTime @default(now()) @map("attempted_at")
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, articleSlug])
+  @@map("quiz_attempts")
+}
+
+model ChatConversation {
+  id             String        @id @default(uuid()) @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  mode           String        @default("dual")
+  topicContext   String?       @map("topic_context")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages       ChatMessage[]
+
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id                     String           @id @default(uuid()) @db.Uuid
+  conversationId         String           @map("conversation_id") @db.Uuid
+  senderType             String           @map("sender_type") // 'user' | 'assistant'
+  content                String
+  dualPerspectivePayload Json?            @map("dual_perspective_payload")
+  groundingReferences    Json?            @map("grounding_references")
+  createdAt              DateTime         @default(now()) @map("created_at")
+
+  conversation           ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}

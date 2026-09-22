@@ -104,6 +104,24 @@ Testing stops at confirming the key's presence and validity. No further request 
 check needed to confirm the key is live is made against the discount service, and no real customer
 account or transaction is affected.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant AppStore as App Store / Public APK
+    participant Decompiler as Decompiler (JADX / Bytecode Viewer)
+    participant Service as Backend Discount Service
+    participant DB as Corvane Transaction DB
+
+    Assessor->>AppStore: Download production loyalty app APK
+    Assessor->>Decompiler: Decompile APK & inspect decompiled Java classes
+    Note over Decompiler: Missing obfuscation leaves symbols & strings readable
+    Decompiler-->>Assessor: Disclose hardcoded DISCOUNT_SERVICE_API_KEY string
+    Assessor->>Service: GET /api/v1/ping (Header: X-API-Key: [ExtractedKey])
+    Service-->>Assessor: 200 OK (Internal service authentication confirmed)
+    Note over Assessor,DB: ENGAGEMENT BOUNDARY PRESERVED<br/>Live key validated with single ping.<br/>Zero customer transactions or discount calculations performed.
+    Assessor->>Assessor: Document High-severity finding (Embedded Backend API Key)
+```
+
 ## Severity Calibration
 
 This rates **High** because the exposed key grants access to a real backend service, reachable by
@@ -127,9 +145,9 @@ depend on obfuscation as their actual protection.
 
 ## Related Classes
 
-- **Insecure Mobile Data Storage** ([../insecure-mobile-data-storage/](../insecure-mobile-data-storage/)):
+- **[Insecure Mobile Data Storage](../insecure-mobile-data-storage/)**:
   a related risk, often uncovered using the same decompilation and device-analysis techniques this
   class relies on.
-- **Insecure Mobile Authentication & Session Management** ([../insecure-mobile-authentication/](../insecure-mobile-authentication/)):
+- **[Insecure Mobile Authentication & Session Management](../insecure-mobile-authentication/)**:
   a frequent downstream consequence, when a client-side security check exposed by insufficient binary
   protection is also the app's only enforcement of an authentication or authorization decision.

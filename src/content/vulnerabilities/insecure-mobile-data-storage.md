@@ -104,6 +104,27 @@ Testing confirms the token's presence and validity using only a test account cre
 assessment. The token is not used to access any real account, driver, or shipment data beyond
 confirming it authenticates successfully.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor
+    participant Device as Test Device (Rooted Android)
+    participant Storage as SharedPreferences XML File
+    participant API as Halvestrom Backend API
+    participant DB as Production Fleet Database
+
+    Assessor->>Device: Authenticate test driver account via app
+    Device->>Storage: Store session token in plaintext XML
+    Assessor->>Device: Execute adb shell & inspect /data/data/
+    Device->>Storage: Read app_prefs.xml
+    Storage-->>Assessor: Disclose plaintext auth_token
+    Assessor->>API: GET /api/v1/driver/profile (Header: Bearer [ExtractedToken])
+    API->>DB: Query test driver record
+    DB-->>API: Return test driver data
+    API-->>Assessor: 200 OK (Token validated without device context)
+    Note over Assessor,DB: ENGAGEMENT BOUNDARY PRESERVED<br/>Token validity verified on test account.<br/>Zero other driver or shipment records accessed.
+    Assessor->>Assessor: Document Critical finding (Insecure Local Token Storage)
+```
+
 ## Severity Calibration
 
 This rates **Critical** because a plaintext, still-valid authentication token stored outside secure
@@ -127,9 +148,9 @@ data on a compromised device can typically reach the key sitting right next to i
 
 ## Related Classes
 
-- **Insecure Mobile Communication** ([../insecure-mobile-communication/](../insecure-mobile-communication/)):
+- **[Insecure Mobile Communication](../insecure-mobile-communication/)**:
   the network-layer sibling of this class, protecting data in transit rather than at rest on the
   device.
-- **Insecure Mobile Authentication & Session Management** ([../insecure-mobile-authentication/](../insecure-mobile-authentication/)):
+- **[Insecure Mobile Authentication & Session Management](../insecure-mobile-authentication/)**:
   a frequent direct consequence, when the credential or token exposed by insecure storage is itself
   the weak point in the app's authentication design.

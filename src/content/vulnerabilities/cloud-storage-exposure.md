@@ -35,41 +35,6 @@ of its own the way a server behind a firewall does: its access control *is* its 
 entirely as configuration rather than network topology, and a single incorrect setting removes the
 entire boundary at once.
 
-<figure class="diagram">
-<svg viewBox="0 0 740 130" role="img" aria-labelledby="diagram-title-cloud-storage-exposure" style="width:100%;height:auto;">
-<title id="diagram-title-cloud-storage-exposure">A bucket created with a permissive access setting is reachable directly from the internet, with no authentication step in between.</title>
-<defs>
-<marker id="arrow-cloud-storage-exposure" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)"/>
-</marker>
-</defs>
-<circle cx="22" cy="20" r="11" fill="var(--accent)"/>
-<text x="22" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-<rect x="10" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="85" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Bucket created</text>
-<text x="85" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">with public ACL</text>
-<line x1="160" y1="72" x2="200" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cloud-storage-exposure)"/>
-<circle cx="212" cy="20" r="11" fill="var(--accent)"/>
-<text x="212" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-<rect x="200" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="275" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">No auth check</text>
-<text x="275" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">exists at request time</text>
-<line x1="350" y1="72" x2="390" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cloud-storage-exposure)"/>
-<circle cx="402" cy="20" r="11" fill="var(--accent)"/>
-<text x="402" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-<rect x="390" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="465" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Anyone on the</text>
-<text x="465" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">internet requests it</text>
-<line x1="540" y1="72" x2="580" y2="72" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow-cloud-storage-exposure)"/>
-<circle cx="592" cy="20" r="11" fill="var(--accent)"/>
-<text x="592" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
-<rect x="580" y="40" width="150" height="64" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-<text x="655" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Contents returned</text>
-<text x="655" y="84" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">in full</text>
-</svg>
-<figcaption>The bucket's access setting is the entire perimeter. Once it's wrong, there's nothing else in the path to catch the mistake.</figcaption>
-</figure>
-
 ## Where It Actually Shows Up
 
 - A bucket ACL or bucket policy granting read (and occasionally write) access to "everyone" or "any
@@ -148,6 +113,24 @@ Testing stops at confirming the listing and the file names and metadata (size, l
 timestamp) of a small number of objects, which is sufficient to establish that the backups are
 reachable and current. No backup file's contents are downloaded or opened as part of the assessment.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as External Security Assessor
+    participant DNS as Public DNS Resolver
+    participant S3API as Cloud Storage API (REST)
+    participant Bucket as S3 Bucket: halvestrom-reporting-backup
+
+    Assessor->>DNS: Resolve halvestrom-reporting-backup.s3.amazonaws.com
+    DNS-->>Assessor: Returns AWS Edge IP Addresses
+
+    Assessor->>S3API: GET /?list-type=2 (No Authorization Header)
+    S3API->>Bucket: Evaluate ACL / Bucket Policy
+    Note over Bucket: Policy Check: Principal = *<br/>Result: Anonymous Read Permitted
+    Bucket-->>S3API: 200 OK with XML Object Listing
+    S3API-->>Assessor: Returns ListBucketResult (e.g. db_backup_2026_prod.sql.gz, size: 84GB)
+    Note over Assessor,Bucket: Exposure confirmed from XML metadata - zero database records downloaded
+```
+
 ## Severity Calibration
 
 This class rates **Critical** here specifically because the exposed objects were recent, automated
@@ -171,9 +154,9 @@ reappears with the next bucket created the same way.
 
 ## Related Classes
 
-- **Overly Permissive Cloud IAM** ([../cloud-iam-misconfiguration/](../cloud-iam-misconfiguration/)):
+- **[Overly Permissive Cloud IAM](../cloud-iam-misconfiguration/)**:
   a different mechanism reaching a similar outcome, unauthorized access to cloud resources, this time
   through excessive identity permissions rather than a resource-level access setting.
-- **Security Misconfiguration** ([../security-misconfiguration/](../security-misconfiguration/)): the
+- **[Security Misconfiguration](../security-misconfiguration/)**: the
   broader class this falls under, an insecure default or setting left unreviewed, applied here to the
   specific, high-frequency case of cloud storage.

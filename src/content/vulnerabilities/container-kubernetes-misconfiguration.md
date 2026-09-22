@@ -29,8 +29,6 @@ those features can be individually weakened or disabled, usually because doing s
 problem (a container needing to access a hardware device, a build tool needing broader filesystem
 access) easier to solve in the moment.
 
-At the cluster level, Kubernetes itself exposes a set of administrative APIs (the control plane, the
-per-node kubelet API) that are meant to be reachable only by the cluster's own trusted components.
 When network policy or authentication on those interfaces is left at a permissive default, that
 internal-only assumption breaks, and anything that can reach the interface can act with the same
 authority the cluster's own control plane has.
@@ -118,6 +116,22 @@ Testing stops at confirming the unauthenticated query succeeds and returns clust
 is queried further, modified, or interacted with beyond what was needed to demonstrate that the API
 itself was reachable and unauthenticated.
 
+```mermaid
+sequenceDiagram
+    participant Assessor as Security Assessor (Internal Test Pod)
+    participant NodeNet as Node Network Interface
+    participant Kubelet as Kubelet API (Port 10250)
+    participant PodStore as Local Pod Manifest Store
+
+    Assessor->>NodeNet: Probe https://node-ip:10250/pods
+    NodeNet->>Kubelet: Forward request without client TLS certificate
+    Note over Kubelet: Configuration check: --anonymous-auth=true (Default/Unenforced)<br/>AuthorizationMode fails to require webhook auth
+    Kubelet->>PodStore: Read pod specs, env vars & volume mounts
+    PodStore-->>Kubelet: Complete list of running cluster pods
+    Kubelet-->>Assessor: HTTP 200 OK with full JSON pod metadata
+    Note right of Assessor: Finding proven: cluster-wide pod inventory exposed without credential use
+```
+
 ## Severity Calibration
 
 This rates **Critical** because the kubelet API, if actually authenticated correctly, would have
@@ -144,9 +158,9 @@ application-level hardening substitutes for it.
 
 ## Related Classes
 
-- **Overly Permissive Cloud IAM** ([../cloud-iam-misconfiguration/](../cloud-iam-misconfiguration/)):
+- **[Overly Permissive Cloud IAM](../cloud-iam-misconfiguration/)**:
   the same least-privilege principle applied to cloud identity permissions rather than container
   runtime and cluster RBAC settings; the two frequently compound in the same environment.
-- **Security Misconfiguration** ([../security-misconfiguration/](../security-misconfiguration/)): the
+- **[Security Misconfiguration](../security-misconfiguration/)**: the
   broader class this falls under, a protective setting left at a permissive default rather than
   actively configured.
